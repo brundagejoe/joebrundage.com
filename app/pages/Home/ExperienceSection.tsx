@@ -1,6 +1,8 @@
+import { Link } from "@remix-run/react";
+
 interface ResumeItem {
   company: string;
-  companyLink?: string;
+  companyLink: string;
   jobTitle: string;
   startDate: string;
   endDate: string;
@@ -49,14 +51,20 @@ const resumeItems: ResumeItem[] = [
 const ExperienceSection = () => {
   return (
     <div className="w-fit">
-      <h2 className="text-5xl mb-4">Experience</h2>
+      <h2 className="text-3xl mb-4">Experience</h2>
       <div className="flex flex-col gap-y-4">
         {resumeItems.map((item) => {
           return (
             <div key={`resume-for-${item.company}`}>
-              <h3 className="text-4xl">{item.company}</h3>
+              <Link
+                to={item.companyLink}
+                className="flex-col w-fit flex text-2xl group/link"
+              >
+                {item.company}
+                <div className="mt-[-2px] h-[2px] w-full rounded-xl bg-black transition-all duration-300 max-w-0 group-hover/link:max-w-full"></div>
+              </Link>
               <div className="flex flex-col md:flex-row md:justify-between">
-                <h4 className="text-2xl">{item.jobTitle}</h4>
+                <h4 className="text-xl">{item.jobTitle}</h4>
                 <p className="text-xl font-medium">
                   {item.startDate}&#8211;{item.endDate}
                 </p>

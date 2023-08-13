@@ -1,16 +1,13 @@
-// import { useEffect, useState } from "react"
 import { Transition } from "@headlessui/react";
 import { Link, useLocation } from "@remix-run/react";
 import clsx from "clsx";
 import { useState } from "react";
 import ShowMoreButton from "./ShowMoreButton";
 
-// import ShowMoreButton from "./ShowMoreButton"
-
 const links = [
   {
-    name: "Blog",
-    href: "/blog",
+    name: "Experience",
+    href: "/experience",
   },
   {
     name: "Projects",
