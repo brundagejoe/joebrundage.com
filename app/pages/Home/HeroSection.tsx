@@ -16,12 +16,15 @@ const HeroSection = () => {
           and computer graphics.
         </p>
         <div className="flex flex-col gap-y-2">
-          <Link to={"mailto:joebrundage@icloud.com"}>
+          <Link className="w-fit" to={"mailto:joebrundage@icloud.com"}>
             <Button>
               <div className="text-xl w-[150px]">Email me</div>
             </Button>
           </Link>
-          <Link to={"https://www.linkedin.com/in/brundagejoe/"}>
+          <Link
+            className="w-fit"
+            to={"https://www.linkedin.com/in/brundagejoe/"}
+          >
             <Button>
               <div className="text-xl w-[150px]">My Linkedin</div>
             </Button>
