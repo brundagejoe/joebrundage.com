@@ -1,6 +1,6 @@
 // import { useEffect, useState } from "react"
 import { Transition } from "@headlessui/react";
-import { Link } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import clsx from "clsx";
 import { useState } from "react";
 import ShowMoreButton from "./ShowMoreButton";
@@ -23,7 +23,8 @@ const links = [
 ];
 
 const MenuBar = () => {
-  // const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const [showMobileDropdown, setShowMobileDropdown] = useState(false);
 
@@ -47,7 +48,7 @@ const MenuBar = () => {
           </div>
           <div className="hidden gap-x-8 text-lg text-gray-600 md:flex">
             {links.map((link) => {
-              const isActive = false;
+              const isActive = location.pathname.includes(link.href);
               return (
                 <Link
                   to={link.href}
