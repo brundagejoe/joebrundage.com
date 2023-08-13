@@ -24,7 +24,6 @@ const links = [
 
 const MenuBar = () => {
   const location = useLocation();
-  const pathname = location.pathname;
 
   const [showMobileDropdown, setShowMobileDropdown] = useState(false);
 
