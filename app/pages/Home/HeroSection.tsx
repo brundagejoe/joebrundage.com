@@ -12,8 +12,8 @@ const HeroSection = () => {
       />
       <div className="flex flex-col gap-y-8 md:py-4">
         <p className="text-3xl">
-          I'm Joe Brundage. I'm a Software Engineer who loves web development
-          and computer graphics.
+          Hi I'm Joe! I'm a Software Engineer who loves web development and
+          computer graphics.
         </p>
         <div className="flex flex-col gap-y-2">
           <Link className="w-fit" to={"mailto:joebrundage@icloud.com"}>
@@ -23,6 +23,7 @@ const HeroSection = () => {
           </Link>
           <Link
             className="w-fit"
+            target="_blank"
             to={"https://www.linkedin.com/in/brundagejoe/"}
           >
             <Button>

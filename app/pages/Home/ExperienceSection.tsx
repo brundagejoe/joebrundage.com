@@ -25,7 +25,7 @@ const resumeItems: ResumeItem[] = [
   },
   {
     company: "Naccarato Leadership Center",
-    companyLink: "rpchiro.com",
+    companyLink: "https://rpchiro.com",
     jobTitle: "Information Technology Specialist",
     startDate: "Dec 2020",
     endDate: "Dec 2021",
