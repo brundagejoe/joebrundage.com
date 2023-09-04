@@ -12,7 +12,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   await requirePassword(request);
   const file = path.join(
     process.cwd(),
-    "app/content/spencer",
+    "public/content/spencer",
     "1-nephi.markdoc"
   );
   const fileContent = await fs.readFile(file, "utf-8");
