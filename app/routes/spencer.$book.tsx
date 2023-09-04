@@ -6,13 +6,12 @@ import * as fs from "fs/promises";
 import React from "react";
 import { components, config } from "~/spencer/markdoc/Config";
 import { requirePassword } from "~/utils/session.server";
+import path from "path";
 
 export const loader = async ({ request }: LoaderArgs) => {
   await requirePassword(request);
-  const fileContent = await fs.readFile(
-    "content/spencer/1-nephi.markdoc",
-    "utf-8"
-  );
+  const file = path.join(process.cwd(), "content/spencer", "1-nephi.markdoc");
+  const fileContent = await fs.readFile(file, "utf-8");
   const ast = Markdoc.parse(fileContent);
 
   const content = Markdoc.transform(ast, config);
