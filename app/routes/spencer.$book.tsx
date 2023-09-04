@@ -13,7 +13,11 @@ export const loader = async ({ request }: LoaderArgs) => {
   // const file = path.join(process.cwd(), "content/spencer", "1-nephi.markdoc");
   console.log("in loader");
   console.log(process.cwd());
-  const file = path.join(process.cwd(), "content/spencer", "1-nephi.markkdoc");
+  const file = path.join(
+    process.cwd(),
+    "../../content/spencer",
+    "1-nephi.markkdoc"
+  );
   const fileContent = await fs.readFile(file, "utf-8");
   const ast = Markdoc.parse(fileContent);
 
