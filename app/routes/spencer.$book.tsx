@@ -10,11 +10,7 @@ import path from "path";
 
 export const loader = async ({ request }: LoaderArgs) => {
   await requirePassword(request);
-  const file = path.join(
-    process.cwd(),
-    "public/content/spencer",
-    "1-nephi.markdoc"
-  );
+  const file = path.join(process.cwd(), "content/spencer", "1-nephi.markdoc");
   const fileContent = await fs.readFile(file, "utf-8");
   const ast = Markdoc.parse(fileContent);
 
