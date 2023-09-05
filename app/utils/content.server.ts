@@ -4,7 +4,6 @@ import { promises as fs } from "fs";
 export const getContent = async (
   fileName: string
 ): Promise<{ success: boolean; content: string }> => {
-  console.log("process.env.DEPLOYMENT", process.env.DEPLOYMENT);
   if (process.env.DEPLOYMENT === "production") {
     const response = await fetch(
       `https://api.github.com/repos/brundagejoe/joebrundage.com/contents/content/${fileName}`
