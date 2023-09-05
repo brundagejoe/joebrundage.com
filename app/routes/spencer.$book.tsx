@@ -2,25 +2,22 @@ import Markdoc from "@markdoc/markdoc";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node"; // or cloudflare/deno
 import { useLoaderData } from "@remix-run/react";
-import * as fs from "fs/promises";
 import React from "react";
 import { components, config } from "~/spencer/markdoc/Config";
+import { getContent } from "~/utils/content.server";
 import { requirePassword } from "~/utils/session.server";
-import path from "path";
 
 export const loader = async ({ request }: LoaderArgs) => {
   await requirePassword(request);
-  // const file = path.join(process.cwd(), "content/spencer", "1-nephi.markdoc");
-  console.log("in loader");
-  console.log(process.cwd());
-  const file = path.join(
-    process.cwd(),
-    "../../content/spencer",
-    "1-nephi.markkdoc"
-  );
-  const fileContent = await fs.readFile(file, "utf-8");
-  const ast = Markdoc.parse(fileContent);
+  const spencerContent = await getContent("spencer/1-nephi.markdoc");
+  if (!spencerContent.success) {
+    throw json(null, {
+      status: 404,
+      statusText: "Not Found",
+    });
+  }
 
+  const ast = Markdoc.parse(spencerContent.content);
   const content = Markdoc.transform(ast, config);
   return json({ content: content });
 };
