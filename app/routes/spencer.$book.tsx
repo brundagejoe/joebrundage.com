@@ -1,7 +1,7 @@
 import Markdoc from "@markdoc/markdoc";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node"; // or cloudflare/deno
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import React from "react";
 import { components, config } from "~/spencer/markdoc/Config";
 import { getContent } from "~/utils/content.server";
@@ -22,12 +22,25 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({ content: content });
 };
 
+const originalChapters = ["I", "II", "III", "IV", "V", "VI", "VII"];
+
 export default function SpencerChapter() {
   const { content } = useLoaderData<typeof loader>();
   const reactContent = Markdoc.renderers.react(content, React, components);
   return (
-    <div className="font-serif w-full flex flex-col items-center">
-      <div className="mt-10 px-10 max-w-3xl">{reactContent}</div>
+    <div className="scroll-smooth font-[Playfair] w-full flex flex-col items-center">
+      <div className="flex gap-x-2">
+        {originalChapters.map((chapter) => {
+          return (
+            <Link key={`oc-${chapter}`} to={`#original-chapter-${chapter}`}>
+              {chapter}
+            </Link>
+          );
+        })}
+      </div>
+      <div className="relative mt-10 px-10 max-w-3xl prose prose-p:indent-8 prose-p:text-left prose-h1:text-center selection:underline selection:decoration-dashed">
+        {reactContent}
+      </div>
     </div>
   );
 }

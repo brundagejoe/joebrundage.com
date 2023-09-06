@@ -1,13 +1,17 @@
 export const OriginalChapter = ({ text }: { text: string }) => {
-  return <h4 className="text-2xl">[{text}]</h4>;
+  return (
+    <h4 id={`original-chapter-${text}`} className="text-2xl absolute left-0">
+      [{text}]
+    </h4>
+  );
 };
 
 export const ModernChapter = ({ text }: { text: string }) => {
-  return <h5 className="text-2xl italic">{text}</h5>;
+  return <h5 className="text-2xl hidden ">{text}</h5>;
 };
 
 export const Book = ({ text }: { text: string }) => {
-  return <h1 className="text-3xl">{text}</h1>;
+  return <h1 className="text-2xl font-black">{text}</h1>;
 };
 
 export const Section = ({
@@ -22,9 +26,9 @@ export const Section = ({
     heading = heading.replace(/_.{1}/g, "");
   }
   return { subheading } ? (
-    <div>
-      <h2 className="text-2xl">{heading}</h2>
-      <h3 className="text-xl">{subheading}</h3>
+    <div className="flex flex-col">
+      <div className="text-3xl font-regular italic">{heading}</div>
+      <div className="text-lg italic font-light">{subheading}</div>
     </div>
   ) : (
     <h2 className="text-2xl">{heading}</h2>
@@ -36,5 +40,5 @@ export const Subsection = ({ heading }: { heading: string }) => {
   if (heading.includes("_")) {
     heading = heading.replace(/_.{1}/g, "");
   }
-  return <h3 className="text-2xl">{heading}</h3>;
+  return <h3 className="text-xl italic font-normal">{heading}</h3>;
 };
