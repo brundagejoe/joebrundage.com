@@ -28,7 +28,7 @@ export default function SpencerChapter() {
   const { content } = useLoaderData<typeof loader>();
   const reactContent = Markdoc.renderers.react(content, React, components);
   return (
-    <div className="scroll-smooth font-[Playfair] w-full flex flex-col items-center">
+    <div className="scroll-smooth font-[Garamond] w-full flex flex-col items-center">
       <div className="flex gap-x-2">
         {originalChapters.map((chapter) => {
           return (
@@ -38,7 +38,7 @@ export default function SpencerChapter() {
           );
         })}
       </div>
-      <div className="relative mt-10 px-10 max-w-3xl prose prose-p:indent-8 prose-p:text-left prose-h1:text-center selection:underline selection:decoration-dashed">
+      <div className="relative mt-10 max-w-2xl px-6 md:px-0 prose prose-p:text-xl/8">
         {reactContent}
       </div>
     </div>
