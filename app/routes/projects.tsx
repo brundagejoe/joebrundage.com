@@ -26,7 +26,7 @@ const projects: {
     name: "Spencer",
     description:
       "Read the Book of Mormon and compare original and current chapters. Select and copy verses in the format you want to use in talks or papers.",
-    link: "/spencer",
+    link: "/spencer/1-nephi",
     logo: <BookIcon />,
   },
   {

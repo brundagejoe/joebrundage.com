@@ -2,7 +2,7 @@ export const OriginalChapter = ({ text }: { text: string }) => {
   return (
     <h4
       id={`original-chapter-${text}`}
-      className="not-prose text-2xl font-normal flex left-0 md:absolute md:-translate-x-24 md:-translate-y-3"
+      className="not-prose text-2xl font-normal flex left-0 md:absolute md:-translate-y-3"
     >
       [{text}]
     </h4>
@@ -11,7 +11,7 @@ export const OriginalChapter = ({ text }: { text: string }) => {
 
 export const ModernChapter = ({ text }: { text: string }) => {
   return (
-    <h5 className="not-prose mt-10 md:mt-0 text-xl md:text-2xl font-normal uppercase flex left-0 md:absolute md:-translate-x-8 md:translate-y-6">
+    <h5 className="not-prose mt-10 md:mt-0 text-xl md:text-2xl font-normal uppercase flex left-0 md:absolute md:translate-x-12 md:translate-y-6">
       <span className="hidden md:flex">{text}</span>
       <span className="flex md:hidden">Chapter {text}</span>
     </h5>
