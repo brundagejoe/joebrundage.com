@@ -1,8 +1,19 @@
+import clsx from "clsx";
 interface BodyContainerProps {
-  children: React.ReactNode;
+  serif?: boolean;
+  children?: React.ReactNode;
 }
-const BodyContainer = ({ children }: BodyContainerProps) => {
-  return <div className="flex flex-col items-center mx-10">{children}</div>;
+const BodyContainer = ({ children, serif }: BodyContainerProps) => {
+  return (
+    <div
+      className={clsx(
+        "flex flex-col items-center mx-10",
+        serif && "font-serif"
+      )}
+    >
+      {children}
+    </div>
+  );
 };
 
 export default BodyContainer;

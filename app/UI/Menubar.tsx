@@ -3,6 +3,7 @@ import { Link, useLocation } from "@remix-run/react";
 import clsx from "clsx";
 import { useState } from "react";
 import ShowMoreButton from "./ShowMoreButton";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 const links = [
   {
@@ -19,14 +20,14 @@ const links = [
   },
 ];
 
-const MenuBar = () => {
+const MenuBar = ({ showProfileContent }: { showProfileContent?: boolean }) => {
   const location = useLocation();
 
   const [showMobileDropdown, setShowMobileDropdown] = useState(false);
 
   return (
     <div className="pb-4">
-      <div className="mx-4 mt-12 font-semibold md:mx-12">
+      <div className="mx-4 mt-12 font-semibold md:mx-12 md:flex md:items-center md:justify-between">
         <div className="flex items-center justify-between md:justify-start md:gap-x-24">
           <Link
             className="group/link cursor-pointer text-xl md:text-2xl"
@@ -46,29 +47,22 @@ const MenuBar = () => {
             {links.map((link) => {
               const isActive = location.pathname.includes(link.href);
               return (
-                <Link
-                  to={link.href}
+                <HoverableLink
                   key={`menu-bar-${link.name}`}
-                  className={clsx("group/link cursor-pointer", {
-                    "hover:text-black": !isActive,
-                    "text-black": isActive,
-                  })}
+                  href={link.href}
+                  isActive={isActive}
                 >
                   {link.name}
-                  <div
-                    className={clsx(
-                      "h-[2px] w-full rounded-xl bg-black transition-all duration-300",
-                      {
-                        "max-w-0 group-hover/link:max-w-full": !isActive,
-                        "max-w-full": isActive,
-                      }
-                    )}
-                  />
-                </Link>
+                </HoverableLink>
               );
             })}
           </div>
         </div>
+        {showProfileContent && (
+          <UserLink className="hidden md:flex ">
+            <UserCircleIcon className="h-10 w-10 text-black cursor-pointer hover:scale-125 transition-transform rounded-full" />
+          </UserLink>
+        )}
       </div>
       <Transition
         show={showMobileDropdown}
@@ -89,9 +83,63 @@ const MenuBar = () => {
             {link.name}
           </Link>
         ))}
+        {showProfileContent && (
+          <UserLink className="flex border-collapse cursor-pointer border-y py-4 pl-4 text-sm font-medium">
+            Profile
+          </UserLink>
+        )}
       </Transition>
     </div>
   );
 };
 
 export default MenuBar;
+
+const HoverableLink = ({
+  href,
+  children,
+  isActive,
+}: {
+  href: string;
+  children?: React.ReactNode;
+  isActive?: boolean;
+}) => {
+  return (
+    <Link
+      to={href}
+      className={clsx("group/link cursor-pointer", {
+        "hover:text-black": !isActive,
+        "text-black": isActive,
+      })}
+    >
+      {children}
+      <div
+        className={clsx(
+          "h-[2px] w-full rounded-xl bg-black transition-all duration-300",
+          {
+            "max-w-0 group-hover/link:max-w-full": !isActive,
+            "max-w-full": isActive,
+          }
+        )}
+      />
+    </Link>
+  );
+};
+
+const UserLink = ({
+  children,
+  className,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+}) => {
+  const location = useLocation();
+  const loginQueryParams = new URLSearchParams([
+    ["redirectTo", location.pathname],
+  ]);
+  return (
+    <Link className={className} to={`/login?${loginQueryParams}`}>
+      {children}
+    </Link>
+  );
+};

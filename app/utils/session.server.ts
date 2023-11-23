@@ -1,18 +1,38 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import bcrypt from "bcryptjs";
+import { getUser } from "~/supabase/users.server";
 
-export const login = async ({ password }: { password: string }) => {
+export enum LoginResult {
+  UserNotFound = "userNotFound",
+  IncorrectPassword = "incorrectPassword",
+}
+
+export const login = async ({
+  username,
+  password,
+}: {
+  username: string;
+  password: string;
+}) => {
+  const userData = await getUser(username);
+  if (userData?.userNotFound || !userData?.userId)
+    return LoginResult.UserNotFound;
   //   const passwordHash = await bcrypt.hash("new password here", 10);
-  const passwordHash =
-    "$2a$10$NNGYI8wd27mMjU3gFJkG4.56qZxXpfqU8DkA6xAZs2cXgDnSB7pA.";
-  const isCorrectPassword = await bcrypt.compare(password, passwordHash);
+  // const passwordHash =
+  //   "$2a$10$NNGYI8wd27mMjU3gFJkG4.56qZxXpfqU8DkA6xAZs2cXgDnSB7pA.";
+  const isCorrectPassword = await bcrypt.compare(
+    password,
+    userData.passwordHash as string
+  );
 
-  return isCorrectPassword;
+  return isCorrectPassword
+    ? { userId: userData.userId }
+    : LoginResult.IncorrectPassword;
 };
 
 const storage = createCookieSessionStorage({
   cookie: {
-    name: "Spencer_session",
+    name: "User_session",
     // normally you want this to be `secure: true`
     // but that doesn't work on localhost for Safari
     // https://web.dev/when-to-use-local-https/
@@ -33,28 +53,28 @@ function getUserSession(request: Request) {
 export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
-  if (!userId || typeof userId !== "string") {
+  if (!userId || typeof userId !== "number") {
     return null;
   }
   return userId;
 }
 
-export async function requirePassword(
+export async function requireUser(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
 ) {
   const session = await getUserSession(request);
-  const password = session.get("password");
-  if (!password || typeof password !== "string") {
+  const userId = session.get("userId");
+  if (!userId || typeof userId !== "number") {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
-    throw redirect(`/spencer/login?${searchParams}`);
+    throw redirect(`/login?${searchParams}`);
   }
-  return password;
+  return userId;
 }
 
-export async function createUserSession(redirectTo: string) {
+export async function createUserSession(userId: number, redirectTo: string) {
   const session = await storage.getSession();
-  session.set("password", "valid");
+  session.set("userId", userId);
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session),

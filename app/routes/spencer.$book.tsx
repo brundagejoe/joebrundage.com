@@ -6,10 +6,10 @@ import { Link, useLoaderData } from "@remix-run/react";
 import React, { useRef, useState } from "react";
 import { components, config } from "~/spencer/markdoc/Config";
 import { getContent } from "~/utils/content.server";
-import { requirePassword } from "~/utils/session.server";
+import { requireUser } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  await requirePassword(request);
+  await requireUser(request);
   const spencerContent = await getContent("spencer/1-nephi.markdoc");
   if (!spencerContent.success) {
     throw json(null, {
