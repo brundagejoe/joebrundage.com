@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import bcrypt from "bcryptjs";
-import { getUser } from "~/supabase/users.server";
+import { fetchUser } from "~/supabase/users.server";
 
 export enum LoginResult {
   UserNotFound = "userNotFound",
@@ -14,7 +14,7 @@ export const login = async ({
   username: string;
   password: string;
 }) => {
-  const userData = await getUser(username);
+  const userData = await fetchUser(username);
   if (userData?.userNotFound || !userData?.userId)
     return LoginResult.UserNotFound;
   //   const passwordHash = await bcrypt.hash("new password here", 10);
@@ -54,7 +54,7 @@ export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
   if (!userId || typeof userId !== "number") {
-    return null;
+    return undefined;
   }
   return userId;
 }

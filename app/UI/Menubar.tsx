@@ -20,7 +20,13 @@ const links = [
   },
 ];
 
-const MenuBar = ({ showProfileContent }: { showProfileContent?: boolean }) => {
+const MenuBar = ({
+  showProfileContent,
+  userId,
+}: {
+  showProfileContent?: boolean;
+  userId?: number;
+}) => {
   const location = useLocation();
 
   const [showMobileDropdown, setShowMobileDropdown] = useState(false);
@@ -59,7 +65,7 @@ const MenuBar = ({ showProfileContent }: { showProfileContent?: boolean }) => {
           </div>
         </div>
         {showProfileContent && (
-          <UserLink className="hidden md:flex ">
+          <UserLink className="hidden md:flex" userId={userId}>
             <UserCircleIcon className="h-10 w-10 text-black cursor-pointer hover:scale-125 transition-transform rounded-full" />
           </UserLink>
         )}
@@ -84,7 +90,10 @@ const MenuBar = ({ showProfileContent }: { showProfileContent?: boolean }) => {
           </Link>
         ))}
         {showProfileContent && (
-          <UserLink className="flex border-collapse cursor-pointer border-y py-4 pl-4 text-sm font-medium">
+          <UserLink
+            className="flex border-collapse cursor-pointer border-y py-4 pl-4 text-sm font-medium"
+            userId={userId}
+          >
             Profile
           </UserLink>
         )}
@@ -129,16 +138,19 @@ const HoverableLink = ({
 const UserLink = ({
   children,
   className,
+  userId,
 }: {
   children?: React.ReactNode;
   className?: string;
+  userId?: number;
 }) => {
   const location = useLocation();
-  const loginQueryParams = new URLSearchParams([
-    ["redirectTo", location.pathname],
-  ]);
+  const searchParams = new URLSearchParams([["redirectTo", location.pathname]]);
   return (
-    <Link className={className} to={`/login?${loginQueryParams}`}>
+    <Link
+      className={className}
+      to={`/${userId ? "profile" : "login"}?${searchParams}`}
+    >
       {children}
     </Link>
   );

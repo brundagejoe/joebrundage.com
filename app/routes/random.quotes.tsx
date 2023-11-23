@@ -1,24 +1,25 @@
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import BodyContainer from "~/UI/BodyContainer";
 import MenuBar from "~/UI/Menubar";
-import { supabase } from "~/supabase/supabase.server";
-import { requireUser } from "~/utils/session.server";
+import { fetchQuotes } from "~/supabase/quotes.server";
+import { getUserId } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  await requireUser(request);
-  let { data: quotes } = await supabase.from("quotes").select("*");
+  const userId = await getUserId(request);
 
   return json({
-    quotes,
+    userId,
+    quotes: await fetchQuotes(),
   });
 };
 export default function Blog() {
-  const { quotes } = useLoaderData<typeof loader>();
+  const { userId, quotes } = useLoaderData<typeof loader>();
   return (
     <div className="font-semibold mb-10">
-      <MenuBar showProfileContent />
+      <MenuBar showProfileContent userId={userId} />
       <BodyContainer serif>
         <h2 className="text-3xl mb-4">Quotes</h2>
         {quotes?.map((quote) => {
@@ -31,6 +32,13 @@ export default function Blog() {
             </div>
           );
         })}
+        {userId && (
+          <div className="w-full justify-center flex">
+            <Link to={"/random/quotes/add"}>
+              <PlusCircleIcon className="w-8 h-8 hover:scale-125 transition-all rounded-full" />
+            </Link>
+          </div>
+        )}
       </BodyContainer>
     </div>
   );
