@@ -1,7 +1,7 @@
 import BodyContainer from "~/UI/BodyContainer";
 import MenuBar from "~/UI/Menubar";
 
-export default function Blog() {
+export default function Quotes() {
   return (
     <div className="font-semibold mb-10">
       <MenuBar />
