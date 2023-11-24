@@ -1,6 +1,6 @@
 import { ArrowSmallRightIcon } from "@heroicons/react/24/outline";
 import type { ActionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node"; // or cloudflare/deno
+import { json } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
