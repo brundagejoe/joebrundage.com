@@ -13,9 +13,15 @@ export const insertQuote = async (quote: {
   author: string;
   date: string;
   note?: string;
-  associated_user_id: string;
+  associated_user_id: number;
 }) => {
   let { error } = await supabase.from("quotes").insert([quote]);
+
+  return error;
+};
+
+export const deleteQuote = async (id: number) => {
+  let { error } = await supabase.from("quotes").delete().match({ id });
 
   return error;
 };

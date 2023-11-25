@@ -11,30 +11,41 @@ export interface Database {
     Tables: {
       quotes: {
         Row: {
-          author: string | null
+          associated_user_id: number | null
+          author: string
           created_at: string
-          date: string | null
+          date: string
           id: number
           note: string | null
-          quote: string | null
+          quote: string
         }
         Insert: {
-          author?: string | null
+          associated_user_id?: number | null
+          author: string
           created_at?: string
-          date?: string | null
+          date: string
           id?: number
           note?: string | null
-          quote?: string | null
+          quote: string
         }
         Update: {
-          author?: string | null
+          associated_user_id?: number | null
+          author?: string
           created_at?: string
-          date?: string | null
+          date?: string
           id?: number
           note?: string | null
-          quote?: string | null
+          quote?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quotes_associated_user_id_fkey"
+            columns: ["associated_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       users: {
         Row: {

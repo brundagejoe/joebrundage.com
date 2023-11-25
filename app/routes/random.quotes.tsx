@@ -1,7 +1,13 @@
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import { PlusCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, Form } from "@remix-run/react";
+import type { FetcherWithComponents } from "@remix-run/react";
+import {
+  useLoaderData,
+  Form,
+  useNavigation,
+  useFetcher,
+} from "@remix-run/react";
 import BodyContainer from "~/UI/BodyContainer";
 import MenuBar from "~/UI/Menubar";
 import { Button } from "~/shadcn-ui-components/ui/button";
@@ -17,9 +23,14 @@ import {
 import { Input } from "~/shadcn-ui-components/ui/input";
 import { Label } from "~/shadcn-ui-components/ui/label";
 import { Textarea } from "~/shadcn-ui-components/ui/textarea";
-import { fetchQuotes, insertQuote } from "~/supabase/quotes.server";
+import {
+  deleteQuote,
+  fetchQuotes,
+  insertQuote,
+} from "~/supabase/quotes.server";
 import { getUserId } from "~/utils/session.server";
 import { z } from "zod";
+import clsx from "clsx";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -31,28 +42,51 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export const action = async ({ request }: ActionArgs) => {
-  const formPayload = Object.fromEntries(await request.formData());
-  const quoteSchema = z.object({
-    quote: z.string().min(1),
-    author: z.string().min(1),
-    date: z.string().min(1),
-    associated_user_id: z.string().min(1),
-    note: z.string(),
-  });
+  const { _action, ...formPayload } = Object.fromEntries(
+    await request.formData()
+  );
 
-  try {
-    const quote = quoteSchema.parse(formPayload);
-    const error = await insertQuote(quote);
-    if (error) throw new Error(error.message);
-    return json({ success: true });
-  } catch (e) {
-    console.log(e);
-    return json({ success: false });
+  switch (_action) {
+    case "addQuote":
+      const quoteSchema = z.object({
+        quote: z.string().min(1),
+        author: z.string().min(1),
+        date: z.string().min(1),
+        associated_user_id: z.coerce.number(),
+        note: z.string(),
+      });
+
+      try {
+        const quote = quoteSchema.parse(formPayload);
+        const error = await insertQuote(quote);
+        if (error) throw new Error(error.message);
+        return json({ success: true });
+      } catch (e) {
+        console.log(e);
+        return json({ success: false });
+      }
+    case "deleteQuote":
+      try {
+        const error = await deleteQuote(
+          parseInt(formPayload.quote_id as string)
+        );
+        if (error) throw new Error(error.message);
+        return json({ success: true });
+      } catch (e) {
+        console.log(e);
+        return json({ success: false });
+      }
+
+    default:
+      return json({ success: false });
   }
 };
 
 export default function Blog() {
   const { userId, quotes } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const isAdding =
+    navigation.formData && navigation.formData.get("_action") === "addQuote";
 
   return (
     <div className="font-semibold mb-10">
@@ -61,14 +95,23 @@ export default function Blog() {
         <h2 className="text-3xl mb-4">Quotes</h2>
         {quotes?.map((quote) => {
           return (
-            <div key={quote.id} className="mb-4">
-              <p className="text-xl font-semibold">{quote.quote}</p>
-              <p className="text-md font-semibold">
-                {quote.author} ({quote.date})
-              </p>
-            </div>
+            <Quote
+              userId={userId}
+              id={quote.id}
+              key={quote.id}
+              quote={quote.quote}
+              author={quote.author}
+              date={quote.date}
+            />
           );
         })}
+        {isAdding && (
+          <Quote
+            quote={navigation.formData?.get("quote") as string}
+            author={navigation.formData?.get("author") as string}
+            date={navigation.formData?.get("date") as string}
+          />
+        )}
         {userId && (
           <div className="w-full justify-center flex">
             <AddQuoteDialog userId={userId} />
@@ -78,6 +121,83 @@ export default function Blog() {
     </div>
   );
 }
+
+const Quote = ({
+  id,
+  quote,
+  author,
+  date,
+  userId,
+}: {
+  id?: number;
+  quote: string;
+  author: string;
+  date: string;
+  userId?: number;
+}) => {
+  const fetcher = useFetcher();
+  const isDeleting =
+    fetcher.formData &&
+    fetcher.formData.get("_action") === "deleteQuote" &&
+    parseInt(fetcher.formData.get("quote_id") as string) === id;
+
+  return (
+    <div
+      className={clsx(
+        "pb-2 pt-6 relative group",
+        isDeleting ? "hidden" : "block"
+      )}
+    >
+      {userId && id && (
+        <div className="absolute right-0 top-0 group-hover:flex hidden">
+          <DeleteDialog fetcher={fetcher} quoteId={id} />
+        </div>
+      )}
+      <p className="text-xl font-semibold">{quote}</p>
+      <p className="text-md font-semibold">
+        {author} ({date})
+      </p>
+    </div>
+  );
+};
+
+const DeleteDialog = ({
+  quoteId,
+  fetcher,
+}: {
+  quoteId: number;
+  fetcher: FetcherWithComponents<any>;
+}) => {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <XCircleIcon className="w-6 h-6 hover:scale-125 transition-all rounded-full cursor-pointer" />
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <fetcher.Form method="POST">
+          <DialogHeader>
+            <DialogTitle>
+              Are you sure you want to delete this quote?
+            </DialogTitle>
+          </DialogHeader>
+          <input type="hidden" id="quote_id" name="quote_id" value={quoteId} />
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                className="w-full mt-4"
+                type="submit"
+                name="_action"
+                value="deleteQuote"
+              >
+                Yes
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </fetcher.Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const AddQuoteDialog = ({ userId }: { userId: number }) => {
   return (
