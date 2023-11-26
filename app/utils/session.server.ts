@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import bcrypt from "bcryptjs";
-import { fetchUser } from "~/supabase/users.server";
+import { addUser, fetchUser } from "~/supabase/users.server";
 
 export enum LoginResult {
   UserNotFound = "userNotFound",
@@ -28,6 +28,30 @@ export const login = async ({
   return isCorrectPassword
     ? { userId: userData.userId }
     : LoginResult.IncorrectPassword;
+};
+
+export const signup = async ({
+  username,
+  password,
+}: {
+  username: string;
+  password: string;
+}) => {
+  const userData = await fetchUser(username);
+  if (userData?.userId)
+    return {
+      error: new Error("User already exists"),
+    };
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const { data, error } = await addUser(username, passwordHash);
+  console.log(data, error);
+
+  return {
+    userId: data?.[0].id,
+    error: error,
+  };
 };
 
 const storage = createCookieSessionStorage({

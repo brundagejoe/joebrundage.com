@@ -20,3 +20,15 @@ export const fetchUser = async (username: string) => {
     passwordHash: data?.[0].password_hash,
   };
 };
+
+export const addUser = async (username: string, passwordHash: string) => {
+  return await supabase
+    .from("users")
+    .insert([
+      {
+        username,
+        password_hash: passwordHash,
+      },
+    ])
+    .select("*");
+};
