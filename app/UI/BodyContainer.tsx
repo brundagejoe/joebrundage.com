@@ -7,7 +7,7 @@ const BodyContainer = ({ children, serif }: BodyContainerProps) => {
   return (
     <div
       className={clsx(
-        "flex flex-col items-center mx-10",
+        "flex flex-col items-center lg:mx-10 mx-4",
         serif && "font-serif"
       )}
     >

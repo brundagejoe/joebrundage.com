@@ -9,7 +9,6 @@ import {
   useFetcher,
 } from "@remix-run/react";
 import BodyContainer from "~/UI/BodyContainer";
-import MenuBar from "~/UI/Menubar";
 import { Button } from "~/shadcn-ui-components/ui/button";
 import {
   Dialog,
@@ -90,7 +89,6 @@ export default function Blog() {
 
   return (
     <div className="font-semibold mb-10">
-      <MenuBar showProfileContent userId={userId} />
       <BodyContainer serif>
         <h2 className="text-3xl mb-4">Quotes</h2>
         {quotes?.map((quote) => {

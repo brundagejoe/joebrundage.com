@@ -7,7 +7,6 @@ import {
   ShapesIcon,
 } from "~/UI/Icons";
 import LaunchOnMount from "~/UI/LaunchOnMount";
-import MenuBar from "~/UI/Menubar";
 import ProjectInfo from "~/pages/Projects/ProjectInfo";
 
 const projects: {
@@ -54,7 +53,6 @@ const projects: {
 export default function Projects() {
   return (
     <div className="font-semibold mb-10">
-      <MenuBar />
       <BodyContainer>
         <LaunchOnMount>
           <h1 className="text-4xl">Some of my favorite projects.</h1>

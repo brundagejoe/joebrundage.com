@@ -46,7 +46,6 @@ export const signup = async ({
   const passwordHash = await bcrypt.hash(password, 10);
 
   const { data, error } = await addUser(username, passwordHash);
-  console.log(data, error);
 
   return {
     userId: data?.[0].id,
