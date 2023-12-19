@@ -5,6 +5,7 @@ import {
   ScribbleIcon,
   FilmIcon,
   ShapesIcon,
+  MusicIcon,
 } from "~/UI/Icons";
 import LaunchOnMount from "~/UI/LaunchOnMount";
 import ProjectInfo from "~/pages/Projects/ProjectInfo";
@@ -47,6 +48,13 @@ const projects: {
       "A simple raytracer built in C++ using only the standard libaries. Render scenes with a simple raytracing algorithm or a more complicated brute force pathtracing technique.",
     link: "https://github.com/brundagejoe/cs455-raytracer",
     logo: <ShapesIcon />,
+  },
+  {
+    name: "Beat calculator",
+    description:
+      "Tap the button to calculate the beats per minute for a song. Or view a metronome to see what a certain BPM sounds like.",
+    link: "/random/beat-timer",
+    logo: <MusicIcon />,
   },
 ];
 

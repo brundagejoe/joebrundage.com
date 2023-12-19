@@ -15,7 +15,7 @@ const HeroSection = () => {
           Hi I'm Joe! I'm a Software Engineer who loves web development and
           computer graphics.
         </p>
-        <div className="flex flex-col gap-y-2">
+        <div className="flex flex-col items-center md:items-start gap-y-2">
           <Link className="w-fit" to={"mailto:joebrundage@icloud.com"}>
             <Button>
               <div className="text-xl w-[150px]">Email me</div>
