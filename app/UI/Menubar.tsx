@@ -83,6 +83,7 @@ const MenuBar = ({
         {links.map((link) => (
           <Link
             to={link.href}
+            onClick={() => setShowMobileDropdown(false)}
             className="flex border-collapse cursor-pointer border-y py-4 pl-4 text-sm font-medium"
             key={`mobile-menu-bar-${link.name}`}
           >
