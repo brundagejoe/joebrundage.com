@@ -1,5 +1,4 @@
-import { Transition } from "@headlessui/react";
-import { EllipsisVerticalIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 
 interface ShowMoreButtonProps {
   onClick?: () => void;
@@ -9,35 +8,26 @@ interface ShowMoreButtonProps {
 const ShowMoreButton = ({ onClick, isActive }: ShowMoreButtonProps) => {
   return (
     <div
-      className="flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-black"
+      className="flex flex-col gap-y-[3px] h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-black"
       onClick={onClick}
     >
-      <Transition
-        show={!isActive}
-        enter="transition-all duration-500 "
-        enterFrom="opacity-0 -translate-x-4 translate-y-2 -rotate-45"
-        enterTo="opacity-100"
-        leave="transition-all duration-100"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0 -translate-x-4 translate-y-2 -rotate-45"
-        className="absolute"
-      >
-        <EllipsisVerticalIcon className="h-6 w-6 text-black" />
-      </Transition>
-      <Transition
-        show={isActive}
-        enter="transition-all duration-500"
-        enterFrom="opacity-0 translate-x-2 translate-y-2 rotate-45"
-        enterTo="opacity-100"
-        leave="transition-all duration-75"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0 translate-x-2 translate-y-2 rotate-45"
-        className="absolute"
-      >
-        <XMarkIcon className="h-6 w-6 text-black" />
-      </Transition>
+      <div
+        className={clsx(lineClass, isActive && "rotate-45 translate-y-[5px]")}
+      />
+      <div
+        className={clsx(
+          lineClass,
+          isActive && "w-0 translate-x-[9px] opacity-0"
+        )}
+      />
+      <div
+        className={clsx(lineClass, isActive && "-rotate-45 -translate-y-[5px]")}
+      />
     </div>
   );
 };
+
+const lineClass =
+  "border w-[18px] border-black rounded-xl transition-all duration-500";
 
 export default ShowMoreButton;
