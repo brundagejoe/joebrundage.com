@@ -14,12 +14,7 @@ const ShowMoreButton = ({ onClick, isActive }: ShowMoreButtonProps) => {
       <div
         className={clsx(lineClass, isActive && "rotate-45 translate-y-[5px]")}
       />
-      <div
-        className={clsx(
-          lineClass,
-          isActive && "w-0 translate-x-[9px] opacity-0"
-        )}
-      />
+      <div className={clsx(lineClass, isActive && "opacity-0 scale-0")} />
       <div
         className={clsx(lineClass, isActive && "-rotate-45 -translate-y-[5px]")}
       />
