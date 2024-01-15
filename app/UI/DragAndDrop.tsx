@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import React, { useRef, useState } from "react";
 import clsx from "clsx";
 
-export const Dropable = ({
+export const Droppable = ({
   children,
 }: {
   children?: ReactElement | ReactElement[];
@@ -26,16 +26,20 @@ export const Dropable = ({
     setOutline(false);
   };
 
+  const [showTest, setShowTest] = useState(false);
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setOutline(false);
+
+    setShowTest(true);
   };
 
   return (
     <div
       className={clsx(
-        "bg-blue-400 w-[400px] h-[400px] rounded-xl p-4",
-        outline && "outline-red-600 outline-2 outline"
+        "h-[400px] w-[400px] rounded-xl bg-blue-400 p-4",
+        outline && "outline outline-2 outline-red-600",
       )}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
@@ -43,6 +47,7 @@ export const Dropable = ({
       onDrop={handleDrop}
     >
       {children}
+      {showTest && <div>Test</div>}
     </div>
   );
 };
@@ -65,16 +70,38 @@ export const Draggable = ({ children }: { children?: ReactElement }) => {
   };
 
   return (
-    <>
-      <div
-        draggable
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        className={clsx("w-fit hover:cursor-grab", isHidden && "opacity-0")}
-      >
-        {children}
-      </div>
-    </>
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      onDrag={handleDrag}
+      onDragEnd={handleDragEnd}
+      className={clsx("w-fit hover:cursor-grab", isHidden && "opacity-0")}
+    >
+      {children}
+    </div>
+  );
+};
+
+const Test = ({ text }: { text: string }) => {
+  return <div className="w-fit rounded-lg bg-red-400 p-10">{text}</div>;
+};
+
+export const DragAndDropBoard = () => {
+  return (
+    <div className="flex gap-x-2">
+      <Droppable>
+        <Draggable>
+          <Test text={"Alpha"} />
+        </Draggable>
+        <Draggable>
+          <Test text={"Bravo"} />
+        </Draggable>
+      </Droppable>
+      <Droppable>
+        <Draggable>
+          <Test text={"Charlie"} />
+        </Draggable>
+      </Droppable>
+    </div>
   );
 };

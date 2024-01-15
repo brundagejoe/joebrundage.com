@@ -1,39 +1,36 @@
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { useState } from "react";
-import { Draggable, Dropable } from "~/UI/DragAndDrop";
 
 export default function MealPlan() {
+  const [numEntries, setNumEntries] = useState(1);
+
   return (
-    <div className="ml-4">
-      <div>Meal plan</div>
-      <EditableText value={"Hello"} />
-      <EditableText fontSize={40} bold placeHolder="Title" />
-      <div className="flex gap-x-2">
-        <Dropable>
-          <Draggable>
-            <Test />
-          </Draggable>
-          <Draggable>
-            <Test />
-          </Draggable>
-        </Dropable>
-        <Dropable>
-          <Draggable>
-            <Test />
-          </Draggable>
-        </Dropable>
+    <div className="mx-10 flex flex-col items-center gap-y-4">
+      <h1 className="text-3xl font-bold">Weekly meal plan</h1>
+      <div className="flex flex-col items-center divide-y-2 divide-solid divide-black rounded-lg border-2 border-black">
+        <div className="p-2 text-2xl font-bold">Input</div>
+        <div className="flex flex-col items-center px-4 pb-1 pt-2">
+          <div className="flex flex-col gap-y-2">
+            {Array.from({ length: numEntries }).map((_, index) => (
+              <div
+                key={`input-${index}`}
+                className="w-[200px] rounded-lg border-2 border-black px-4 py-1 text-xl font-bold"
+              >
+                <EditableText value="Pasta" fontSize={20} bold selectOnFocus />
+              </div>
+            ))}
+          </div>
+
+          <PlusCircleIcon
+            className="mt-2 h-8 w-8"
+            onClick={() => setNumEntries((v) => v + 1)}
+          />
+        </div>
       </div>
     </div>
   );
 }
-
-const Test = () => {
-  return (
-    <div className="bg-red-400 w-fit p-10 rounded-lg">
-      <EditableText value="Meal A" />
-    </div>
-  );
-};
 
 const EditableText = ({
   value = "",
@@ -41,12 +38,14 @@ const EditableText = ({
   onChange,
   fontSize = 16,
   bold,
+  selectOnFocus,
 }: {
   value?: string;
   placeHolder?: string;
   onChange?: (newValue: string) => void;
   fontSize?: number;
   bold?: boolean;
+  selectOnFocus?: boolean;
 }) => {
   const [text, setText] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
@@ -75,7 +74,8 @@ const EditableText = ({
     <input
       style={textStyle}
       autoFocus
-      className="outline outline-2 rounded-lg px-2 -translate-x-2"
+      className="w-[168px] -translate-x-2 rounded-lg px-2 outline-2"
+      onFocus={(e) => selectOnFocus && e.target.select()}
       onBlur={() => setIsEditing(false)}
       onKeyUp={handleKeyUp}
       value={text}
