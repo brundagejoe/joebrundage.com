@@ -32,6 +32,12 @@ const recentBooks = [
     link: "https://www.amazon.com/Sapiens-Humankind-Yuval-Noah-Harari/dp/0062316095",
   },
   {
+    title: "Steve Jobs",
+    author: "Walter Isaacson",
+    yearCreated: 2011,
+    link: "https://www.amazon.com/Steve-Jobs-Walter-Isaacson/dp/1451648537",
+  },
+  {
     title: "Romney: A Reckoning",
     author: "McKay Coppins",
     yearCreated: 2023,
@@ -54,8 +60,8 @@ const recentBooks = [
 export default function Books() {
   return (
     <BodyContainer>
-      <div className="flex-col flex gap-y-2">
-        <h1 className="font-bold text-3xl mb-2">
+      <div className="flex flex-col gap-y-2">
+        <h1 className="mb-2 text-3xl font-bold">
           Some of the books I've recently read
         </h1>
         {recentBooks.map((book, index) => {
