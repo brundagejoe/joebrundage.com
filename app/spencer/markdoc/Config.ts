@@ -1,4 +1,4 @@
-import type { Config } from "@markdoc/markdoc";
+import type { Config } from "@markdoc/markdoc"
 
 import {
   Book,
@@ -6,7 +6,7 @@ import {
   OriginalChapter,
   Section,
   Subsection,
-} from "./Components";
+} from "./Components"
 
 export const config: Config = {
   tags: {
@@ -60,7 +60,7 @@ export const config: Config = {
       },
     },
   },
-};
+}
 
 export const components = {
   components: {
@@ -70,4 +70,4 @@ export const components = {
     Subsection: Subsection,
     ModernChapter: ModernChapter,
   },
-};
+}

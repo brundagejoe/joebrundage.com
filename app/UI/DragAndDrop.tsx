@@ -1,39 +1,39 @@
-import type { ReactElement } from "react";
-import React, { useRef, useState } from "react";
-import clsx from "clsx";
+import type { ReactElement } from "react"
+import React, { useRef, useState } from "react"
+import clsx from "clsx"
 
 export const Droppable = ({
   children,
 }: {
-  children?: ReactElement | ReactElement[];
+  children?: ReactElement | ReactElement[]
 }) => {
-  const [outline, setOutline] = useState(false);
-  const enterTarget = useRef<HTMLElement | null>(null);
+  const [outline, setOutline] = useState(false)
+  const enterTarget = useRef<HTMLElement | null>(null)
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    enterTarget.current = e.target as HTMLElement;
-    e.preventDefault();
-    setOutline(true);
-  };
+    enterTarget.current = e.target as HTMLElement
+    e.preventDefault()
+    setOutline(true)
+  }
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
+    e.preventDefault()
+  }
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     if (enterTarget.current !== e.target) {
-      return;
+      return
     }
-    e.preventDefault();
-    setOutline(false);
-  };
+    e.preventDefault()
+    setOutline(false)
+  }
 
-  const [showTest, setShowTest] = useState(false);
+  const [showTest, setShowTest] = useState(false)
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setOutline(false);
+    e.preventDefault()
+    setOutline(false)
 
-    setShowTest(true);
-  };
+    setShowTest(true)
+  }
 
   return (
     <div
@@ -49,25 +49,25 @@ export const Droppable = ({
       {children}
       {showTest && <div>Test</div>}
     </div>
-  );
-};
+  )
+}
 
 export const Draggable = ({ children }: { children?: ReactElement }) => {
-  const [isHidden, setIsHidden] = useState(false);
-  const altKeyDown = useRef(false);
+  const [isHidden, setIsHidden] = useState(false)
+  const altKeyDown = useRef(false)
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.effectAllowed = "copy";
-    altKeyDown.current = e.altKey;
-  };
+    e.dataTransfer.effectAllowed = "copy"
+    altKeyDown.current = e.altKey
+  }
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    !altKeyDown.current && setIsHidden(true);
-  };
+    !altKeyDown.current && setIsHidden(true)
+  }
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    setIsHidden(false);
-  };
+    setIsHidden(false)
+  }
 
   return (
     <div
@@ -79,12 +79,12 @@ export const Draggable = ({ children }: { children?: ReactElement }) => {
     >
       {children}
     </div>
-  );
-};
+  )
+}
 
 const Test = ({ text }: { text: string }) => {
-  return <div className="w-fit rounded-lg bg-red-400 p-10">{text}</div>;
-};
+  return <div className="w-fit rounded-lg bg-red-400 p-10">{text}</div>
+}
 
 export const DragAndDropBoard = () => {
   return (
@@ -103,5 +103,5 @@ export const DragAndDropBoard = () => {
         </Draggable>
       </Droppable>
     </div>
-  );
-};
+  )
+}

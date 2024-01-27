@@ -1,12 +1,12 @@
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
-import { XIcon } from "lucide-react";
-import React, { useState } from "react";
+import { PlusCircleIcon } from "@heroicons/react/24/outline"
+import clsx from "clsx"
+import { XIcon } from "lucide-react"
+import React, { useState } from "react"
 
 export default function MealPlan() {
   const [entries, setEntries] = useState<{ text: string; id: number }[]>([
     { text: "", id: 0 },
-  ]);
+  ])
 
   const addEntry = () => {
     setEntries((v) => [
@@ -15,35 +15,35 @@ export default function MealPlan() {
         text: "",
         id: Math.floor(Math.random() * 100_000),
       },
-    ]);
-  };
+    ])
+  }
 
   const handleChangeText = (index: number, value: string) => {
     setEntries((v) => {
-      const newEntries = [...v];
+      const newEntries = [...v]
       newEntries[index] = {
         ...newEntries[index],
         text: value,
-      };
-      return newEntries;
-    });
-  };
+      }
+      return newEntries
+    })
+  }
 
   const handleClickEnter = (index: number) => {
     if (index === entries.length - 1) {
-      addEntry();
+      addEntry()
     }
-  };
+  }
 
   const handleBlurInput = (index: number, value: string) => {
     if (index === entries.length - 1 && value === "") {
-      setEntries((v) => v.slice(0, v.length - 1));
+      setEntries((v) => v.slice(0, v.length - 1))
     }
-  };
+  }
 
   const handleClickDelete = (index: number) => {
-    setEntries((v) => v.filter((_, i) => i !== index));
-  };
+    setEntries((v) => v.filter((_, i) => i !== index))
+  }
 
   return (
     <div className="mx-10 flex flex-col items-center gap-y-4">
@@ -80,7 +80,7 @@ export default function MealPlan() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 const Card = ({
@@ -91,12 +91,12 @@ const Card = ({
   onBlurInput,
   defaultToEditMode,
 }: {
-  value?: string;
-  onClose?: () => void;
-  onChange?: (newValue: string) => void;
-  onHitEnter?: () => void;
-  onBlurInput?: (value: string) => void;
-  defaultToEditMode?: boolean;
+  value?: string
+  onClose?: () => void
+  onChange?: (newValue: string) => void
+  onHitEnter?: () => void
+  onBlurInput?: (value: string) => void
+  defaultToEditMode?: boolean
 }) => {
   return (
     <div className="group relative flex h-[100px] w-[200px] items-center justify-center rounded-lg shadow-md outline outline-1 outline-gray-200">
@@ -117,8 +117,8 @@ const Card = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
 const EditableText = ({
   initialValue = "",
@@ -131,55 +131,55 @@ const EditableText = ({
   onHitEnter,
   onBlurInput,
 }: {
-  initialValue?: string;
-  placeHolder?: string;
-  onChange?: (newValue: string) => void;
-  fontSize?: number;
-  bold?: boolean;
-  selectOnFocus?: boolean;
-  defaultToEditMode?: boolean;
-  onHitEnter?: (value: string) => void;
-  onBlurInput?: (value: string) => void;
+  initialValue?: string
+  placeHolder?: string
+  onChange?: (newValue: string) => void
+  fontSize?: number
+  bold?: boolean
+  selectOnFocus?: boolean
+  defaultToEditMode?: boolean
+  onHitEnter?: (value: string) => void
+  onBlurInput?: (value: string) => void
 }) => {
-  const [text, setText] = useState(initialValue);
-  const [isEditing, setIsEditing] = useState(defaultToEditMode);
+  const [text, setText] = useState(initialValue)
+  const [isEditing, setIsEditing] = useState(defaultToEditMode)
 
   const handleClickText = () => {
-    setIsEditing(true);
-  };
+    setIsEditing(true)
+  }
 
   const handleChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
-    onChange && onChange(event.target.value);
-  };
+    setText(event.target.value)
+    onChange && onChange(event.target.value)
+  }
 
   const handleKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      setIsEditing(false);
-      onHitEnter && onHitEnter(text);
+      setIsEditing(false)
+      onHitEnter && onHitEnter(text)
     } else if (event.key === "Escape") {
-      setIsEditing(false);
-      onBlurInput && onBlurInput(text);
+      setIsEditing(false)
+      onBlurInput && onBlurInput(text)
     }
-  };
+  }
 
   const handleBlur = () => {
-    setIsEditing(false);
-    onBlurInput && onBlurInput(text);
-  };
+    setIsEditing(false)
+    onBlurInput && onBlurInput(text)
+  }
 
   const textStyle = {
     fontSize: `${fontSize}px`,
     fontWeight: bold ? "bold" : "normal",
-  };
+  }
 
   const calculateInputSize = () => {
     if (text.length === 0) {
-      return 1;
+      return 1
     } else {
-      return text.length;
+      return text.length
     }
-  };
+  }
   return (
     <div className="relative">
       {isEditing ? (
@@ -204,5 +204,5 @@ const EditableText = ({
         </p>
       )}
     </div>
-  );
-};
+  )
+}

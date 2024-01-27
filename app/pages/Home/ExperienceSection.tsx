@@ -1,12 +1,12 @@
-import { Link } from "@remix-run/react";
+import { Link } from "@remix-run/react"
 
 interface ResumeItem {
-  company: string;
-  companyLink: string;
-  jobTitle: string;
-  startDate: string;
-  endDate: string;
-  description: string[];
+  company: string
+  companyLink: string
+  jobTitle: string
+  startDate: string
+  endDate: string
+  description: string[]
 }
 
 const resumeItems: ResumeItem[] = [
@@ -46,22 +46,22 @@ const resumeItems: ResumeItem[] = [
       "Spent one-on-one time with students helping them solve issues with their code and debugging software issues on their computers",
     ],
   },
-];
+]
 
 const ExperienceSection = () => {
   return (
     <div className="w-fit">
-      <h2 className="text-3xl mb-4">Experience</h2>
+      <h2 className="mb-4 text-3xl">Experience</h2>
       <div className="flex flex-col gap-y-4">
         {resumeItems.map((item) => {
           return (
             <div key={`resume-for-${item.company}`}>
               <Link
                 to={item.companyLink}
-                className="flex-col w-fit flex text-2xl group/link"
+                className="group/link flex w-fit flex-col text-2xl"
               >
                 {item.company}
-                <div className="mt-[-2px] h-[2px] w-full rounded-xl bg-black transition-all duration-300 max-w-0 group-hover/link:max-w-full"></div>
+                <div className="mt-[-2px] h-[2px] w-full max-w-0 rounded-xl bg-black transition-all duration-300 group-hover/link:max-w-full"></div>
               </Link>
               <div className="flex flex-col md:flex-row md:justify-between">
                 <h4 className="text-xl">{item.jobTitle}</h4>
@@ -78,15 +78,15 @@ const ExperienceSection = () => {
                     >
                       {desc}
                     </li>
-                  );
+                  )
                 })}
               </ul>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ExperienceSection;
+export default ExperienceSection

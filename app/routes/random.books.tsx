@@ -1,4 +1,4 @@
-import BodyContainer from "~/UI/BodyContainer";
+import BodyContainer from "~/UI/BodyContainer"
 
 const recentBooks = [
   {
@@ -55,7 +55,7 @@ const recentBooks = [
     yearCreated: 2011,
     link: "https://www.amazon.com/11-22-63-Stephen-King/dp/1451627289",
   },
-];
+]
 
 export default function Books() {
   return (
@@ -72,9 +72,9 @@ export default function Books() {
                 {book.author} ({book.yearCreated})
               </span>
             </a>
-          );
+          )
         })}
       </div>
     </BodyContainer>
-  );
+  )
 }

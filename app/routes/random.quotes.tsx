@@ -1,15 +1,15 @@
-import { PlusCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import type { FetcherWithComponents } from "@remix-run/react";
+import { PlusCircleIcon, XCircleIcon } from "@heroicons/react/24/outline"
+import type { ActionArgs, LoaderArgs } from "@remix-run/node"
+import { json } from "@remix-run/node"
+import type { FetcherWithComponents } from "@remix-run/react"
 import {
   useLoaderData,
   Form,
   useNavigation,
   useFetcher,
-} from "@remix-run/react";
-import BodyContainer from "~/UI/BodyContainer";
-import { Button } from "~/shadcn-ui-components/ui/button";
+} from "@remix-run/react"
+import BodyContainer from "~/UI/BodyContainer"
+import { Button } from "~/shadcn-ui-components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -18,32 +18,28 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "~/shadcn-ui-components/ui/dialog";
-import { Input } from "~/shadcn-ui-components/ui/input";
-import { Label } from "~/shadcn-ui-components/ui/label";
-import { Textarea } from "~/shadcn-ui-components/ui/textarea";
-import {
-  deleteQuote,
-  fetchQuotes,
-  insertQuote,
-} from "~/supabase/quotes.server";
-import { getUserId } from "~/utils/session.server";
-import { z } from "zod";
-import clsx from "clsx";
+} from "~/shadcn-ui-components/ui/dialog"
+import { Input } from "~/shadcn-ui-components/ui/input"
+import { Label } from "~/shadcn-ui-components/ui/label"
+import { Textarea } from "~/shadcn-ui-components/ui/textarea"
+import { deleteQuote, fetchQuotes, insertQuote } from "~/supabase/quotes.server"
+import { getUserId } from "~/utils/session.server"
+import { z } from "zod"
+import clsx from "clsx"
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const userId = await getUserId(request);
+  const userId = await getUserId(request)
 
   return json({
     userId,
     quotes: await fetchQuotes(),
-  });
-};
+  })
+}
 
 export const action = async ({ request }: ActionArgs) => {
   const { _action, ...formPayload } = Object.fromEntries(
-    await request.formData()
-  );
+    await request.formData(),
+  )
 
   switch (_action) {
     case "addQuote":
@@ -53,44 +49,44 @@ export const action = async ({ request }: ActionArgs) => {
         date: z.string().min(1),
         associated_user_id: z.coerce.number(),
         note: z.string(),
-      });
+      })
 
       try {
-        const quote = quoteSchema.parse(formPayload);
-        const error = await insertQuote(quote);
-        if (error) throw new Error(error.message);
-        return json({ success: true });
+        const quote = quoteSchema.parse(formPayload)
+        const error = await insertQuote(quote)
+        if (error) throw new Error(error.message)
+        return json({ success: true })
       } catch (e) {
-        console.log(e);
-        return json({ success: false });
+        console.log(e)
+        return json({ success: false })
       }
     case "deleteQuote":
       try {
         const error = await deleteQuote(
-          parseInt(formPayload.quote_id as string)
-        );
-        if (error) throw new Error(error.message);
-        return json({ success: true });
+          parseInt(formPayload.quote_id as string),
+        )
+        if (error) throw new Error(error.message)
+        return json({ success: true })
       } catch (e) {
-        console.log(e);
-        return json({ success: false });
+        console.log(e)
+        return json({ success: false })
       }
 
     default:
-      return json({ success: false });
+      return json({ success: false })
   }
-};
+}
 
 export default function Blog() {
-  const { userId, quotes } = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
+  const { userId, quotes } = useLoaderData<typeof loader>()
+  const navigation = useNavigation()
   const isAdding =
-    navigation.formData && navigation.formData.get("_action") === "addQuote";
+    navigation.formData && navigation.formData.get("_action") === "addQuote"
 
   return (
-    <div className="font-semibold mb-10">
+    <div className="mb-10 font-semibold">
       <BodyContainer serif>
-        <h2 className="text-3xl mb-4">Quotes</h2>
+        <h2 className="mb-4 text-3xl">Quotes</h2>
         {quotes?.map((quote) => {
           return (
             <Quote
@@ -101,7 +97,7 @@ export default function Blog() {
               author={quote.author}
               date={quote.date}
             />
-          );
+          )
         })}
         {isAdding && (
           <Quote
@@ -111,13 +107,13 @@ export default function Blog() {
           />
         )}
         {userId && (
-          <div className="w-full justify-center flex">
+          <div className="flex w-full justify-center">
             <AddQuoteDialog userId={userId} />
           </div>
         )}
       </BodyContainer>
     </div>
-  );
+  )
 }
 
 const Quote = ({
@@ -127,27 +123,27 @@ const Quote = ({
   date,
   userId,
 }: {
-  id?: number;
-  quote: string;
-  author: string;
-  date: string;
-  userId?: number;
+  id?: number
+  quote: string
+  author: string
+  date: string
+  userId?: number
 }) => {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher()
   const isDeleting =
     fetcher.formData &&
     fetcher.formData.get("_action") === "deleteQuote" &&
-    parseInt(fetcher.formData.get("quote_id") as string) === id;
+    parseInt(fetcher.formData.get("quote_id") as string) === id
 
   return (
     <div
       className={clsx(
-        "pb-2 pt-6 relative group",
-        isDeleting ? "hidden" : "block"
+        "group relative pb-2 pt-6",
+        isDeleting ? "hidden" : "block",
       )}
     >
       {userId && id && (
-        <div className="absolute right-0 top-0 group-hover:flex hidden">
+        <div className="absolute right-0 top-0 hidden group-hover:flex">
           <DeleteDialog fetcher={fetcher} quoteId={id} />
         </div>
       )}
@@ -156,20 +152,20 @@ const Quote = ({
         {author} ({date})
       </p>
     </div>
-  );
-};
+  )
+}
 
 const DeleteDialog = ({
   quoteId,
   fetcher,
 }: {
-  quoteId: number;
-  fetcher: FetcherWithComponents<any>;
+  quoteId: number
+  fetcher: FetcherWithComponents<any>
 }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <XCircleIcon className="w-6 h-6 hover:scale-125 transition-all rounded-full cursor-pointer" />
+        <XCircleIcon className="h-6 w-6 cursor-pointer rounded-full transition-all hover:scale-125" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <fetcher.Form method="POST">
@@ -182,7 +178,7 @@ const DeleteDialog = ({
           <DialogFooter>
             <DialogClose asChild>
               <Button
-                className="w-full mt-4"
+                className="mt-4 w-full"
                 type="submit"
                 name="_action"
                 value="deleteQuote"
@@ -194,14 +190,14 @@ const DeleteDialog = ({
         </fetcher.Form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
 const AddQuoteDialog = ({ userId }: { userId: number }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <PlusCircleIcon className="w-8 h-8 hover:scale-125 transition-all rounded-full" />
+        <PlusCircleIcon className="h-8 w-8 rounded-full transition-all hover:scale-125" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form method="POST">
@@ -210,7 +206,7 @@ const AddQuoteDialog = ({ userId }: { userId: number }) => {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="quote" className="text-right pt-1">
+              <Label htmlFor="quote" className="pt-1 text-right">
                 Quote
               </Label>
               <Textarea className="col-span-3" id="quote" name="quote" />
@@ -228,7 +224,7 @@ const AddQuoteDialog = ({ userId }: { userId: number }) => {
               <Input id="date" name="date" className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="note" className="text-right pt-1">
+              <Label htmlFor="note" className="pt-1 text-right">
                 Notes
               </Label>
               <Textarea className="col-span-3" id="note" name="note" />
@@ -250,5 +246,5 @@ const AddQuoteDialog = ({ userId }: { userId: number }) => {
         </Form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

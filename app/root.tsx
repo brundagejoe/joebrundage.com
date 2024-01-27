@@ -1,5 +1,5 @@
-import type { LinksFunction } from "@remix-run/node";
-import stylesheet from "~/tailwind.css";
+import type { LinksFunction } from "@remix-run/node"
+import stylesheet from "~/tailwind.css"
 
 import {
   Links,
@@ -8,12 +8,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "@remix-run/react";
-import MenuBar from "./UI/Menubar";
+} from "@remix-run/react"
+import MenuBar from "./UI/Menubar"
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
-];
+]
 
 export default function App() {
   return (
@@ -38,5 +38,5 @@ export default function App() {
         <LiveReload />
       </body>
     </html>
-  );
+  )
 }

@@ -1,9 +1,9 @@
-import { Transition } from "@headlessui/react";
-import { Link, useLocation } from "@remix-run/react";
-import clsx from "clsx";
-import { useState } from "react";
-import ShowMoreButton from "./ShowMoreButton";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { Transition } from "@headlessui/react"
+import { Link, useLocation } from "@remix-run/react"
+import clsx from "clsx"
+import { useState } from "react"
+import ShowMoreButton from "./ShowMoreButton"
+import { UserCircleIcon } from "@heroicons/react/24/outline"
 
 const links = [
   {
@@ -18,18 +18,18 @@ const links = [
     name: "Blog",
     href: "/blog",
   },
-];
+]
 
 const MenuBar = ({
   showProfileContent,
   userId,
 }: {
-  showProfileContent?: boolean;
-  userId?: number;
+  showProfileContent?: boolean
+  userId?: number
 }) => {
-  const location = useLocation();
+  const location = useLocation()
 
-  const [showMobileDropdown, setShowMobileDropdown] = useState(false);
+  const [showMobileDropdown, setShowMobileDropdown] = useState(false)
 
   return (
     <div className="pb-4">
@@ -51,7 +51,7 @@ const MenuBar = ({
           </div>
           <div className="hidden gap-x-8 text-lg text-gray-600 md:flex">
             {links.map((link) => {
-              const isActive = location.pathname.includes(link.href);
+              const isActive = location.pathname.includes(link.href)
               return (
                 <HoverableLink
                   key={`menu-bar-${link.name}`}
@@ -60,13 +60,13 @@ const MenuBar = ({
                 >
                   {link.name}
                 </HoverableLink>
-              );
+              )
             })}
           </div>
         </div>
         {showProfileContent && (
           <UserLink className="hidden md:flex" userId={userId}>
-            <UserCircleIcon className="h-10 w-10 text-black cursor-pointer hover:scale-125 transition-transform rounded-full" />
+            <UserCircleIcon className="h-10 w-10 cursor-pointer rounded-full text-black transition-transform hover:scale-125" />
           </UserLink>
         )}
       </div>
@@ -78,7 +78,7 @@ const MenuBar = ({
         leave="transition-all duration-500"
         leaveFrom="opacity-100"
         leaveTo="opacity-0 -translate-y-2"
-        className="absolute mt-4 w-full bg-white md:hidden z-50"
+        className="absolute z-50 mt-4 w-full bg-white md:hidden"
       >
         {links.map((link) => (
           <Link
@@ -100,19 +100,19 @@ const MenuBar = ({
         )}
       </Transition>
     </div>
-  );
-};
+  )
+}
 
-export default MenuBar;
+export default MenuBar
 
 const HoverableLink = ({
   href,
   children,
   isActive,
 }: {
-  href: string;
-  children?: React.ReactNode;
-  isActive?: boolean;
+  href: string
+  children?: React.ReactNode
+  isActive?: boolean
 }) => {
   return (
     <Link
@@ -129,24 +129,24 @@ const HoverableLink = ({
           {
             "max-w-0 group-hover/link:max-w-full": !isActive,
             "max-w-full": isActive,
-          }
+          },
         )}
       />
     </Link>
-  );
-};
+  )
+}
 
 const UserLink = ({
   children,
   className,
   userId,
 }: {
-  children?: React.ReactNode;
-  className?: string;
-  userId?: number;
+  children?: React.ReactNode
+  className?: string
+  userId?: number
 }) => {
-  const location = useLocation();
-  const searchParams = new URLSearchParams([["redirectTo", location.pathname]]);
+  const location = useLocation()
+  const searchParams = new URLSearchParams([["redirectTo", location.pathname]])
   return (
     <Link
       className={className}
@@ -154,5 +154,5 @@ const UserLink = ({
     >
       {children}
     </Link>
-  );
-};
+  )
+}

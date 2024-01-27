@@ -1,6 +1,6 @@
 interface ButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
+  children: React.ReactNode
+  onClick?: () => void
 }
 const Button = ({ children, onClick }: ButtonProps) => {
   return (
@@ -10,7 +10,7 @@ const Button = ({ children, onClick }: ButtonProps) => {
     >
       {children}
     </button>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

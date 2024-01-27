@@ -1,10 +1,10 @@
-import { Link } from "@remix-run/react";
-import profilePicture from "../../images/joe-hannah-500x500.png";
-import Button from "~/UI/Button";
+import { Link } from "@remix-run/react"
+import profilePicture from "../../images/joe-hannah-500x500.png"
+import Button from "~/UI/Button"
 
 const HeroSection = () => {
   return (
-    <div className="md:mt-10 flex flex-col md:flex-row-reverse items-center gap-8 md:w-[800px]">
+    <div className="flex flex-col items-center gap-8 md:mt-10 md:w-[800px] md:flex-row-reverse">
       <img
         className="w-[200px] md:w-[400px]"
         src={profilePicture}
@@ -15,10 +15,10 @@ const HeroSection = () => {
           Hi I'm Joe! I'm a Software Engineer who loves web development and
           computer graphics.
         </p>
-        <div className="flex flex-col items-center md:items-start gap-y-2">
+        <div className="flex flex-col items-center gap-y-2 md:items-start">
           <Link className="w-fit" to={"mailto:joebrundage@icloud.com"}>
             <Button>
-              <div className="text-xl w-[150px]">Email me</div>
+              <div className="w-[150px] text-xl">Email me</div>
             </Button>
           </Link>
           <Link
@@ -27,13 +27,13 @@ const HeroSection = () => {
             to={"https://www.linkedin.com/in/brundagejoe/"}
           >
             <Button>
-              <div className="text-xl w-[150px]">My Linkedin</div>
+              <div className="w-[150px] text-xl">My Linkedin</div>
             </Button>
           </Link>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default HeroSection;
+export default HeroSection

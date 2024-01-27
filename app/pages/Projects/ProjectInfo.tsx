@@ -1,10 +1,10 @@
-import { Link } from "@remix-run/react";
+import { Link } from "@remix-run/react"
 
 interface ProjectInfoProps {
-  projectName: string;
-  projectDescription: string;
-  projectLink?: string;
-  projectLogo: JSX.Element;
+  projectName: string
+  projectDescription: string
+  projectLink?: string
+  projectLogo: JSX.Element
 }
 
 const OptionalLink = ({
@@ -12,9 +12,9 @@ const OptionalLink = ({
   children,
   className,
 }: {
-  link?: string;
-  children: React.ReactNode;
-  className?: string;
+  link?: string
+  children: React.ReactNode
+  className?: string
 }) => {
   return link ? (
     <Link className={className} to={link} target="_blank">
@@ -22,8 +22,8 @@ const OptionalLink = ({
     </Link>
   ) : (
     <div className={className}>{children}</div>
-  );
-};
+  )
+}
 
 const ProjectInfo = ({
   projectName,
@@ -34,13 +34,13 @@ const ProjectInfo = ({
   return (
     <OptionalLink
       link={projectLink}
-      className="flex flex-col cursor-pointer bg-gray-100 text-2xl p-12 rounded-lg font-medium w-[350px] h-full"
+      className="flex h-full w-[350px] cursor-pointer flex-col rounded-lg bg-gray-100 p-12 text-2xl font-medium"
     >
       {projectLogo}
-      <h2 className="mt-8 mb-4">{projectName}</h2>
+      <h2 className="mb-4 mt-8">{projectName}</h2>
       <p className="text-gray-500">{projectDescription}</p>
     </OptionalLink>
-  );
-};
+  )
+}
 
-export default ProjectInfo;
+export default ProjectInfo

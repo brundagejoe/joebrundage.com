@@ -1,4 +1,4 @@
-import BodyContainer from "~/UI/BodyContainer";
+import BodyContainer from "~/UI/BodyContainer"
 import {
   BookIcon,
   StatIcon,
@@ -6,15 +6,15 @@ import {
   FilmIcon,
   ShapesIcon,
   MusicIcon,
-} from "~/UI/Icons";
-import LaunchOnMount from "~/UI/LaunchOnMount";
-import ProjectInfo from "~/pages/Projects/ProjectInfo";
+} from "~/UI/Icons"
+import LaunchOnMount from "~/UI/LaunchOnMount"
+import ProjectInfo from "~/pages/Projects/ProjectInfo"
 
 const projects: {
-  name: string;
-  link?: string;
-  description: string;
-  logo: JSX.Element;
+  name: string
+  link?: string
+  description: string
+  logo: JSX.Element
 }[] = [
   {
     name: "Rec41",
@@ -56,16 +56,16 @@ const projects: {
     link: "/random/beat-timer",
     logo: <MusicIcon />,
   },
-];
+]
 
 export default function Projects() {
   return (
-    <div className="font-semibold mb-10">
+    <div className="mb-10 font-semibold">
       <BodyContainer>
         <LaunchOnMount>
           <h1 className="text-4xl">Some of my favorite projects.</h1>
         </LaunchOnMount>
-        <div className="mt-4 md:grid md:grid-cols-3 flex flex-col gap-8">
+        <div className="mt-4 flex flex-col gap-8 md:grid md:grid-cols-3">
           {projects.map((project, index) => {
             return (
               <LaunchOnMount
@@ -81,10 +81,10 @@ export default function Projects() {
                   projectLogo={project.logo}
                 />
               </LaunchOnMount>
-            );
+            )
           })}
         </div>
       </BodyContainer>
     </div>
-  );
+  )
 }

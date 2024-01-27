@@ -1,3 +1,3 @@
 export default function Index() {
-  return <div>Spencer</div>;
+  return <div>Spencer</div>
 }

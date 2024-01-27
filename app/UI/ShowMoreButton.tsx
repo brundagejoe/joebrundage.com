@@ -1,28 +1,28 @@
-import clsx from "clsx";
+import clsx from "clsx"
 
 interface ShowMoreButtonProps {
-  onClick?: () => void;
-  isActive: boolean;
+  onClick?: () => void
+  isActive: boolean
 }
 
 const ShowMoreButton = ({ onClick, isActive }: ShowMoreButtonProps) => {
   return (
     <div
-      className="flex flex-col gap-y-[3px] h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-black"
+      className="flex h-8 w-8 cursor-pointer flex-col items-center justify-center gap-y-[3px] overflow-hidden rounded-full border-2 border-black"
       onClick={onClick}
     >
       <div
-        className={clsx(lineClass, isActive && "rotate-45 translate-y-[5px]")}
+        className={clsx(lineClass, isActive && "translate-y-[5px] rotate-45")}
       />
-      <div className={clsx(lineClass, isActive && "opacity-0 scale-0")} />
+      <div className={clsx(lineClass, isActive && "scale-0 opacity-0")} />
       <div
-        className={clsx(lineClass, isActive && "-rotate-45 -translate-y-[5px]")}
+        className={clsx(lineClass, isActive && "-translate-y-[5px] -rotate-45")}
       />
     </div>
-  );
-};
+  )
+}
 
 const lineClass =
-  "border w-[18px] border-black rounded-xl transition-all duration-500";
+  "border w-[18px] border-black rounded-xl transition-all duration-500"
 
-export default ShowMoreButton;
+export default ShowMoreButton
