@@ -1,5 +1,6 @@
 import Markdoc from "@markdoc/markdoc"
-import { json, type LoaderArgs } from "@remix-run/node"
+import type { LoaderFunctionArgs } from "@remix-run/node"
+import { json } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
 import React from "react"
 import BodyContainer from "~/UI/BodyContainer"
@@ -23,7 +24,7 @@ const separateFirstParagraph = (content: string) => {
   return { firstParagraph, cleanedContent }
 }
 
-export const loader = async ({ params }: LoaderArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { article: articleTitle } = params
   const { success, content } = await getBlogContent(articleTitle)
   if (!success) {

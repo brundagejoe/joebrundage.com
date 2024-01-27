@@ -6,8 +6,8 @@
 
 import { PassThrough } from "node:stream"
 
-import type { AppLoadContext, EntryContext } from "@remix-run/node"
-import { Response } from "@remix-run/node"
+import type { EntryContext } from "@remix-run/node"
+import { createReadableStreamFromReadable } from "@remix-run/node"
 import { RemixServer } from "@remix-run/react"
 import isbot from "isbot"
 import { renderToPipeableStream } from "react-dom/server"
@@ -19,9 +19,8 @@ export default function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  loadContext: AppLoadContext,
 ) {
-  return isbot(request.headers.get("user-agent"))
+  return isbot(request.headers.get("user-agent") || "")
     ? handleBotRequest(
         request,
         responseStatusCode,
@@ -54,11 +53,12 @@ function handleBotRequest(
         onAllReady() {
           shellRendered = true
           const body = new PassThrough()
+          const stream = createReadableStreamFromReadable(body)
 
           responseHeaders.set("Content-Type", "text/html")
 
           resolve(
-            new Response(body, {
+            new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),
@@ -103,11 +103,12 @@ function handleBrowserRequest(
         onShellReady() {
           shellRendered = true
           const body = new PassThrough()
+          const stream = createReadableStreamFromReadable(body)
 
           responseHeaders.set("Content-Type", "text/html")
 
           resolve(
-            new Response(body, {
+            new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),

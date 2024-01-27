@@ -66,3 +66,42 @@ export const getBlogContent = async (
     content: fileContents,
   }
 }
+
+export const getJsonContent = async (
+  fileName: string,
+): Promise<{ success: boolean; content: string }> => {
+  if (process.env.DEPLOYMENT === "production") {
+    const response = await fetch(
+      `https://raw.githubusercontent.com/brundagejoe/joebrundage.com/production/content/json/${fileName}.json`,
+    )
+    if (response.ok) {
+      const contentString = await response.text()
+      return {
+        success: true,
+        content: contentString,
+      }
+    } else {
+      return {
+        success: false,
+        content: "bad",
+      }
+    }
+  }
+
+  try {
+    const jsonDirectory = path.join(process.cwd(), "/content")
+    const fileContents = await fs.readFile(
+      jsonDirectory + `/json/${fileName}.json`,
+      "utf8",
+    )
+    return {
+      success: true,
+      content: fileContents,
+    }
+  } catch (e) {
+    return {
+      success: false,
+      content: "bad",
+    }
+  }
+}
