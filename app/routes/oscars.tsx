@@ -1,5 +1,5 @@
 import type { ClientLoaderFunctionArgs } from "@remix-run/react"
-import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react"
+import { Link, useLoaderData, useNavigate } from "@remix-run/react"
 import clsx from "clsx"
 import SimpleSearchBar from "~/UI/SimpleSearchBar"
 import {
@@ -23,6 +23,35 @@ type Nominee = {
   winner: boolean
 }
 
+export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
+  const nominees = await getNomineesFromLocalForage()
+
+  const searchParams = new URL(request.url).searchParams
+  const query = searchParams.get("q")
+  const year = parseInt(searchParams.get("year") || "")
+  const category = searchParams.get("category")
+
+  if (year && category) {
+    const data = getCategory(nominees, category, year)
+    return { data }
+  }
+
+  if (!query) return { data: [] }
+
+  const data = queryNominees(query, nominees)
+
+  return { data }
+}
+
+const getCategory = (nominees: Nominee[], category: string, year: number) => {
+  const categoryLower = category.toLowerCase()
+  return nominees.filter(
+    (nominee) =>
+      nominee.category.toLowerCase() === categoryLower &&
+      nominee.year_film === year,
+  )
+}
+
 const queryNominees = (query: string, nominees: Nominee[]) => {
   const queryLower = query.toLowerCase()
   return nominees.filter(
@@ -32,28 +61,12 @@ const queryNominees = (query: string, nominees: Nominee[]) => {
   )
 }
 
-export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  const nominees = await getNomineesFromLocalForage()
-
-  const searchParams = new URL(request.url).searchParams
-  const query = searchParams.get("q")
-
-  if (!query) return { data: [] }
-
-  const data = queryNominees(query, nominees)
-
-  return { data }
-}
-
 const Oscars = () => {
   const { data } = useLoaderData<typeof clientLoader>()
-  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
   const handleSearch = (searchString: string) => {
-    const newSearchParams = new URLSearchParams(searchParams)
-    newSearchParams.set("q", searchString)
-    navigate(`?${newSearchParams.toString()}`)
+    navigate(generateSearchLink(searchString))
   }
 
   const winnerCount = data.filter((nominee) => nominee.winner).length
@@ -63,40 +76,63 @@ const Oscars = () => {
     <div className="mb-10 flex w-full flex-col items-center gap-y-4">
       <SimpleSearchBar onSearch={handleSearch} />
       <div>
-        <Table className="max-w-[800px] px-4">
-          <TableCaption>
-            {winnerCount} wins / {nomineeCount} total nominations
-          </TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Year</TableHead>
-              <TableHead>Cateogry</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Film</TableHead>
-              <TableHead className="text-right">Winner?</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((nominee, index) => {
-              return (
-                <TableRow
-                  className={clsx({ "bg-green-100": nominee.winner })}
-                  key={`nominee-${index}`}
-                >
-                  <TableCell className="font-medium">
-                    {nominee.year_film}
-                  </TableCell>
-                  <TableCell>{nominee.category}</TableCell>
-                  <TableCell>{nominee.name}</TableCell>
-                  <TableCell>{nominee.film}</TableCell>
-                  <TableCell className="text-right">
-                    {nominee.winner ? "Yes" : "No"}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+        {data.length !== 0 ? (
+          <Table className="max-w-[800px] px-4">
+            <TableCaption>
+              {winnerCount} wins / {nomineeCount} total nominations
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Year</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Film</TableHead>
+                <TableHead className="text-right">Winner?</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((nominee, index) => {
+                return (
+                  <TableRow
+                    className={clsx({ "bg-green-100": nominee.winner })}
+                    key={`nominee-${index}`}
+                  >
+                    <TableCell className="font-medium">
+                      {nominee.year_film}
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        to={generateCategoryLink(
+                          nominee.category,
+                          nominee.year_film,
+                        )}
+                      >
+                        {nominee.category}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={generateSearchLink(nominee.name)}>
+                        {nominee.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={generateSearchLink(nominee.film)}>
+                        {nominee.film}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {nominee.winner ? "Yes" : "No"}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="mt-4 font-semibold text-gray-500">
+            No results found
+          </div>
+        )}
       </div>
     </div>
   )
@@ -104,16 +140,21 @@ const Oscars = () => {
 
 export default Oscars
 
+const generateCategoryLink = (category: string, year: number) => {
+  return `?year=${year}&category=${category}`
+}
+const generateSearchLink = (query: string) => {
+  return `?q=${query}`
+}
+
 const getNomineesFromLocalForage = async (): Promise<Nominee[]> => {
   const cached = (await localForage.getItem("oscars")) as Nominee[]
   if (cached) {
-    console.log("From cache!")
     return cached
   }
   const response = await fetch("/oscars-awards.json")
   let data = await response.json()
   const content = data.content as Nominee[]
   localForage.setItem("oscars", content)
-  console.log("From fetch!")
   return content as Nominee[]
 }
