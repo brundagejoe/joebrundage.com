@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "~/shadcn-ui-components/ui/table"
 import localForage from "localforage"
+import socialImage from "../images/oscars-logo.jpeg"
 
 type Nominee = {
   year_film: number
@@ -26,6 +27,16 @@ type Nominee = {
   name: string
   film: string
   winner: boolean
+}
+
+export const meta = () => {
+  return [
+    { title: "Joe Brundage | Oscars Database" },
+    {
+      property: "og:image",
+      content: `https://joebrundage.com${socialImage}`,
+    },
+  ]
 }
 
 export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {

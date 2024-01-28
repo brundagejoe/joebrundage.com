@@ -15,7 +15,6 @@ export const meta = () => {
 }
 
 const BeatTimer = () => {
-  console.log(socialImage)
   const [metronomeSelected, setMetronomeSelected] = useState(false)
   return (
     <div className="mt-4 flex flex-col items-center">
