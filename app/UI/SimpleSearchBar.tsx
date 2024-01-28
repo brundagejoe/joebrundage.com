@@ -3,7 +3,9 @@ import { useState } from "react"
 
 const SimpleSearchBar = ({
   onSearch,
+  placeholder = "Search",
 }: {
+  placeholder?: string
   onSearch?: (text: string) => void
 }) => {
   const [searchText, setSearchText] = useState("")
@@ -18,7 +20,7 @@ const SimpleSearchBar = ({
       />
       <input
         className="w-[300px] rounded-full border border-gray-300 py-2 pl-4 pr-12"
-        placeholder="Search"
+        placeholder={placeholder}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
         onKeyUp={(e) => {

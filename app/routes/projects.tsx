@@ -1,11 +1,11 @@
 import BodyContainer from "~/UI/BodyContainer"
 import {
   BookIcon,
-  StatIcon,
   ScribbleIcon,
   FilmIcon,
   ShapesIcon,
   MusicIcon,
+  OscarsIcon,
 } from "~/UI/Icons"
 import LaunchOnMount from "~/UI/LaunchOnMount"
 import ProjectInfo from "~/pages/Projects/ProjectInfo"
@@ -16,11 +16,18 @@ const projects: {
   description: string
   logo: JSX.Element
 }[] = [
+  // {
+  //   name: "Rec41",
+  //   description:
+  //     "A stat recorder, viewer and analyzer built for pickup and rec basketball leagues. Intuitively record play-by-plays in real-time and share with your friends.",
+  //   logo: <StatIcon />,
+  // },
   {
-    name: "Rec41",
+    name: "Oscars",
     description:
-      "A stat recorder, viewer and analyzer built for pickup and rec basketball leagues. Intuitively record play-by-plays in real-time and share with your friends.",
-    logo: <StatIcon />,
+      "Quickly search nominees and winners for the Academy Awards. This uses a locally-cached database so make instant requests.",
+    logo: <OscarsIcon />,
+    link: "/oscars",
   },
   {
     name: "Spencer",

@@ -1,5 +1,10 @@
 import type { ClientLoaderFunctionArgs } from "@remix-run/react"
-import { Link, useLoaderData, useNavigate } from "@remix-run/react"
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useSearchParams,
+} from "@remix-run/react"
 import clsx from "clsx"
 import SimpleSearchBar from "~/UI/SimpleSearchBar"
 import {
@@ -64,6 +69,11 @@ const queryNominees = (query: string, nominees: Nominee[]) => {
 const Oscars = () => {
   const { data } = useLoaderData<typeof clientLoader>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const containsSearch =
+    searchParams.has("q") ||
+    searchParams.has("year") ||
+    searchParams.has("category")
 
   const handleSearch = (searchString: string) => {
     navigate(generateSearchLink(searchString))
@@ -74,10 +84,13 @@ const Oscars = () => {
 
   return (
     <div className="mb-10 flex w-full flex-col items-center gap-y-4">
-      <SimpleSearchBar onSearch={handleSearch} />
-      <div>
+      <SimpleSearchBar
+        placeholder={containsSearch ? "Search" : "Search a film or nominee"}
+        onSearch={handleSearch}
+      />
+      <div className="w-screen overflow-x-scroll md:w-fit">
         {data.length !== 0 ? (
-          <Table className="max-w-[800px] px-4">
+          <Table className="box-border max-w-[762px] px-4">
             <TableCaption>
               {winnerCount} wins / {nomineeCount} total nominations
             </TableCaption>
@@ -94,7 +107,9 @@ const Oscars = () => {
               {data.map((nominee, index) => {
                 return (
                   <TableRow
-                    className={clsx({ "bg-green-100": nominee.winner })}
+                    className={clsx({
+                      "bg-green-100 hover:text-green-700": nominee.winner,
+                    })}
                     key={`nominee-${index}`}
                   >
                     <TableCell className="font-medium">
@@ -128,10 +143,12 @@ const Oscars = () => {
               })}
             </TableBody>
           </Table>
-        ) : (
+        ) : containsSearch ? (
           <div className="mt-4 font-semibold text-gray-500">
             No results found
           </div>
+        ) : (
+          <></>
         )}
       </div>
     </div>
