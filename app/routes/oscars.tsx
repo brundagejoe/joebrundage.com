@@ -1,11 +1,5 @@
-import type { LoaderFunctionArgs } from "@remix-run/node"
-import { json } from "@remix-run/node"
-import {
-  ClientLoaderFunctionArgs,
-  useLoaderData,
-  useNavigate,
-  useSearchParams,
-} from "@remix-run/react"
+import type { ClientLoaderFunctionArgs } from "@remix-run/react"
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react"
 import clsx from "clsx"
 import SimpleSearchBar from "~/UI/SimpleSearchBar"
 import {
@@ -17,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/shadcn-ui-components/ui/table"
-import { getJsonContent } from "~/utils/content.server"
+import localForage from "localforage"
 
 type Nominee = {
   year_film: number
@@ -38,28 +32,21 @@ const queryNominees = (query: string, nominees: Nominee[]) => {
   )
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const response = await getJsonContent("oscars-awards")
-  if (!response.success) throw new Error("Failed to fetch data")
-  const allNominees = JSON.parse(response.content) as Nominee[]
+export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
+  const nominees = await getNomineesFromLocalForage()
 
   const searchParams = new URL(request.url).searchParams
   const query = searchParams.get("q")
 
-  const data = query ? queryNominees(query, allNominees) : []
+  if (!query) return { data: [] }
 
-  return json({ data })
-}
+  const data = queryNominees(query, nominees)
 
-export const clientLoader = async ({
-  serverLoader,
-}: ClientLoaderFunctionArgs) => {
-  const data = await serverLoader()
-  return data
+  return { data }
 }
 
 const Oscars = () => {
-  const { data } = useLoaderData<typeof loader>()
+  const { data } = useLoaderData<typeof clientLoader>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -71,6 +58,7 @@ const Oscars = () => {
 
   const winnerCount = data.filter((nominee) => nominee.winner).length
   const nomineeCount = data.length
+
   return (
     <div className="mb-10 flex w-full flex-col items-center gap-y-4">
       <SimpleSearchBar onSearch={handleSearch} />
@@ -115,3 +103,17 @@ const Oscars = () => {
 }
 
 export default Oscars
+
+const getNomineesFromLocalForage = async (): Promise<Nominee[]> => {
+  const cached = (await localForage.getItem("oscars")) as Nominee[]
+  if (cached) {
+    console.log("From cache!")
+    return cached
+  }
+  const response = await fetch("/oscars-awards.json")
+  let data = await response.json()
+  const content = data.content as Nominee[]
+  localForage.setItem("oscars", content)
+  console.log("From fetch!")
+  return content as Nominee[]
+}
