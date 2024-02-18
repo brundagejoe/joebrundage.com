@@ -93,74 +93,96 @@ const Oscars = () => {
   const winnerCount = data.filter((nominee) => nominee.winner).length
   const nomineeCount = data.length
 
+  const isMobile = window.innerWidth < 768
+
   return (
     <div className="mb-10 flex w-full flex-col items-center gap-y-4">
       <SimpleSearchBar
         placeholder={containsSearch ? "Search" : "Search a film or nominee"}
         onSearch={handleSearch}
       />
+      <div className="flex flex-col gap-y-3">
+        {isMobile &&
+          (data.length !== 0 ? (
+            data.map((nominee, index) => (
+              <NomineeCard
+                key={`nominee-${index}`}
+                category={nominee.category}
+                name={nominee.name}
+                film={nominee.film}
+                year={nominee.year_film}
+                winner={nominee.winner}
+              />
+            ))
+          ) : (
+            <div className="mt-4 font-semibold text-gray-500">
+              No results found
+            </div>
+          ))}
+      </div>
       <div className="w-screen overflow-x-scroll md:w-fit">
-        {data.length !== 0 ? (
-          <Table className="box-border max-w-[762px] px-4">
-            <TableCaption>
-              {winnerCount} wins / {nomineeCount} total nominations
-            </TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Year</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Film</TableHead>
-                <TableHead className="text-right">Winner?</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((nominee, index) => {
-                return (
-                  <TableRow
-                    className={clsx({
-                      "bg-green-100 hover:text-green-700": nominee.winner,
-                    })}
-                    key={`nominee-${index}`}
-                  >
-                    <TableCell className="font-medium">
-                      {nominee.year_film}
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        to={generateCategoryLink(
-                          nominee.category,
-                          nominee.year_film,
-                        )}
-                      >
-                        {nominee.category}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link to={generateSearchLink(nominee.name)}>
-                        {nominee.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link to={generateSearchLink(nominee.film)}>
-                        {nominee.film}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {nominee.winner ? "Yes" : "No"}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        ) : containsSearch ? (
-          <div className="mt-4 font-semibold text-gray-500">
-            No results found
-          </div>
-        ) : (
-          <></>
-        )}
+        {!isMobile &&
+          (data.length !== 0 ? (
+            <Table className="box-border hidden max-w-[762px] px-4 md:table">
+              <TableCaption>
+                {winnerCount} wins / {nomineeCount} total nominations
+              </TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Year</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Film</TableHead>
+                  <TableHead className="text-right">Winner?</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((nominee, index) => {
+                  return (
+                    <TableRow
+                      className={clsx({
+                        "bg-green-100 hover:text-green-700": nominee.winner,
+                      })}
+                      key={`nominee-${index}`}
+                    >
+                      <TableCell className="font-medium">
+                        {nominee.year_film}
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          to={generateCategoryLink(
+                            nominee.category,
+                            nominee.year_film,
+                          )}
+                        >
+                          {nominee.category}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Link to={generateSearchLink(nominee.name)}>
+                          {nominee.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Link to={generateSearchLink(nominee.film)}>
+                          {nominee.film}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {nominee.winner ? "Yes" : "No"}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          ) : containsSearch ? (
+            <div className="mt-4 font-semibold text-gray-500">
+              No results found
+            </div>
+          ) : (
+            <></>
+          ))}
       </div>
     </div>
   )
@@ -185,4 +207,44 @@ const getNomineesFromLocalForage = async (): Promise<Nominee[]> => {
   const content = data.content as Nominee[]
   localForage.setItem("oscars", content)
   return content as Nominee[]
+}
+
+const NomineeCard = ({
+  category,
+  name,
+  film,
+  year,
+  winner,
+}: {
+  category: string
+  name: string
+  film: string
+  year: number
+  winner: boolean
+}) => {
+  return (
+    <div
+      className={clsx(
+        "flex max-w-[380px] flex-col items-center rounded-xl p-5 text-center outline",
+        winner ? "outline-3 outline-green-500" : "outline-1 outline-gray-200",
+      )}
+    >
+      <p className="text-xs italic">{titleizeSentence(category)}</p>
+      <p className="mt-1 text-2xl font-semibold uppercase">{name}</p>
+      <p className="mt-1 text-xs font-semibold uppercase">{film}</p>
+      <p className="mt-3 w-[200px] border-t-[1.5px] border-black pt-1 text-xs uppercase">
+        {year}
+      </p>
+    </div>
+  )
+}
+
+const titleizeSentence = (sentence: string) => {
+  const excludedWords = ["in", "a"]
+
+  return sentence.toLowerCase().replace(/\b\w+\b/g, (word) => {
+    return excludedWords.includes(word.toLowerCase())
+      ? word
+      : word.charAt(0).toUpperCase() + word.slice(1)
+  })
 }
