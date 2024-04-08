@@ -21,18 +21,19 @@ export default function AppleTV() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="mx-4 mb-10 flex flex-col items-center gap-y-4">
       <div className="w-fit">
         <SimpleSearchBar
-          placeholder={"Search"}
+          defaultSearch={searchParams.get("q") || undefined}
+          persistSearch
           onSearch={(v) => handleSearch(v)}
         />
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-6">
         {movies.map((movie) => (
           <div
             key={movie.trackName}
-            className="flex w-[200px] flex-col items-center"
+            className="flex w-[200px] flex-col items-start gap-y-1"
           >
             <a target="_blank" rel="noreferrer" href={movie.trackViewUrl}>
               <img
@@ -42,8 +43,10 @@ export default function AppleTV() {
               />
             </a>
             <div>
-              <h2>{movie.trackName}</h2>
-              <p>{movie.trackPrice}</p>
+              <p className="pr-2 font-semibold">{movie.trackName}</p>
+              {(movie.trackPrice || 0) > 0 && (
+                <p className=" text-sm font-light">${movie.trackPrice}</p>
+              )}
             </div>
           </div>
         ))}
