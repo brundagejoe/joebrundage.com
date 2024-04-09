@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      apple_tv_requests: {
+        Row: {
+          created_at: string
+          id: number
+          price: number | null
+          title: string | null
+          track_id: number
+          user_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          price?: number | null
+          title?: string | null
+          track_id: number
+          user_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          price?: number | null
+          title?: string | null
+          track_id?: number
+          user_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_apple_tv_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           associated_user_id: number | null

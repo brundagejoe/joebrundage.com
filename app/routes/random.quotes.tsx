@@ -1,5 +1,5 @@
 import { PlusCircleIcon, XCircleIcon } from "@heroicons/react/24/outline"
-import type { ActionArgs, LoaderArgs } from "@remix-run/node"
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node"
 import { json } from "@remix-run/node"
 import type { FetcherWithComponents } from "@remix-run/react"
 import {
@@ -27,7 +27,7 @@ import { getUserId } from "~/utils/session.server"
 import { z } from "zod"
 import clsx from "clsx"
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId(request)
 
   return json({
@@ -36,7 +36,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   })
 }
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const { _action, ...formPayload } = Object.fromEntries(
     await request.formData(),
   )
