@@ -1,14 +1,12 @@
-import BodyContainer from "~/UI/BodyContainer"
+import { Title, Text } from "~/UI/Typography"
 
-export default function Quotes() {
+export default function Blog() {
   return (
-    <div className="mb-10 font-semibold">
-      <BodyContainer>
-        <h2 className="mb-4 text-3xl">Haven't written anything yet</h2>
-        <p className="mb-4 text-lg">
-          But I'm keeping it here to motivate me...
-        </p>
-      </BodyContainer>
+    <div className="mb-10 flex w-full flex-col items-center">
+      <div className="flex max-w-md flex-col gap-y-4">
+        <Title>I haven't written anything here yet</Title>
+        <Text>But I'm keeping it here to motivate me...</Text>
+      </div>
     </div>
   )
 }

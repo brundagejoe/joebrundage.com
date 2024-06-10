@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react"
+import { Text, Title } from "~/UI/Typography"
 
 interface ResumeItem {
   company: string
@@ -48,41 +48,35 @@ const resumeItems: ResumeItem[] = [
   },
 ]
 
+const ResumeItem = ({ resumeItem }: { resumeItem: ResumeItem }) => {
+  return (
+    <div>
+      <Title href={resumeItem.companyLink}>{resumeItem.company}</Title>
+      <div className="mt-2 flex gap-x-2">
+        <Text className="font-semibold text-black">{resumeItem.jobTitle}</Text>
+        <Text>
+          ({resumeItem.startDate}&#8211;{resumeItem.endDate})
+        </Text>
+      </div>
+      <ul className="mt-4 flex list-disc flex-col gap-y-3">
+        {resumeItem.description.map((desc, index) => {
+          return (
+            <li key={index}>
+              <Text>{desc}</Text>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
 const ExperienceSection = () => {
   return (
-    <div className="w-fit">
-      <h2 className="mb-4 text-3xl">Experience</h2>
-      <div className="flex flex-col gap-y-4">
-        {resumeItems.map((item) => {
-          return (
-            <div key={`resume-for-${item.company}`}>
-              <Link
-                to={item.companyLink}
-                className="group/link flex w-fit flex-col text-2xl"
-              >
-                {item.company}
-                <div className="mt-[-2px] h-[2px] w-full max-w-0 rounded-xl bg-black transition-all duration-300 group-hover/link:max-w-full"></div>
-              </Link>
-              <div className="flex flex-col md:flex-row md:justify-between">
-                <h4 className="text-xl">{item.jobTitle}</h4>
-                <p className="text-xl font-medium">
-                  {item.startDate}&#8211;{item.endDate}
-                </p>
-              </div>
-              <ul className="list-disc pl-4 text-xl">
-                {item.description.map((desc, index) => {
-                  return (
-                    <li
-                      className="md:w-[800px]"
-                      key={`resume-description-${item.company}-${index}`}
-                    >
-                      {desc}
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          )
+    <div className="flex flex-col items-center">
+      <div className="box-content flex max-w-md flex-col gap-y-16 px-8">
+        {resumeItems.map((item, index) => {
+          return <ResumeItem key={index} resumeItem={item} />
         })}
       </div>
     </div>

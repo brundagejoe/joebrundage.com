@@ -7,7 +7,7 @@ import {
   MusicIcon,
   OscarsIcon,
 } from "~/UI/Icons"
-import LaunchOnMount from "~/UI/LaunchOnMount"
+import { Title } from "~/UI/Typography"
 import ProjectInfo from "~/pages/Projects/ProjectInfo"
 
 const projects: {
@@ -69,25 +69,17 @@ export default function Projects() {
   return (
     <div className="mb-10 font-semibold">
       <BodyContainer>
-        <LaunchOnMount>
-          <h1 className="text-4xl">Some of my favorite projects.</h1>
-        </LaunchOnMount>
+        <Title type="h1">Some of my favorite projects.</Title>
         <div className="mt-4 flex flex-col gap-8 md:grid md:grid-cols-3">
           {projects.map((project, index) => {
             return (
-              <LaunchOnMount
-                key={`project-${index}`}
-                delay={(index + 1) * 100}
-                enterFrom="opacity-0 translate-y-[200px] scale-150"
-                enterTo="opacity-100 translate-y-0 scale-100"
-              >
-                <ProjectInfo
-                  projectName={project.name}
-                  projectDescription={project.description}
-                  projectLink={project.link}
-                  projectLogo={project.logo}
-                />
-              </LaunchOnMount>
+              <ProjectInfo
+                key={index}
+                projectName={project.name}
+                projectDescription={project.description}
+                projectLink={project.link}
+                projectLogo={project.logo}
+              />
             )
           })}
         </div>
