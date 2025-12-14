@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react"
 
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
+import { ThemeToggle } from "@/shared/ui/theme-toggle"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
@@ -53,18 +54,21 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
+              <ThemeToggle />
             </nav>
 
             {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-            >
-              <Menu className="size-5" />
-            </Button>
+            <div className="md:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+              >
+                <Menu className="size-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -108,6 +112,9 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <div className="flex justify-center mt-4">
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </div>

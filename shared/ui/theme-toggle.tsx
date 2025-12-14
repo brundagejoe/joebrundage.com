@@ -1,0 +1,69 @@
+"use client"
+
+import * as React from "react"
+import { Moon, Sun, Monitor } from "lucide-react"
+import { useTheme } from "next-themes"
+
+import { buttonVariants } from "@/shared/ui/button"
+import { cn } from "@/shared/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu"
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  // Avoid hydration mismatch
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <button
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+        aria-label="Toggle theme"
+      >
+        <Sun className="size-5" />
+      </button>
+    )
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+        aria-label="Toggle theme"
+      >
+        {theme === "light" ? (
+          <Sun className="size-5" />
+        ) : theme === "dark" ? (
+          <Moon className="size-5" />
+        ) : (
+          <Monitor className="size-5" />
+        )}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+          <DropdownMenuRadioItem value="light">
+            <Sun className="mr-2 size-4" />
+            Light
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">
+            <Moon className="mr-2 size-4" />
+            Dark
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="system">
+            <Monitor className="mr-2 size-4" />
+            System
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
