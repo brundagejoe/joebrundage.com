@@ -2,7 +2,7 @@ import { Link } from "@/shared/ui/link"
 
 export default function Page() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-16">
       {/* Header Section */}
       <section className="bg-background">
         <div className="mx-auto max-w-4xl px-6 py-10 flex flex-col gap-4">
@@ -169,8 +169,8 @@ export default function Page() {
       </section>
 
       {/* Get in Touch */}
-      <section className="bg-card">
-        <div className="mx-auto max-w-4xl px-6 py-10 flex flex-col gap-4">
+      <section id="contact" className="bg-card">
+        <div className="mx-auto max-w-4xl px-6 py-10 pb-32 flex flex-col gap-4">
           <h2 className="text-2xl font-semibold">Get in Touch</h2>
           <p className="text-muted-foreground leading-relaxed">
             If you're looking for an engineer who can own complex systems, move

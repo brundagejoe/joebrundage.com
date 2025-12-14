@@ -1,0 +1,116 @@
+"use client"
+
+import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Menu, X } from "lucide-react"
+
+import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/button"
+
+export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const pathname = usePathname()
+
+  const navItems = [
+    { href: "/projects", label: "Projects" },
+    { href: "/#contact", label: "Contact" },
+  ]
+
+  const isActive = (href: string) => {
+    // Contact is an anchor link, never active
+    if (href === "/#contact") {
+      return false
+    }
+    // Projects is active only when on /projects page
+    return pathname === href
+  }
+
+  return (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo/Name */}
+            <Link
+              href="/"
+              className="text-lg font-semibold text-foreground hover:text-foreground/80 transition-colors"
+            >
+              Joe Brundage
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "text-sm font-medium text-foreground/70 hover:text-foreground transition-colors",
+                    isActive(item.href) && "text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu className="size-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Menu - Full Screen */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-background z-50 md:hidden",
+          "transition-opacity duration-300",
+          mobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          {/* Menu Header */}
+          <div className="flex items-center justify-between h-16 px-6 border-b border-border">
+            <span className="text-lg font-semibold">Menu</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <X className="size-5" />
+            </Button>
+          </div>
+
+          {/* Menu Navigation */}
+          <nav className="flex flex-col gap-1 p-6 flex-1 justify-center">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "px-4 py-3 rounded-lg text-base font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors text-center",
+                  isActive(item.href) && "text-foreground bg-muted"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </div>
+    </>
+  )
+}

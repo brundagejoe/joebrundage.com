@@ -24,7 +24,7 @@ export default function ProjectsPage() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background pt-16">
       <section className="flex-1">
         <div className="mx-auto max-w-4xl px-6 py-6 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
