@@ -98,23 +98,20 @@ export function Header() {
           </div>
 
           {/* Menu Navigation */}
-          <nav className="flex flex-col gap-1 p-6 flex-1 justify-center">
+          <nav className="flex flex-col gap-6 px-6 pt-8">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
-                  "px-4 py-3 rounded-lg text-base font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors text-center",
-                  isActive(item.href) && "text-foreground bg-muted"
+                  "text-2xl font-medium text-foreground hover:text-foreground transition-colors text-left",
+                  isActive(item.href) && "text-foreground"
                 )}
               >
                 {item.label}
               </Link>
             ))}
-            <div className="flex justify-center mt-4">
-              <ThemeToggle />
-            </div>
           </nav>
         </div>
       </div>

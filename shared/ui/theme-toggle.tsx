@@ -17,11 +17,17 @@ import {
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
+  const [open, setOpen] = React.useState(false)
 
   // Avoid hydration mismatch
   React.useEffect(() => {
     setMounted(true)
   }, [])
+
+  const handleThemeChange = (value: string) => {
+    setTheme(value)
+    setOpen(false)
+  }
 
   if (!mounted) {
     return (
@@ -35,7 +41,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
         className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
         aria-label="Toggle theme"
@@ -49,7 +55,7 @@ export function ThemeToggle() {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+        <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
           <DropdownMenuRadioItem value="light">
             <Sun className="mr-2 size-4" />
             Light
