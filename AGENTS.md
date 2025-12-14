@@ -39,14 +39,16 @@ This repository uses **Feature Sliced Design (FSD) v2** architecture combined wi
 ## Layer Descriptions
 
 ### `app/` - Next.js App Router
+
 - **Purpose**: Routing, page composition, and Next.js-specific configuration
 - **Contains**: Route handlers, layouts, page components
-- **Rules**: 
+- **Rules**:
   - Can import from all FSD layers (`shared`, `entities`, `features`, `widgets`)
   - Should not contain business logic (delegate to features/widgets)
   - Keep minimal - use for routing structure only
 
 ### `shared/` - Infrastructure Layer
+
 - **Purpose**: Reusable code that has no business logic
 - **Contains**:
   - `ui/`: UI component library (buttons, inputs, dialogs, etc.)
@@ -58,6 +60,7 @@ This repository uses **Feature Sliced Design (FSD) v2** architecture combined wi
   - No business domain knowledge
 
 ### `entities/` - Business Entities
+
 - **Purpose**: Business domain models and data structures
 - **Contains**: (Currently empty, ready for use)
   - Type definitions for domain objects
@@ -68,6 +71,7 @@ This repository uses **Feature Sliced Design (FSD) v2** architecture combined wi
   - Represents core business concepts (User, Post, Product, etc.)
 
 ### `features/` - User Interactions
+
 - **Purpose**: User-facing functionality and interactions
 - **Contains**: (Currently empty, ready for use)
   - Feature-specific components
@@ -79,6 +83,7 @@ This repository uses **Feature Sliced Design (FSD) v2** architecture combined wi
   - Represents user actions (e.g., `create-post`, `edit-profile`)
 
 ### `widgets/` - Composite UI Blocks
+
 - **Purpose**: Complex UI compositions that combine features
 - **Contains**: (Currently empty, ready for use)
   - Page sections and layouts
@@ -118,15 +123,17 @@ import { CreatePostForm } from "@/features/create-post"
 import { PostList } from "@/widgets/post-list"
 
 // ❌ Wrong - Violating layer rules
-import { Button } from "@/components/ui/button"  // Old path, doesn't exist
-import { User } from "@/shared/user"              // Business logic in shared
+import { Button } from "@/components/ui/button" // Old path, doesn't exist
+import { User } from "@/shared/user" // Business logic in shared
 ```
 
 ## Component Library
 
+This repository uses **shadcn/ui** as its component library. All UI components are built using shadcn/ui components, which are themselves built on **Base UI** primitives.
+
 ### UI Components (`shared/ui/`)
 
-The repository uses **shadcn/ui** components built on **Base UI** primitives. All components are in `shared/ui/`:
+All shadcn/ui components are located in `shared/ui/`:
 
 - `button.tsx` - Button component with variants
 - `input.tsx` - Input field
@@ -169,7 +176,7 @@ The `cn()` utility (from `@/shared/lib/utils`) merges Tailwind classes:
 import { cn } from "@/shared/lib/utils"
 
 // Merges and deduplicates className strings
-<div className={cn("base-class", condition && "conditional-class")} />
+;<div className={cn("base-class", condition && "conditional-class")} />
 ```
 
 ## Tech Stack
@@ -221,16 +228,19 @@ import { cn } from "@/shared/lib/utils"
 ## Configuration Files
 
 ### `components.json`
+
 - shadcn/ui configuration
 - Defines component paths and aliases
 - Points to `@/shared/ui` for components
 
 ### `tsconfig.json`
+
 - TypeScript configuration
 - Path aliases for FSD layers
 - Strict mode enabled
 
 ### `next.config.ts`
+
 - Next.js configuration
 - Currently minimal, ready for customization
 
@@ -243,12 +253,7 @@ import { cn } from "@/shared/lib/utils"
 import { SomePrimitive } from "@base-ui/react/..."
 
 export function Component({ className, ...props }: ComponentProps) {
-  return (
-    <SomePrimitive
-      className={cn("base-styles", className)}
-      {...props}
-    />
-  )
+  return <SomePrimitive className={cn("base-styles", className)} {...props} />
 }
 ```
 
@@ -278,13 +283,13 @@ By default, components in `app/` are Server Components. No `"use client"` needed
 
 ## Quick Reference
 
-| Layer | Can Import From | Purpose |
-|-------|----------------|---------|
-| `app/` | All layers | Routing & pages |
-| `widgets/` | shared, entities, features | Composite UI |
-| `features/` | shared, entities | User interactions |
-| `entities/` | shared | Business models |
-| `shared/` | None (external libs only) | Infrastructure |
+| Layer       | Can Import From            | Purpose           |
+| ----------- | -------------------------- | ----------------- |
+| `app/`      | All layers                 | Routing & pages   |
+| `widgets/`  | shared, entities, features | Composite UI      |
+| `features/` | shared, entities           | User interactions |
+| `entities/` | shared                     | Business models   |
+| `shared/`   | None (external libs only)  | Infrastructure    |
 
 ## Getting Started
 
@@ -293,8 +298,8 @@ By default, components in `app/` are Server Components. No `"use client"` needed
 3. **Lint**: `npm run lint`
 
 The codebase is ready for development. Start by:
+
 - Adding entities in `entities/`
 - Creating features in `features/`
 - Composing widgets in `widgets/`
 - Building pages in `app/`
-
