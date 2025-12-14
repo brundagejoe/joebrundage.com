@@ -15,7 +15,7 @@ import {
 } from "@/shared/ui/dropdown-menu"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
   const [open, setOpen] = React.useState(false)
 
@@ -29,16 +29,31 @@ export function ThemeToggle() {
     setOpen(false)
   }
 
+  // Show Monitor icon when theme is "system", otherwise use resolvedTheme for Sun/Moon
+  // The blocking script in layout.tsx ensures the theme class is set before React hydrates
+  const getIcon = () => {
+    if (theme === "system") return Monitor
+    if (resolvedTheme === "light") return Sun
+    if (resolvedTheme === "dark") return Moon
+    // Fallback if resolvedTheme isn't available yet
+    return Monitor
+  }
+
   if (!mounted) {
+    // Show a placeholder that matches the button size to prevent layout shift
+    // The blocking script prevents theme flash, so we don't need to guess the icon
     return (
       <button
         className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
         aria-label="Toggle theme"
+        suppressHydrationWarning
       >
-        <Sun className="size-5" />
+        <div className="size-5" />
       </button>
     )
   }
+
+  const Icon = getIcon()
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -46,13 +61,7 @@ export function ThemeToggle() {
         className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
         aria-label="Toggle theme"
       >
-        {theme === "light" ? (
-          <Sun className="size-5" />
-        ) : theme === "dark" ? (
-          <Moon className="size-5" />
-        ) : (
-          <Monitor className="size-5" />
-        )}
+        <Icon className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
