@@ -34,7 +34,7 @@ export function ThemeProvider({
       disableTransitionOnChange={false}
       {...props}
     >
-      <ThemeRouteSync isToolsRoute={isToolsRoute} />
+      <ThemeRouteSync isToolsRoute={!!isToolsRoute} />
       {children}
     </NextThemesProvider>
   )

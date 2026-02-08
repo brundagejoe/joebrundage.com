@@ -8,9 +8,9 @@ export default function ToolsPage() {
           <Card>
             <CardContent className="pt-4">
               <h2 className="text-2xl font-semibold">Tools</h2>
-              <p className="text-muted-foreground leading-relaxed mt-4">
-                Placeholder for tools. Subroutes will be added under{" "}
-                <code>/tools</code>.
+              <p className="text-muted-foreground leading-relaxed mt-2">
+                Welcome. Use the global search in the header to quickly jump to
+                a tool by code or title.
               </p>
             </CardContent>
           </Card>
