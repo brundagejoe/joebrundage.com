@@ -11,4 +11,5 @@ export const TOOLS: ToolDefinition[] = [
     title: "Hash Collision Probability Calculator",
     href: "/tools/hash-collisions",
   },
+  { code: "META", title: "Meta Analyzer", href: "/tools/meta-analyzer" },
 ]
