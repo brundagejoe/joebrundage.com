@@ -12,9 +12,11 @@ import { ThemeToggle } from "@/shared/ui/theme-toggle"
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const pathname = usePathname()
+  const isToolsRoute = pathname === "/tools" || pathname?.startsWith("/tools/")
 
   const navItems = [
     { href: "/projects", label: "Projects" },
+    { href: "/tools", label: "Tools" },
     { href: "/#contact", label: "Contact" },
   ]
 
@@ -54,12 +56,12 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
-              <ThemeToggle />
+              {!isToolsRoute && <ThemeToggle />}
             </nav>
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center gap-2">
-              <ThemeToggle />
+              {!isToolsRoute && <ThemeToggle />}
               <Button
                 variant="ghost"
                 size="icon"

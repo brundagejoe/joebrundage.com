@@ -36,10 +36,26 @@ export default function RootLayout({
                 try {
                   var theme = localStorage.getItem('theme') || 'system';
                   var resolvedTheme = theme;
+                  var isToolsRoute = window.location.pathname === '/tools' || window.location.pathname.startsWith('/tools/');
+                  if (!isToolsRoute && theme === 'terminal') {
+                    theme = 'light';
+                    resolvedTheme = 'light';
+                    localStorage.setItem('theme', 'light');
+                  }
+                  if (isToolsRoute) {
+                    resolvedTheme = 'terminal';
+                  }
                   if (theme === 'system') {
                     resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                   }
-                  if (resolvedTheme === 'dark') {
+                  if (isToolsRoute) {
+                    resolvedTheme = 'terminal';
+                  }
+                  document.documentElement.classList.remove('terminal');
+                  if (resolvedTheme === 'terminal') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.add('terminal');
+                  } else if (resolvedTheme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else {
                     document.documentElement.classList.remove('dark');
