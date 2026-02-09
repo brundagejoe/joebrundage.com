@@ -11,5 +11,10 @@ export const TOOLS: ToolDefinition[] = [
     title: "Hash Collision Probability Calculator",
     href: "/tools/hash-collisions",
   },
+  {
+    code: "SSC",
+    title: "A/B Test Sample Size Calculator",
+    href: "/tools/sample-size-calculator",
+  },
   { code: "META", title: "Meta Analyzer", href: "/tools/meta-analyzer" },
 ]
