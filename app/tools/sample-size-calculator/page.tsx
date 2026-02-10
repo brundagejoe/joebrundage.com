@@ -38,7 +38,7 @@ const ALPHA_MAX = 20
 
 const DEFAULT_STATE: CalculatorState = {
   baselinePercent: 20,
-  mdePercent: 5,
+  mdePercent: 10,
   mdeMode: "relative",
   powerPercent: 80,
   alphaPercent: 5,
