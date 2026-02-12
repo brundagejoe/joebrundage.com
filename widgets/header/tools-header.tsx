@@ -123,7 +123,7 @@ export function ToolsHeader() {
               autoHighlight
             >
               <ComboboxInput
-                className="w-full rounded-none border-input bg-input/30 text-foreground focus-within:border-ring focus-within:ring-0 [&_input]:font-mono [&_input]:tracking-wide [&_input]:placeholder:text-muted-foreground [&_input]:text-sm"
+                className="w-full rounded-none border-input bg-input/30 text-foreground focus-within:border-ring focus-within:ring-0 [&_input]:font-mono [&_input]:tracking-wide [&_input]:placeholder:text-muted-foreground [&_input]:text-base md:[&_input]:text-sm"
                 placeholder="Search tools by code or title (Cmd+K)"
                 showTrigger={false}
                 onBlur={() => setOpen(false)}
