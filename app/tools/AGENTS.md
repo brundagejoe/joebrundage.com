@@ -20,6 +20,7 @@ The tools header combobox reads from this file. Do not hardcode tool lists in th
 2. Implement the tool UI and logic on that page.
 3. Add one entry to `shared/config/tools.ts`:
    - `code`: short uppercase code (unique), for example `NCK`
+   - `code` must be uppercase only; do not use lowercase or mixed case
    - `title`: display name in search
    - `href`: full route path, for example `/tools/nck`
 4. Confirm the new tool is discoverable in the tools header search by:
@@ -31,6 +32,7 @@ The tools header combobox reads from this file. Do not hardcode tool lists in th
 ## Conventions
 
 - Keep tool codes uppercase and concise.
+- Reject lowercase tool codes during review; normalize to uppercase before commit.
 - Keep tool pages under `app/tools/<slug>/page.tsx`.
 - Use shared UI components from `@/shared/ui/*`.
 - Keep forms Enter-submittable (`<form onSubmit=...>`), not click-only.

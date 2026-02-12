@@ -16,5 +16,6 @@ export const TOOLS: ToolDefinition[] = [
     title: "A/B Test Sample Size Calculator",
     href: "/tools/sample-size-calculator",
   },
+  { code: "BAYESP", title: "Bayes Primer", href: "/tools/bayes-primer" },
   { code: "META", title: "Meta Analyzer", href: "/tools/meta-analyzer" },
 ]
