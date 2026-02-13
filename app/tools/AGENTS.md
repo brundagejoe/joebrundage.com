@@ -41,3 +41,4 @@ The tools header combobox reads from this file. Do not hardcode tool lists in th
 
 - `NCK` -> `/tools/nck`
 - `HASH` -> `/tools/hash-collisions`
+- `EVP` -> `/tools/expected-value-primer`

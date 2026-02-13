@@ -17,5 +17,10 @@ export const TOOLS: ToolDefinition[] = [
     href: "/tools/sample-size-calculator",
   },
   { code: "BAYESP", title: "Bayes Primer", href: "/tools/bayes-primer" },
+  {
+    code: "EVP",
+    title: "Expected Value Primer",
+    href: "/tools/expected-value-primer",
+  },
   { code: "META", title: "Meta Analyzer", href: "/tools/meta-analyzer" },
 ]
