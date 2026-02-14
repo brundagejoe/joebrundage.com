@@ -272,6 +272,69 @@ import { useState } from "react"
 
 By default, components in `app/` are Server Components. No `"use client"` needed unless using client-side features.
 
+## AI Features and Access Control
+
+This repo now supports both AI-protected routes and AI-protected features within otherwise public pages.
+
+### Source of Truth for AI Access
+
+- `shared/lib/auth/ai-access.ts` is the single source of truth.
+- Use:
+  - `requireAiAccess()` for API route protection (returns 401/403 JSON responses).
+  - `canAccessAi(user)` for UI-level gating in Server Components.
+- Role allowlist is configured by `AI_ALLOWED_ROLES` (comma-separated) and parsed in `shared/config/ai.ts`.
+- Role resolution order:
+  1. `user.app_metadata.role`
+  2. `user.user_metadata.role`
+
+### Protecting AI API Routes
+
+For any route under `app/api/**` that calls OpenAI:
+
+1. Gate with `requireAiAccess()` at the top of the handler.
+2. Return consistent JSON error shapes for:
+   - missing env vars
+   - provider errors
+   - invalid request payloads
+3. Prefer `cache: "no-store"` for OpenAI fetches.
+4. Validate and sanitize model output server-side before returning it to clients.
+
+### Gating AI UI Features (Without Blocking Entire Page)
+
+When a page should stay usable without AI, but one feature should be AI-only:
+
+1. Use a Server Component page wrapper (`app/.../page.tsx`) to read the signed-in user via `createSupabaseServerClient()`.
+2. Compute a boolean gate with `canAccessAi(user)`.
+3. Pass that boolean into a Client Component that renders the interactive UI.
+4. Conditionally render AI-only controls (buttons/forms) from that boolean.
+5. Keep non-AI functionality available when user is logged out or unauthorized.
+
+Example: Bayes Primer custom generation
+- `app/tools/bayes-primer/page.tsx`
+- `app/tools/bayes-primer/bayes-primer-client.tsx`
+- `app/api/tools/bayes-primer/custom/route.ts`
+
+### OpenAI Responses API Conventions
+
+- Use the Responses API endpoint: `https://api.openai.com/v1/responses`.
+- Default model for new lightweight generation paths: `gpt-5-mini` (unless a task says otherwise).
+- Prefer structured output with JSON schema:
+  - Provide `text.format.type = "json_schema"` and a strict schema.
+  - Parse structured fields first; only use text parsing as fallback.
+- For reliability:
+  - keep prompts explicit about output keys/types
+  - clamp numeric ranges and apply safe fallbacks
+  - handle incomplete responses (e.g. token exhaustion) with clear retryable errors
+
+### Debugging AI Integration
+
+- Add temporary server-side logs in API routes when diagnosing model output shape issues.
+- Log:
+  - provider HTTP status
+  - raw response payload (or safely truncated payload)
+  - parsed payload result
+- Remove or reduce noisy logs once stable.
+
 ## Best Practices
 
 1. **Respect Layer Boundaries**: Don't import from higher layers into lower layers

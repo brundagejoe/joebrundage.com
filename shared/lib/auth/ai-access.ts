@@ -3,7 +3,7 @@ import type { User } from "@supabase/supabase-js"
 import { getAllowedAiRoles } from "@/shared/config/ai"
 import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
 
-function resolveUserRole(user: User): string | null {
+export function resolveUserRole(user: User): string | null {
   const appRole = user.app_metadata?.role
   if (typeof appRole === "string" && appRole.trim().length > 0) {
     return appRole.trim()
@@ -17,7 +17,7 @@ function resolveUserRole(user: User): string | null {
   return null
 }
 
-function canAccessAi(user: User): boolean {
+export function canAccessAi(user: User): boolean {
   const allowedRoles = getAllowedAiRoles()
   if (allowedRoles.length === 0) {
     return true
