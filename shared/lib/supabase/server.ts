@@ -1,0 +1,25 @@
+import { cookies } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
+import { getSupabaseConfig } from "@/shared/lib/supabase/config"
+
+export async function createSupabaseServerClient() {
+  const { url, publishableKey } = getSupabaseConfig()
+  const cookieStore = await cookies()
+
+  return createServerClient(url, publishableKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll()
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
+        } catch {
+          // In some server contexts (e.g. Server Components), setting cookies is unavailable.
+        }
+      },
+    },
+  })
+}
