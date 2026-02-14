@@ -29,16 +29,6 @@ export function ThemeToggle() {
     setOpen(false)
   }
 
-  // Show Monitor icon when theme is "system", otherwise use resolvedTheme for Sun/Moon
-  // The blocking script in layout.tsx ensures the theme class is set before React hydrates
-  const getIcon = () => {
-    if (theme === "system") return Monitor
-    if (resolvedTheme === "light") return Sun
-    if (resolvedTheme === "dark") return Moon
-    // Fallback if resolvedTheme isn't available yet
-    return Monitor
-  }
-
   if (!mounted) {
     // Show a placeholder that matches the button size to prevent layout shift
     // The blocking script prevents theme flash, so we don't need to guess the icon
@@ -53,7 +43,14 @@ export function ThemeToggle() {
     )
   }
 
-  const Icon = getIcon()
+  const iconEl =
+    theme === "system" || !resolvedTheme ? (
+      <Monitor className="size-5" />
+    ) : resolvedTheme === "light" ? (
+      <Sun className="size-5" />
+    ) : (
+      <Moon className="size-5" />
+    )
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -61,7 +58,7 @@ export function ThemeToggle() {
         className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
         aria-label="Toggle theme"
       >
-        <Icon className="size-5" />
+        {iconEl}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>

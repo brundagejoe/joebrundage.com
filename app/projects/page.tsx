@@ -30,7 +30,7 @@ export default function ProjectsPage() {
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Projects</h2>
             <p className="text-muted-foreground leading-relaxed">
-              A collection of projects I've worked on, ranging from web
+              A collection of projects I&apos;ve worked on, ranging from web
               applications to graphics and animation work.
             </p>
           </div>

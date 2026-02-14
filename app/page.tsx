@@ -83,7 +83,7 @@ export default function Page() {
               <div className="flex flex-col gap-2">
                 <h2 className="text-2xl font-semibold">Selected Projects</h2>
                 <p className="text-muted-foreground">
-                  Examples of systems I've owned or led in production.
+                  Examples of systems I&apos;ve owned or led in production.
                 </p>
               </div>
               <div className="flex flex-col gap-8 mt-6">
@@ -164,7 +164,7 @@ export default function Page() {
                 I have a computer science background with an emphasis in
                 computer graphics, which informs how I approach performance,
                 algorithms, and system design. While my day-to-day work is
-                product-focused, I'm comfortable working close to the metal when
+                product-focused, I&apos;m comfortable working close to the metal when
                 performance or correctness demand it.
               </p>
             </CardContent>
@@ -179,13 +179,13 @@ export default function Page() {
             <CardContent className="pt-4">
               <h2 className="text-2xl font-semibold">About</h2>
               <p className="text-muted-foreground leading-relaxed mt-6">
-                I've spent the last three years at{" "}
+                I&apos;ve spent the last three years at{" "}
                 <Link href="https://neighbor.com" external>
                   Neighbor
                 </Link>
                 , a peer-to-peer storage marketplace that connects people who
                 need storage space with those who have unused space in their
-                homes or properties. I've grown by taking on increasingly
+                homes or properties. I&apos;ve grown by taking on increasingly
                 complex systems and higher-impact responsibilities in a
                 fast-moving environment.
               </p>
@@ -201,8 +201,8 @@ export default function Page() {
             <CardContent className="pt-4">
               <h2 className="text-2xl font-semibold">Get in Touch</h2>
               <p className="text-muted-foreground leading-relaxed mt-6">
-                If you're looking for an engineer who can own complex systems,
-                move quickly, and think deeply about tradeoffs, I'd love to
+                If you&apos;re looking for an engineer who can own complex systems,
+                move quickly, and think deeply about tradeoffs, I&apos;d love to
                 connect. You can reach me at{" "}
                 <Link href="mailto:joebrundage@icloud.com">
                   joebrundage@icloud.com

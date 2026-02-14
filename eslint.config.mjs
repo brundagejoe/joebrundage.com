@@ -16,7 +16,6 @@ const eslintConfig = defineConfig([
   {
     rules: {
       semi: ["error", "never"],
-      "@typescript-eslint/semi": ["error", "never"],
     },
   },
 ])
