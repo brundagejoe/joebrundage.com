@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useMutation } from "@tanstack/react-query"
 
 import { Badge } from "@/shared/ui/badge"
 import { Button } from "@/shared/ui/button"
@@ -28,6 +29,18 @@ type PathResult = {
   leftTags: Tag[] | null
   rightTags: Tag[] | null
   metaDiff: DiffBuckets | null
+}
+
+type AnalyzeInput = {
+  leftBase: string | null
+  rightBase: string | null
+  paths: string[]
+  mode: "both" | "left" | "right"
+}
+
+type AnalyzeOutput = {
+  mode: "both" | "left" | "right"
+  results: PathResult[]
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -241,52 +254,14 @@ export default function MetaAnalyzerPage() {
   const [leftBaseInput, setLeftBaseInput] = React.useState("")
   const [rightBaseInput, setRightBaseInput] = React.useState("")
   const [pathsInput, setPathsInput] = React.useState("")
-  const [error, setError] = React.useState<string | null>(null)
-  const [running, setRunning] = React.useState(false)
-  const [results, setResults] = React.useState<PathResult[]>([])
-  const [mode, setMode] = React.useState<"both" | "left" | "right">("both")
+  const [validationError, setValidationError] = React.useState<string | null>(
+    null
+  )
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const leftBase = normalizeBaseUrl(leftBaseInput)
-    const rightBase = normalizeBaseUrl(rightBaseInput)
-    const normalizedPaths = normalizePaths(pathsInput)
-
-    if (!leftBase && !rightBase) {
-      setError("Provide at least one base URL.")
-      setResults([])
-      return
-    }
-
-    if (leftBaseInput.trim() && !leftBase) {
-      setError("Base URL 1 is invalid.")
-      setResults([])
-      return
-    }
-
-    if (rightBaseInput.trim() && !rightBase) {
-      setError("Base URL 2 is invalid.")
-      setResults([])
-      return
-    }
-
-    if (normalizedPaths.length === 0) {
-      setError("Provide at least one path.")
-      setResults([])
-      return
-    }
-
-    const runMode: "both" | "left" | "right" =
-      leftBase && rightBase ? "both" : leftBase ? "left" : "right"
-
-    setMode(runMode)
-    setError(null)
-    setRunning(true)
-
-    try {
-      const nextResults = await Promise.all(
-        normalizedPaths.map(async (path): Promise<PathResult> => {
+  const analyzeMutation = useMutation<AnalyzeOutput, Error, AnalyzeInput>({
+    mutationFn: async ({ leftBase, rightBase, paths, mode }) => {
+      const results = await Promise.all(
+        paths.map(async (path): Promise<PathResult> => {
           const leftUrl = leftBase ? `${leftBase}${path}` : null
           const rightUrl = rightBase ? `${rightBase}${path}` : null
 
@@ -300,7 +275,7 @@ export default function MetaAnalyzerPage() {
           const leftTags = leftFetch && leftFetch.ok ? leftFetch.tags : null
           const rightTags = rightFetch && rightFetch.ok ? rightFetch.tags : null
 
-          if (runMode === "both" && !leftTags && !rightTags) {
+          if (mode === "both" && !leftTags && !rightTags) {
             return {
               path,
               leftUrl,
@@ -313,7 +288,7 @@ export default function MetaAnalyzerPage() {
             }
           }
 
-          if (runMode === "both") {
+          if (mode === "both") {
             return {
               path,
               leftUrl,
@@ -333,10 +308,10 @@ export default function MetaAnalyzerPage() {
             rightUrl,
             leftError,
             rightError,
-            leftTags: runMode === "left" ? inventoryTags : null,
-            rightTags: runMode === "right" ? inventoryTags : null,
+            leftTags: mode === "left" ? inventoryTags : null,
+            rightTags: mode === "right" ? inventoryTags : null,
             metaDiff:
-              runMode === "left"
+              mode === "left"
                 ? {
                     onlyLeft: inventoryTags,
                     onlyRight: [],
@@ -353,23 +328,63 @@ export default function MetaAnalyzerPage() {
         })
       )
 
-      const hasComparableData = nextResults.some((result) => result.metaDiff)
+      const hasComparableData = results.some((result) => result.metaDiff)
       if (!hasComparableData) {
-        setError("No valid comparison data was produced.")
-        setResults([])
-        return
+        throw new Error("No valid comparison data was produced.")
       }
 
-      setResults(nextResults)
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error ? submitError.message : "Unexpected processing failure."
-      )
-      setResults([])
-    } finally {
-      setRunning(false)
+      return { mode, results }
+    },
+  })
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const leftBase = normalizeBaseUrl(leftBaseInput)
+    const rightBase = normalizeBaseUrl(rightBaseInput)
+    const normalizedPaths = normalizePaths(pathsInput)
+
+    if (!leftBase && !rightBase) {
+      setValidationError("Provide at least one base URL.")
+      return
     }
+
+    if (leftBaseInput.trim() && !leftBase) {
+      setValidationError("Base URL 1 is invalid.")
+      return
+    }
+
+    if (rightBaseInput.trim() && !rightBase) {
+      setValidationError("Base URL 2 is invalid.")
+      return
+    }
+
+    if (normalizedPaths.length === 0) {
+      setValidationError("Provide at least one path.")
+      return
+    }
+
+    const runMode: "both" | "left" | "right" =
+      leftBase && rightBase ? "both" : leftBase ? "left" : "right"
+
+    setValidationError(null)
+    analyzeMutation.reset()
+    analyzeMutation.mutate({
+      leftBase,
+      rightBase,
+      paths: normalizedPaths,
+      mode: runMode,
+    })
   }
+
+  const mode = analyzeMutation.data?.mode ?? "both"
+  const results = analyzeMutation.data?.results ?? []
+  const error =
+    validationError ??
+    (analyzeMutation.isError
+      ? analyzeMutation.error.message
+      : null)
+  const running = analyzeMutation.isPending
 
   return (
     <div className="min-h-screen bg-background pt-16">

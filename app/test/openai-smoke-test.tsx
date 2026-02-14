@@ -1,25 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { Button } from "@/shared/ui/button"
 
-type TestState = "idle" | "loading" | "success" | "error"
+type TestResponse = {
+  text?: string
+  error?: string
+  debug?: { keys?: string[] }
+}
 
 export function OpenAISmokeTest() {
-  const [state, setState] = useState<TestState>("idle")
-  const [message, setMessage] = useState("")
-  const [debug, setDebug] = useState("")
-
-  async function runTest() {
-    setState("loading")
-    setMessage("")
-    setDebug("")
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async () => {
       const response = await fetch("/api/test/openai", {
         method: "POST",
       })
-      const data = await response.json()
+      const data = (await response.json()) as TestResponse
 
       if (!response.ok) {
         throw new Error(
@@ -27,25 +23,35 @@ export function OpenAISmokeTest() {
         )
       }
 
-      setMessage(
-        typeof data?.text === "string" ? data.text : "Received an empty response."
-      )
-      if (Array.isArray(data?.debug?.keys)) {
-        setDebug(`Response keys: ${data.debug.keys.join(", ")}`)
-      }
-      setState("success")
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unknown error.")
-      setState("error")
-    }
-  }
+      return data
+    },
+  })
+
+  const state =
+    mutation.isPending
+      ? "loading"
+      : mutation.isError
+        ? "error"
+        : mutation.isSuccess
+          ? "success"
+          : "idle"
+  const message = mutation.isError
+    ? mutation.error instanceof Error
+      ? mutation.error.message
+      : "Unknown error."
+    : typeof mutation.data?.text === "string"
+      ? mutation.data.text
+      : ""
+  const debug = Array.isArray(mutation.data?.debug?.keys)
+    ? `Response keys: ${mutation.data?.debug?.keys?.join(", ")}`
+    : ""
 
   return (
     <div className="mt-6 space-y-3">
       <Button
         type="button"
         size="sm"
-        onClick={runTest}
+        onClick={() => mutation.mutate()}
         disabled={state === "loading"}
       >
         {state === "loading" ? "Generating..." : "Generate test text"}

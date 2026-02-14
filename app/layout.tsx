@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { HeaderRouter } from "@/widgets/header"
 import { ThemeProvider } from "@/shared/ui/theme-provider"
+import { AppQueryProvider } from "@/shared/ui/query-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -69,10 +70,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <HeaderRouter />
-          {children}
-        </ThemeProvider>
+        <AppQueryProvider>
+          <ThemeProvider>
+            <HeaderRouter />
+            {children}
+          </ThemeProvider>
+        </AppQueryProvider>
       </body>
     </html>
   )

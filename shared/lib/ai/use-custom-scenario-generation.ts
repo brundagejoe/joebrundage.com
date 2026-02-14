@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useMutation } from "@tanstack/react-query"
 
 type UseCustomScenarioGenerationOptions = {
   endpoint: string
@@ -20,7 +21,38 @@ export function useCustomScenarioGeneration<TResponse>({
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [situation, setSituation] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
-  const [isGenerating, setIsGenerating] = React.useState(false)
+  const mutation = useMutation({
+    mutationFn: async (trimmedSituation: string): Promise<TResponse> => {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+          buildRequest
+            ? buildRequest(trimmedSituation)
+            : { situation: trimmedSituation }
+        ),
+      })
+
+      const data = (await response.json()) as TResponse & ApiErrorResponse
+
+      if (!response.ok) {
+        throw new Error(data.error || defaultErrorMessage)
+      }
+
+      return data
+    },
+    onSuccess: () => {
+      setSituation("")
+      setIsDialogOpen(false)
+    },
+    onError: (submitError) => {
+      const message =
+        submitError instanceof Error ? submitError.message : defaultErrorMessage
+      setError(message)
+    },
+  })
 
   const openDialog = React.useCallback(() => {
     setError(null)
@@ -39,38 +71,9 @@ export function useCustomScenarioGeneration<TResponse>({
       throw new Error(message)
     }
 
-    setIsGenerating(true)
     setError(null)
-
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          buildRequest ? buildRequest(trimmedSituation) : { situation: trimmedSituation }
-        ),
-      })
-
-      const data = (await response.json()) as TResponse & ApiErrorResponse
-
-      if (!response.ok) {
-        throw new Error(data.error || defaultErrorMessage)
-      }
-
-      setSituation("")
-      setIsDialogOpen(false)
-      return data
-    } catch (submitError) {
-      const message =
-        submitError instanceof Error ? submitError.message : defaultErrorMessage
-      setError(message)
-      throw submitError
-    } finally {
-      setIsGenerating(false)
-    }
-  }, [buildRequest, defaultErrorMessage, endpoint, situation])
+    return mutation.mutateAsync(trimmedSituation)
+  }, [mutation, situation])
 
   return {
     isDialogOpen,
@@ -79,7 +82,7 @@ export function useCustomScenarioGeneration<TResponse>({
     setSituation,
     error,
     setError,
-    isGenerating,
+    isGenerating: mutation.isPending,
     openDialog,
     closeDialog,
     submit,
