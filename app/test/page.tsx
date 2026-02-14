@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
 import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
 import { Link } from "@/shared/ui/link"
+import { OpenAISmokeTest } from "@/app/test/openai-smoke-test"
 
 export default async function TestPage() {
   const supabase = await createSupabaseServerClient()
@@ -28,6 +29,7 @@ export default async function TestPage() {
               <Link href="/change-password">change your password</Link> while
               logged in.
             </p>
+            <OpenAISmokeTest />
           </CardContent>
         </Card>
       </div>
