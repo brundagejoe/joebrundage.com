@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# joebrundage.com
 
-## Getting Started
+Personal website and tools app built with Next.js App Router.
 
-First, run the development server:
+This repository powers:
+
+- A personal site (`/`, `/projects`)
+- A tools suite (`/tools/*`) for probability/statistics and SEO analysis workflows
+- Supabase-backed authentication (`/login`, `/signup`, `/change-password`)
+- Role-gated AI-assisted scenario generation for selected tools
+
+## What is in the app
+
+### Core pages
+
+- `/` personal profile and experience overview
+- `/projects` selected project highlights
+- `/tools` tools index
+
+### Tools
+
+- `NCK` - N Choose K Calculator
+- `HASH` - Hash Collision Probability Calculator
+- `SSC` - A/B Test Sample Size Calculator
+- `BAYESP` - Bayes Primer (AI custom scenarios supported)
+- `EVP` - Expected Value Primer (AI custom scenarios supported)
+- `META` - Meta Analyzer (compare meta tags across sites/paths)
+
+### Auth and protected surfaces
+
+- Email/password auth with Supabase
+- API-level AI access control with role checks for OpenAI-backed routes
+
+## Tech stack
+
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Tailwind CSS v4
+- shadcn/ui + Base UI primitives
+- Supabase SSR/auth
+- TanStack Query
+- OpenAI Responses API
+
+## Architecture
+
+The codebase follows Feature-Sliced Design (FSD-style layers):
+
+- `app/` route composition and pages
+- `shared/` UI primitives, utilities, config, infrastructure
+- `entities/` business entities (ready for use)
+- `features/` user interactions (ready for use)
+- `widgets/` higher-level UI composition (e.g., header variants)
+
+Import aliases are configured in `tsconfig.json` (`@/shared/*`, `@/entities/*`, etc.).
+
+## Local development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - start local dev server
+- `npm run build` - production build
+- `npm run start` - run production server
+- `npm run lint` - run ESLint
 
-## Learn More
+## AI integration notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- OpenAI calls use the Responses API (`/v1/responses`)
+- Custom scenario endpoints currently live under:
+  - `app/api/tools/bayes-primer/custom/route.ts`
+  - `app/api/tools/expected-value-primer/custom/route.ts`
+- These routes enforce auth + AI role checks and validate/sanitize structured output server-side
