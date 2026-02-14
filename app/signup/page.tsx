@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, type FormEvent } from "react"
+import { Suspense, useMemo, useState, type FormEvent } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/shared/lib/supabase/client"
@@ -36,6 +36,14 @@ function getSafeRedirectPath(next: string | null) {
 }
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen pt-24 px-6" />}>
+      <SignupPageContent />
+    </Suspense>
+  )
+}
+
+function SignupPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createSupabaseBrowserClient(), [])
