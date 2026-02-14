@@ -14,6 +14,7 @@ import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
 import { Textarea } from "@/shared/ui/textarea"
+import { useCustomScenarioGeneration } from "@/shared/lib/ai/use-custom-scenario-generation"
 
 type BuiltInExampleKey = "medical" | "spam" | "librarian"
 type ExampleKey = BuiltInExampleKey | "custom"
@@ -179,10 +180,11 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
   const [error, setError] = React.useState<string | null>(null)
   const [result, setResult] = React.useState<Result>(getInitialResult)
 
-  const [isCustomDialogOpen, setIsCustomDialogOpen] = React.useState(false)
-  const [customSituation, setCustomSituation] = React.useState("")
-  const [customError, setCustomError] = React.useState<string | null>(null)
-  const [isGeneratingCustom, setIsGeneratingCustom] = React.useState(false)
+  const customGeneration =
+    useCustomScenarioGeneration<CustomGenerationResponse>({
+      endpoint: "/api/tools/bayes-primer/custom",
+      defaultErrorMessage: "Could not generate a custom scenario.",
+    })
 
   const selectedExample = React.useMemo(() => {
     if (activeExample === "custom") {
@@ -254,31 +256,8 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
   ) => {
     event.preventDefault()
 
-    const trimmedSituation = customSituation.trim()
-    if (trimmedSituation.length === 0) {
-      setCustomError("Please describe a situation first.")
-      return
-    }
-
-    setIsGeneratingCustom(true)
-    setCustomError(null)
-
     try {
-      const response = await fetch("/api/tools/bayes-primer/custom", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ situation: trimmedSituation }),
-      })
-      const data =
-        (await response.json()) as Partial<CustomGenerationResponse> & {
-          error?: string
-        }
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not generate a custom scenario.")
-      }
+      const data = await customGeneration.submit()
 
       const generatedExample: ExampleConfig = {
         key: "custom",
@@ -302,16 +281,8 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
 
       setCustomExample(generatedExample)
       handleLoadExample(generatedExample)
-      setCustomSituation("")
-      setIsCustomDialogOpen(false)
-    } catch (generationError) {
-      setCustomError(
-        generationError instanceof Error
-          ? generationError.message
-          : "Could not generate a custom scenario."
-      )
-    } finally {
-      setIsGeneratingCustom(false)
+    } catch (error) {
+      void error
     }
   }
 
@@ -347,10 +318,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
               <Button
                 type="button"
                 variant={activeExample === "custom" ? "default" : "outline"}
-                onClick={() => {
-                  setCustomError(null)
-                  setIsCustomDialogOpen(true)
-                }}
+                onClick={customGeneration.openDialog}
               >
                 {customExample?.title || "Custom"}
               </Button>
@@ -476,8 +444,8 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
       </section>
 
       <AlertDialog
-        open={isCustomDialogOpen}
-        onOpenChange={setIsCustomDialogOpen}
+        open={customGeneration.isDialogOpen}
+        onOpenChange={customGeneration.setIsDialogOpen}
       >
         <AlertDialogContent className="max-w-xl">
           <AlertDialogHeader>
@@ -492,23 +460,31 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
               <Label htmlFor="custom-situation-input">Situation</Label>
               <Textarea
                 id="custom-situation-input"
-                value={customSituation}
-                onChange={(event) => setCustomSituation(event.target.value)}
+                value={customGeneration.situation}
+                onChange={(event) =>
+                  customGeneration.setSituation(event.target.value)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault()
+                    event.currentTarget.form?.requestSubmit()
+                  }
+                }}
                 placeholder="A startup screens resumes with an AI filter; given a flagged candidate, what's the chance they're truly a strong fit?"
                 rows={5}
-                disabled={isGeneratingCustom}
+                disabled={customGeneration.isGenerating}
                 required
               />
             </div>
-            {customError ? (
-              <p className="text-sm text-destructive">{customError}</p>
+            {customGeneration.error ? (
+              <p className="text-sm text-destructive">{customGeneration.error}</p>
             ) : null}
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isGeneratingCustom}>
+              <AlertDialogCancel disabled={customGeneration.isGenerating}>
                 Cancel
               </AlertDialogCancel>
-              <Button type="submit" disabled={isGeneratingCustom}>
-                {isGeneratingCustom ? "Generating..." : "Generate"}
+              <Button type="submit" disabled={customGeneration.isGenerating}>
+                {customGeneration.isGenerating ? "Generating..." : "Generate"}
               </Button>
             </AlertDialogFooter>
           </form>

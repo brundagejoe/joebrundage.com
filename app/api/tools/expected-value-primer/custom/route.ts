@@ -12,20 +12,20 @@ const RequestSchema = z.object({
   situation: z.string().trim().min(1),
 })
 
-const BayesScenarioSchema = z
+const ExpectedValueScenarioSchema = z
   .object({
     title: z.string().trim().min(1),
     description: z.string().trim().min(1),
-    priorLabel: z.string().trim().min(1),
-    likelihoodLabel: z.string().trim().min(1),
-    falsePositiveLabel: z.string().trim().min(1),
-    priorPercent: z.number(),
-    truePositivePercent: z.number(),
-    falsePositivePercent: z.number(),
+    probabilityLabel: z.string().trim().min(1),
+    successLabel: z.string().trim().min(1),
+    failureLabel: z.string().trim().min(1),
+    probabilityPercent: z.number(),
+    successOutcome: z.number(),
+    failureOutcome: z.number(),
   })
   .strict()
 
-type BayesScenarioPayload = z.infer<typeof BayesScenarioSchema>
+type ExpectedValueScenarioPayload = z.infer<typeof ExpectedValueScenarioSchema>
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) {
@@ -40,17 +40,25 @@ function clamp(value: number, min: number, max: number): number {
   return value
 }
 
-function normalizeBayesScenario(
+function normalizeFiniteNumber(value: unknown, fallback: number): number {
+  const parsed = z.coerce.number().safeParse(value)
+  if (!parsed.success || !Number.isFinite(parsed.data)) {
+    return fallback
+  }
+  return parsed.data
+}
+
+function normalizeExpectedValueScenario(
   value: unknown,
   situation: string
-): BayesScenarioPayload | null {
+): ExpectedValueScenarioPayload | null {
   if (!value || typeof value !== "object") {
     return null
   }
 
   const record = value as Record<string, unknown>
   const fallbackTitle = "Custom"
-  const fallbackDescription = `Bayes setup tailored to: ${situation}`
+  const fallbackDescription = `Expected value setup tailored to: ${situation}`
 
   const candidate = {
     title: z.string().trim().min(1).catch(fallbackTitle).parse(record.title),
@@ -60,55 +68,47 @@ function normalizeBayesScenario(
       .min(1)
       .catch(fallbackDescription)
       .parse(record.description),
-    priorLabel: z
+    probabilityLabel: z
       .string()
       .trim()
       .min(1)
-      .catch("Chance the underlying claim is true before seeing this evidence.")
-      .parse(record.priorLabel),
-    likelihoodLabel: z
+      .catch("Probability the favorable outcome occurs.")
+      .parse(record.probabilityLabel),
+    successLabel: z
       .string()
       .trim()
       .min(1)
-      .catch("If the claim is true, chance this evidence appears.")
-      .parse(record.likelihoodLabel),
-    falsePositiveLabel: z
+      .catch("Net gain if the favorable outcome occurs.")
+      .parse(record.successLabel),
+    failureLabel: z
       .string()
       .trim()
       .min(1)
-      .catch("If the claim is false, chance this evidence still appears.")
-      .parse(record.falsePositiveLabel),
-    priorPercent: z.coerce.number().catch(10).parse(record.priorPercent),
-    truePositivePercent: z.coerce
-      .number()
-      .catch(80)
-      .parse(record.truePositivePercent),
-    falsePositivePercent: z.coerce
-      .number()
-      .catch(15)
-      .parse(record.falsePositivePercent),
+      .catch("Net gain (or loss) if the favorable outcome does not occur.")
+      .parse(record.failureLabel),
+    probabilityPercent: normalizeFiniteNumber(record.probabilityPercent, 50),
+    successOutcome: normalizeFiniteNumber(record.successOutcome, 100),
+    failureOutcome: normalizeFiniteNumber(record.failureOutcome, -50),
   }
 
-  const parsed = BayesScenarioSchema.safeParse(candidate)
+  const parsed = ExpectedValueScenarioSchema.safeParse(candidate)
   if (!parsed.success) {
     return null
   }
 
   return {
     ...parsed.data,
-    priorPercent: clamp(parsed.data.priorPercent, 0, 100),
-    truePositivePercent: clamp(parsed.data.truePositivePercent, 0, 100),
-    falsePositivePercent: clamp(parsed.data.falsePositivePercent, 0, 100),
+    probabilityPercent: clamp(parsed.data.probabilityPercent, 0, 100),
   }
 }
 
 function parseScenarioFromResponse(
   data: unknown,
   situation: string
-): BayesScenarioPayload | null {
+): ExpectedValueScenarioPayload | null {
   const candidates = getStructuredJsonCandidates(data)
   for (const candidate of candidates) {
-    const parsed = normalizeBayesScenario(candidate, situation)
+    const parsed = normalizeExpectedValueScenario(candidate, situation)
     if (parsed) {
       return parsed
     }
@@ -119,7 +119,7 @@ function parseScenarioFromResponse(
     return null
   }
 
-  return normalizeBayesScenario(textCandidate, situation)
+  return normalizeExpectedValueScenario(textCandidate, situation)
 }
 
 export async function POST(request: Request) {
@@ -153,24 +153,25 @@ export async function POST(request: Request) {
 
   const { situation } = parsedBody.data
 
-  const input = `You are creating a Bayes Primer example.
+  const input = `You are creating an Expected Value Primer example.
 
 Return exactly one JSON object with these keys and only these keys:
 - title
 - description
-- priorLabel
-- likelihoodLabel
-- falsePositiveLabel
-- priorPercent
-- truePositivePercent
-- falsePositivePercent
+- probabilityLabel
+- successLabel
+- failureLabel
+- probabilityPercent
+- successOutcome
+- failureOutcome
 
 Rules:
 - title: short button label, 2 to 4 words.
-- description: one sentence explaining why Bayes intuition matters for this situation.
+- description: one sentence explaining why expected value matters for this situation.
 - Labels: plain language and specific to the situation.
-- Percent values must be numbers between 0 and 100.
-- Use realistic but educational starter values that show meaningful base-rate effects.
+- probabilityPercent must be a number between 0 and 100.
+- successOutcome and failureOutcome must be realistic net outcomes for one decision (can be negative).
+- Use realistic but educational starter values.
 - Output valid JSON only with no markdown fences.
 
 Situation:
@@ -192,37 +193,33 @@ ${situation}`
         text: {
           format: {
             type: "json_schema",
-            name: "bayes_custom_scenario",
+            name: "expected_value_custom_scenario",
             schema: {
               type: "object",
               additionalProperties: false,
               required: [
                 "title",
                 "description",
-                "priorLabel",
-                "likelihoodLabel",
-                "falsePositiveLabel",
-                "priorPercent",
-                "truePositivePercent",
-                "falsePositivePercent",
+                "probabilityLabel",
+                "successLabel",
+                "failureLabel",
+                "probabilityPercent",
+                "successOutcome",
+                "failureOutcome",
               ],
               properties: {
                 title: { type: "string" },
                 description: { type: "string" },
-                priorLabel: { type: "string" },
-                likelihoodLabel: { type: "string" },
-                falsePositiveLabel: { type: "string" },
-                priorPercent: { type: "number", minimum: 0, maximum: 100 },
-                truePositivePercent: {
+                probabilityLabel: { type: "string" },
+                successLabel: { type: "string" },
+                failureLabel: { type: "string" },
+                probabilityPercent: {
                   type: "number",
                   minimum: 0,
                   maximum: 100,
                 },
-                falsePositivePercent: {
-                  type: "number",
-                  minimum: 0,
-                  maximum: 100,
-                },
+                successOutcome: { type: "number" },
+                failureOutcome: { type: "number" },
               },
             },
           },
