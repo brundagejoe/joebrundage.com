@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense, useMemo, useState, type FormEvent } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/shared/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card"
@@ -87,7 +87,6 @@ function SignupPageContent() {
     }
 
     if (data.session) {
-      setIsSubmitting(false)
       router.push(next)
       router.refresh()
       return
@@ -101,6 +100,7 @@ function SignupPageContent() {
     setIsSubmitting(false)
 
     if (signInError) {
+      setIsSubmitting(false)
       setInfoMessage(
         "Account created, but your project may require email confirmation before login. Check your email, then log in."
       )
@@ -204,7 +204,14 @@ function SignupPageContent() {
               </FieldSet>
 
               <Button disabled={isSubmitting} type="submit" className="w-full rounded-md">
-                {isSubmitting ? "Creating account..." : "Create account"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create account"
+                )}
               </Button>
             </form>
 
