@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog"
+import { AiFeatureGateButton } from "@/shared/ui/ai-feature-gate-button"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
@@ -314,15 +315,14 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
                 {example.title}
               </Button>
             ))}
-            {canUseAiCustom ? (
-              <Button
-                type="button"
-                variant={activeExample === "custom" ? "default" : "outline"}
-                onClick={customGeneration.openDialog}
-              >
-                {customExample?.title || "Custom"}
-              </Button>
-            ) : null}
+            <AiFeatureGateButton
+              variant={activeExample === "custom" ? "default" : "outline"}
+              canUseAi={canUseAiCustom}
+              onAllowedClick={customGeneration.openDialog}
+              featureLabel="custom Bayes scenarios"
+            >
+              {customExample?.title || "Custom"}
+            </AiFeatureGateButton>
           </div>
 
           <p className="mt-3 text-sm text-muted-foreground">
