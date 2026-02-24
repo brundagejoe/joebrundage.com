@@ -4,22 +4,32 @@ import { Card, CardContent } from "@/shared/ui/card"
 export default function ProjectsPage() {
   const projects = [
     {
+      name: "Bookclub",
+      description:
+        "Create a private book club, share an invite link, collect pitches, run ranked-choice voting, and schedule your next discussion with Google Calendar/iCal support.",
+      href: "/projects/bookclub",
+      external: false,
+    },
+    {
       name: "SimpleGL",
       description:
         "A minimal, production-oriented template for using WebGL in React without heavy abstractions or complex setup. Designed to make low-level graphics work approachable in a modern web stack, combining React, TypeScript, Vite, Rust, and WebAssembly, with a focus on clean system boundaries and performance-aware rendering.",
       href: "https://github.com/brundagejoe/simple-gl",
+      external: true,
     },
     {
       name: "The Witch's Cat",
       description:
         "Animated capstone film produced at BYU (Class of 2023). Served as FX Technical Director, owning the fire effects used throughout the film, and led early research and development for the animation pipeline, balancing visual quality, performance constraints, and production timelines in a collaborative environment.",
       href: "https://animation.byu.edu/the-witchs-cat-2023",
+      external: true,
     },
     {
       name: "Raytracer (C++)",
       description:
         "A raytracer implemented from scratch in C++ using only the standard library. Supports both basic ray tracing and brute-force path tracing, with an emphasis on algorithmic clarity, performance tradeoffs, and a deep understanding of rendering fundamentals.",
       href: "https://github.com/brundagejoe/cs455-raytracer",
+      external: true,
     },
   ]
 
@@ -40,7 +50,7 @@ export default function ProjectsPage() {
                 key={project.name}
                 href={project.href}
                 className="block text-foreground no-underline hover:no-underline"
-                external
+                external={project.external}
               >
                 <Card>
                   <CardContent className="flex flex-col gap-2">

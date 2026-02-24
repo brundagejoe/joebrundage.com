@@ -48,10 +48,12 @@ function SignupPageContent() {
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createSupabaseBrowserClient(), [])
 
+  const [displayName, setDisplayName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [displayNameError, setDisplayNameError] = useState<string | null>(null)
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null)
   const [infoMessage, setInfoMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,8 +64,15 @@ function SignupPageContent() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage(null)
+    setDisplayNameError(null)
     setConfirmPasswordError(null)
     setInfoMessage(null)
+
+    const trimmedDisplayName = displayName.trim()
+    if (trimmedDisplayName.length < 2 || trimmedDisplayName.length > 80) {
+      setDisplayNameError("Display name must be between 2 and 80 characters.")
+      return
+    }
 
     if (password !== confirmPassword) {
       setConfirmPasswordError("Passwords do not match.")
@@ -76,6 +85,10 @@ function SignupPageContent() {
       email,
       password,
       options: {
+        data: {
+          full_name: trimmedDisplayName,
+          name: trimmedDisplayName,
+        },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     })
@@ -124,6 +137,22 @@ function SignupPageContent() {
             <form className="space-y-5" onSubmit={handleSubmit}>
               <FieldSet className="gap-4">
                 <FieldGroup className="gap-4">
+                  <Field data-invalid={!!displayNameError}>
+                    <FieldLabel htmlFor="display-name">Display name</FieldLabel>
+                    <Input
+                      id="display-name"
+                      type="text"
+                      className="rounded-md"
+                      value={displayName}
+                      onChange={(event) => setDisplayName(event.target.value)}
+                      autoComplete="name"
+                      maxLength={80}
+                      aria-invalid={!!displayNameError}
+                      required
+                    />
+                    <FieldError>{displayNameError}</FieldError>
+                  </Field>
+
                   <Field>
                     <FieldLabel htmlFor="email">Email</FieldLabel>
                     <Input

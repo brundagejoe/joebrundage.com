@@ -24,7 +24,10 @@ export function Header() {
     if (href === "/#contact") {
       return false
     }
-    // Projects is active only when on /projects page
+    // Projects is active for nested project pages.
+    if (href === "/projects") {
+      return pathname === "/projects" || pathname.startsWith("/projects/")
+    }
     return pathname === href
   }
 
