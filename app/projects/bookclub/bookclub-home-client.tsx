@@ -3,7 +3,6 @@
 import * as React from "react"
 import NextLink from "next/link"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 
@@ -124,31 +123,27 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
         </div>
 
         {!isAuthed ? (
-          <Card>
-            <CardContent className="space-y-3 py-3">
-              <p className="text-sm text-muted-foreground">
-                You need an account to create or join a bookclub.
-              </p>
-              <div className="flex gap-3">
-                <NextLink href="/login?next=/projects/bookclub">
-                  <Button>Log in</Button>
-                </NextLink>
-                <NextLink href="/signup?next=/projects/bookclub">
-                  <Button variant="outline">Sign up</Button>
-                </NextLink>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              You need an account to create or join a bookclub.
+            </p>
+            <div className="flex gap-3">
+              <NextLink href="/login?next=/projects/bookclub">
+                <Button>Log in</Button>
+              </NextLink>
+              <NextLink href="/signup?next=/projects/bookclub">
+                <Button variant="outline">Sign up</Button>
+              </NextLink>
+            </div>
+          </div>
         ) : null}
 
         {isAuthed ? (
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create a Club</CardTitle>
-                <CardDescription>Start a new bookclub and invite others.</CardDescription>
-              </CardHeader>
-              <CardContent>
+            <section className="space-y-3">
+              <h3 className="text-lg font-semibold">Create a Club</h3>
+              <p className="text-sm text-muted-foreground">Start a new bookclub and invite others.</p>
+              <div>
                 <form className="space-y-3" onSubmit={handleCreate}>
                   <Input
                     value={createName}
@@ -163,15 +158,13 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
                     Create bookclub
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Join by Invite</CardTitle>
-                <CardDescription>Paste an invite code from a share link.</CardDescription>
-              </CardHeader>
-              <CardContent>
+            <section className="space-y-3">
+              <h3 className="text-lg font-semibold">Join by Invite</h3>
+              <p className="text-sm text-muted-foreground">Paste an invite code from a share link.</p>
+              <div>
                 <form className="space-y-3" onSubmit={handleJoin}>
                   <Input
                     value={joinCode}
@@ -186,19 +179,19 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
                     Join bookclub
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           </div>
         ) : null}
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Bookclubs</CardTitle>
-            <CardDescription>Open any club to submit, vote, or manage rounds.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <section className="space-y-3">
+          <h3 className="text-lg font-semibold">Your Bookclubs</h3>
+          <p className="text-sm text-muted-foreground">
+            Open any club to submit, vote, or manage sessions.
+          </p>
+          <div className="space-y-3">
             {loading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
             {!loading && clubs.length === 0 ? (
               <p className="text-sm text-muted-foreground">No bookclubs yet.</p>
@@ -206,12 +199,12 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
             {clubs.map((club) => (
               <div
                 key={club.id}
-                className="rounded-md border border-border p-3 flex items-center justify-between gap-3"
+                className="flex items-center justify-between gap-3"
               >
                 <div>
                   <p className="font-medium">{club.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    Round {club.currentRound} • {club.phase}
+                    Session {club.currentRound} • {club.phase}
                     {club.isOwner ? " • owner" : ""}
                   </p>
                 </div>
@@ -222,8 +215,8 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
                 </NextLink>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </section>
     </div>
   )

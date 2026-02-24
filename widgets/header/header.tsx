@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/shared/ui/theme-toggle"
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const pathname = usePathname()
+  const currentPathname = pathname ?? ""
 
   const navItems = [
     { href: "/projects", label: "Projects" },
@@ -26,9 +27,11 @@ export function Header() {
     }
     // Projects is active for nested project pages.
     if (href === "/projects") {
-      return pathname === "/projects" || pathname.startsWith("/projects/")
+      return (
+        currentPathname === "/projects" || currentPathname.startsWith("/projects/")
+      )
     }
-    return pathname === href
+    return currentPathname === href
   }
 
   return (

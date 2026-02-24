@@ -95,6 +95,8 @@ export async function GET(
   const books = booksResult.data ?? []
   const pitches = pitchesResult.data ?? []
   const myVotes = myVotesResult.data ?? []
+  const pitchedBookIds = new Set(pitches.map((pitch) => pitch.book_id))
+  const booksWithPitches = books.filter((book) => pitchedBookIds.has(book.id))
 
   const votesSubmittedCountResult = await supabase
     .from("bookclub_votes")
@@ -149,7 +151,7 @@ export async function GET(
       joinedAt: member.joined_at,
       displayName: member.display_name,
     })),
-    books: books.map((book) => ({
+    books: booksWithPitches.map((book) => ({
       id: book.id,
       clubId: book.club_id,
       roundNumber: book.round_number,

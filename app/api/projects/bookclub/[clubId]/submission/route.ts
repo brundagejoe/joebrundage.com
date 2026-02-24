@@ -76,6 +76,28 @@ export async function POST(
 
   const submissionRound = getSubmissionRound(club.phase, club.current_round)
 
+  const { data: existingPitch, error: existingPitchError } = await supabase
+    .from("bookclub_pitches")
+    .select("id")
+    .eq("club_id", clubId)
+    .eq("round_number", submissionRound)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (existingPitchError) {
+    return NextResponse.json({ error: existingPitchError.message }, { status: 500 })
+  }
+
+  if (existingPitch) {
+    return NextResponse.json(
+      {
+        error:
+          "You already submitted for this round. Remove your submission before submitting again.",
+      },
+      { status: 409 }
+    )
+  }
+
   const { data: existingBooks, error: booksError } = await supabase
     .from("bookclub_books")
     .select("id, title, author, normalized_title, normalized_author")
@@ -135,15 +157,14 @@ export async function POST(
     bookId = createdBook.id
   }
 
-  const { error: pitchError } = await supabase.from("bookclub_pitches").upsert(
+  const { error: pitchError } = await supabase.from("bookclub_pitches").insert(
     {
       club_id: clubId,
       round_number: submissionRound,
       user_id: user.id,
       book_id: bookId,
       pitch: parsed.data.pitch,
-    },
-    { onConflict: "club_id,round_number,user_id" }
+    }
   )
 
   if (pitchError) {
@@ -151,4 +172,106 @@ export async function POST(
   }
 
   return NextResponse.json({ ok: true, submissionRound })
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ clubId: string }> }
+) {
+  const { clubId } = await params
+
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 })
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("bookclub_members")
+    .select("role")
+    .eq("club_id", clubId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (membershipError) {
+    return NextResponse.json({ error: membershipError.message }, { status: 500 })
+  }
+
+  if (!membership) {
+    return NextResponse.json({ error: "Not a member of this club." }, { status: 403 })
+  }
+
+  const { data: club, error: clubError } = await supabase
+    .from("bookclubs")
+    .select("phase, current_round")
+    .eq("id", clubId)
+    .single()
+
+  if (clubError || !club) {
+    return NextResponse.json({ error: clubError?.message ?? "Club not found." }, { status: 404 })
+  }
+
+  if (club.phase === "voting") {
+    return NextResponse.json(
+      { error: "Cannot remove submission while voting is active." },
+      { status: 409 }
+    )
+  }
+
+  const submissionRound = getSubmissionRound(club.phase, club.current_round)
+
+  const { data: existingPitch, error: existingPitchError } = await supabase
+    .from("bookclub_pitches")
+    .select("id, book_id")
+    .eq("club_id", clubId)
+    .eq("round_number", submissionRound)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (existingPitchError) {
+    return NextResponse.json({ error: existingPitchError.message }, { status: 500 })
+  }
+
+  if (!existingPitch) {
+    return NextResponse.json({ ok: true, deleted: false })
+  }
+
+  const { error: deleteError } = await supabase
+    .from("bookclub_pitches")
+    .delete()
+    .eq("id", existingPitch.id)
+
+  if (deleteError) {
+    return NextResponse.json({ error: deleteError.message }, { status: 500 })
+  }
+
+  const { data: remainingOnBook, error: remainingOnBookError } = await supabase
+    .from("bookclub_pitches")
+    .select("id")
+    .eq("club_id", clubId)
+    .eq("round_number", submissionRound)
+    .eq("book_id", existingPitch.book_id)
+    .limit(1)
+
+  if (remainingOnBookError) {
+    return NextResponse.json({ error: remainingOnBookError.message }, { status: 500 })
+  }
+
+  if (!remainingOnBook || remainingOnBook.length === 0) {
+    const { error: cleanupError } = await supabase
+      .from("bookclub_books")
+      .delete()
+      .eq("id", existingPitch.book_id)
+      .eq("club_id", clubId)
+      .eq("round_number", submissionRound)
+
+    if (cleanupError) {
+      return NextResponse.json({ error: cleanupError.message }, { status: 500 })
+    }
+  }
+
+  return NextResponse.json({ ok: true, deleted: true })
 }

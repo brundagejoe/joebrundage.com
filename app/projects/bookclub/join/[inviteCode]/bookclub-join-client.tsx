@@ -3,7 +3,6 @@
 import * as React from "react"
 import NextLink from "next/link"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
 import { Button } from "@/shared/ui/button"
 
 type BookclubJoinClientProps = {
@@ -51,27 +50,23 @@ export function BookclubJoinClient({ inviteCode, isAuthed }: BookclubJoinClientP
   return (
     <div className="min-h-screen bg-background pt-16">
       <section className="mx-auto max-w-xl px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Join Bookclub</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {!isAuthed ? (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Log in first to accept this invite.
-                </p>
-                <NextLink href={`/login?next=/projects/bookclub/join/${inviteCode}`}>
-                  <Button>Log in</Button>
-                </NextLink>
-              </>
-            ) : null}
-            {isAuthed && status === "joining" ? (
-              <p className="text-sm text-muted-foreground">Joining bookclub...</p>
-            ) : null}
-            {status === "error" ? <p className="text-sm text-destructive">{error}</p> : null}
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Join Bookclub</h2>
+          {!isAuthed ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Log in first to accept this invite.
+              </p>
+              <NextLink href={`/login?next=/projects/bookclub/join/${inviteCode}`}>
+                <Button>Log in</Button>
+              </NextLink>
+            </>
+          ) : null}
+          {isAuthed && status === "joining" ? (
+            <p className="text-sm text-muted-foreground">Joining bookclub...</p>
+          ) : null}
+          {status === "error" ? <p className="text-sm text-destructive">{error}</p> : null}
+        </div>
       </section>
     </div>
   )

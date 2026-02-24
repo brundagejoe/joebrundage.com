@@ -343,6 +343,7 @@ Example: Bayes Primer custom generation
 4. **Use Path Aliases**: Always use `@/` aliases, never relative imports across layers
 5. **Component Composition**: Build complex UIs by composing simpler components
 6. **Follow FSD Principles**: Each layer has a clear purpose and responsibility
+7. **Validate Changes**: After code changes, run `npm run check` (lint + typecheck) before finishing
 
 ## Quick Reference
 
@@ -359,6 +360,7 @@ Example: Bayes Primer custom generation
 1. **Development**: `npm run dev`
 2. **Build**: `npm run build`
 3. **Lint**: `npm run lint`
+4. **Validation (Lint + Typecheck)**: `npm run check`
 
 The codebase is ready for development. Start by:
 
