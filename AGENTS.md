@@ -368,3 +368,21 @@ The codebase is ready for development. Start by:
 - Creating features in `features/`
 - Composing widgets in `widgets/`
 - Building pages in `app/`
+
+## Cursor Cloud specific instructions
+
+### Services
+
+This is a single Next.js application (no separate backend). Run with `npm run dev` on port 3000.
+
+### External dependencies
+
+- **Supabase** (auth + Postgres): Required for login/signup and Book Club features. Env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` must be set. Without them, auth-gated pages return errors but the rest of the site (homepage, static tools) works fine.
+- **OpenAI API**: Optional. Powers AI-generated scenarios in Bayes Primer and Expected Value Primer tools. Requires `OPENAI_API_KEY`. The app gracefully degrades without it.
+
+### Gotchas
+
+- There are no automated tests in this repo — `npm run check` (lint + typecheck) is the primary validation command.
+- The dev server uses Turbopack. Hot reload is fast; no need to restart for most code changes.
+- No `.env` files are committed. All secrets come from environment variables.
+- `npm run build` generates some `baseline-browser-mapping` warnings — these are cosmetic and safe to ignore.
