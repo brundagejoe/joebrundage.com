@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 
 function getSafeRedirectPath(next: string | null) {
   if (!next) {

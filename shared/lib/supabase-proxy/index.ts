@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
-import { getSupabaseConfig } from "./config"
+import { getSupabaseConfig } from "@/shared/lib/supabase-config"
 
 export async function updateSession(request: NextRequest) {
   const { url, publishableKey } = getSupabaseConfig()

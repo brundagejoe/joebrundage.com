@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { User } from "@supabase/supabase-js"
 import { getAllowedAiRoles } from "@/shared/config"
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 
 export function resolveUserRole(user: User): string | null {
   const appRole = user.app_metadata?.role

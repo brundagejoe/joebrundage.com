@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 import { Link } from "@/shared/ui/link"
 import { OpenAISmokeTest } from "@/app/test/openai-smoke-test"
 

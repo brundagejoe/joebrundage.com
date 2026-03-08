@@ -5,7 +5,7 @@ import {
   getSubmissionRound,
   normalizeBookField,
 } from "@/shared/lib/bookclub"
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 
 const SubmissionSchema = z.object({
   title: z.string().trim().min(1).max(200),

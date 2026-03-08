@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { ChangePasswordForm } from "@/app/change-password/change-password-form"
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getSubmissionRound } from "@/shared/lib/bookclub"
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 
 export async function GET(
   _request: Request,

@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 
 export function getSubmissionRound(phase: string, currentRound: number): number {
   return phase === "reading" ? currentRound + 1 : currentRound

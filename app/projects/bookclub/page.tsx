@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/shared/lib/supabase"
+import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 import { BookclubHomeClient } from "@/app/projects/bookclub/bookclub-home-client"
 
 export default async function BookclubHomePage() {
