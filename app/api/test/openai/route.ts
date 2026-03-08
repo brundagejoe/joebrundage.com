@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { requireAiAccess } from "@/shared/lib/auth/ai-access"
+import { requireAiAccess } from "@/shared/lib/auth"
 
 const OPENAI_URL = "https://api.openai.com/v1/responses"
 

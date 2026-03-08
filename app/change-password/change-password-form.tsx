@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from "react"
 import { Eye, EyeOff } from "lucide-react"
-import { createSupabaseBrowserClient } from "@/shared/lib/supabase/client"
+import { createSupabaseBrowserClient } from "@/shared/lib/supabase"
 import { Button } from "@/shared/ui/button"
 import {
   Field,

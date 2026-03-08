@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
-import { buildGoogleCalendarLink } from "@/shared/lib/bookclub/calendar"
+import { buildGoogleCalendarLink } from "@/shared/lib/bookclub"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 const MeetingSchema = z.object({
   meetingAt: z.string().datetime({ offset: true }),

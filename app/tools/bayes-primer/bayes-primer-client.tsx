@@ -15,7 +15,7 @@ import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
 import { Textarea } from "@/shared/ui/textarea"
-import { useCustomScenarioGeneration } from "@/shared/lib/ai/use-custom-scenario-generation"
+import { useCustomScenarioGeneration } from "@/shared/lib/ai"
 
 type BuiltInExampleKey = "medical" | "spam" | "librarian"
 type ExampleKey = BuiltInExampleKey | "custom"

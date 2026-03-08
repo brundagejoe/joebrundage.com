@@ -5,9 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 
-import { ThemeToggle } from "@/features/theme-toggle"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
+import { ThemeToggle } from "./theme-toggle"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)

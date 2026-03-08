@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
-import { buildIcsContent } from "@/shared/lib/bookclub/calendar"
+import { buildIcsContent } from "@/shared/lib/bookclub"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 export async function GET(
   _request: Request,

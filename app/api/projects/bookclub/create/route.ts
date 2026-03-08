@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
-import { getDisplayName } from "@/shared/lib/bookclub/data"
+import { getDisplayName } from "@/shared/lib/bookclub"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 const CreateBookclubSchema = z.object({
   name: z.string().trim().min(2).max(80),

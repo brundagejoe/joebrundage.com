@@ -1,6 +1,6 @@
 import { ExpectedValuePrimerClient } from "@/app/tools/expected-value-primer/expected-value-primer-client"
-import { canAccessAi } from "@/shared/lib/auth/ai-access"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
+import { canAccessAi } from "@/shared/lib/auth"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 export default async function ExpectedValuePrimerPage() {
   const supabase = await createSupabaseServerClient()

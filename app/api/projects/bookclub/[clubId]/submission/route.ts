@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
-import { getSubmissionRound } from "@/shared/lib/bookclub/data"
-import { findFuzzyDuplicate, normalizeBookField } from "@/shared/lib/bookclub/text"
+import {
+  findFuzzyDuplicate,
+  getSubmissionRound,
+  normalizeBookField,
+} from "@/shared/lib/bookclub"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 const SubmissionSchema = z.object({
   title: z.string().trim().min(1).max(200),

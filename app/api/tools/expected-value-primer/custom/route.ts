@@ -5,8 +5,8 @@ import {
   getStructuredJsonCandidates,
   getTextFallbackJsonCandidate,
   OPENAI_RESPONSES_URL,
-} from "@/shared/lib/ai/openai-responses"
-import { requireAiAccess } from "@/shared/lib/auth/ai-access"
+} from "@/shared/lib/ai"
+import { requireAiAccess } from "@/shared/lib/auth"
 
 const RequestSchema = z.object({
   situation: z.string().trim().min(1),

@@ -1,5 +1,5 @@
-import { canAccessAi } from "@/shared/lib/auth/ai-access"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
+import { canAccessAi } from "@/shared/lib/auth"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 import { BayesPrimerClient } from "@/app/tools/bayes-primer/bayes-primer-client"
 
 export default async function BayesPlaygroundPage() {

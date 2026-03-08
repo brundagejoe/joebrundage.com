@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
-import { computeRankedChoiceWinner } from "@/shared/lib/bookclub/voting"
+import { computeRankedChoiceWinner } from "@/shared/lib/bookclub"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 const TransitionSchema = z.object({
   action: z.enum(["start_voting", "end_voting", "reopen_submissions"]),

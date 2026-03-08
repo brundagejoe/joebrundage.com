@@ -1,5 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr"
-import { getSupabaseConfig } from "@/shared/lib/supabase/config"
+import { getSupabaseConfig } from "./config"
 
 export function createSupabaseBrowserClient() {
   const { url, publishableKey } = getSupabaseConfig()

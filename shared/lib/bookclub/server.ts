@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { User } from "@supabase/supabase-js"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 export async function requireAuthedUser() {
   const supabase = await createSupabaseServerClient()

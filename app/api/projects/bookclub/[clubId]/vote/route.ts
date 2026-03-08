@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 const VoteSchema = z.object({
   rankedBookIds: z.array(z.string().uuid()).min(1),

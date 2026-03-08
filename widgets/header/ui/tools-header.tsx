@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { TOOLS, type ToolDefinition } from "@/shared/config/tools"
+import { TOOLS, type ToolDefinition } from "@/shared/config"
 import { buttonVariants } from "@/shared/ui/button"
 import {
   Combobox,

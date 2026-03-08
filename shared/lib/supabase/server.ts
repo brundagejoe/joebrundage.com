@@ -1,6 +1,6 @@
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
-import { getSupabaseConfig } from "@/shared/lib/supabase/config"
+import { getSupabaseConfig } from "./config"
 
 export async function createSupabaseServerClient() {
   const { url, publishableKey } = getSupabaseConfig()

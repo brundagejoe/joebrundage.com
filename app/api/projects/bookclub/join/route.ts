@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createSupabaseServerClient } from "@/shared/lib/supabase/server"
-import { getBookclubByInviteCode, getDisplayName } from "@/shared/lib/bookclub/data"
+import { getBookclubByInviteCode, getDisplayName } from "@/shared/lib/bookclub"
+import { createSupabaseServerClient } from "@/shared/lib/supabase"
 
 const JoinSchema = z.object({
   inviteCode: z.string().trim().min(4).max(64),

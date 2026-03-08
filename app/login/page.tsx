@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState, type FormEvent } from "react"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { createSupabaseBrowserClient } from "@/shared/lib/supabase/client"
+import { createSupabaseBrowserClient } from "@/shared/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card"
 import { Button } from "@/shared/ui/button"
 import { Link } from "@/shared/ui/link"
