@@ -8,7 +8,6 @@ function ThemeRouteSync({ isToolsRoute }: { isToolsRoute: boolean }) {
   const { theme, setTheme } = useTheme()
 
   React.useEffect(() => {
-    // If "terminal" was previously persisted, normalize it outside /tools.
     if (!isToolsRoute && theme === "terminal") {
       setTheme("light")
     }

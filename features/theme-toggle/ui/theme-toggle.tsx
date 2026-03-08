@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Moon, Sun, Monitor } from "lucide-react"
+import { Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { buttonVariants } from "@/shared/ui/button"
 import { cn } from "@/shared/lib/utils"
+import { buttonVariants } from "@/shared/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,6 @@ export function ThemeToggle() {
   const [mounted, setMounted] = React.useState(false)
   const [open, setOpen] = React.useState(false)
 
-  // Avoid hydration mismatch
   React.useEffect(() => {
     setMounted(true)
   }, [])
@@ -30,8 +29,6 @@ export function ThemeToggle() {
   }
 
   if (!mounted) {
-    // Show a placeholder that matches the button size to prevent layout shift
-    // The blocking script prevents theme flash, so we don't need to guess the icon
     return (
       <button
         className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}

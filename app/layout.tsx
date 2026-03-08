@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
+import { AppQueryProvider } from "@/shared/lib/query/query-provider"
+import { ThemeProvider } from "@/shared/lib/theme/theme-provider"
 import { HeaderRouter } from "@/widgets/header"
-import { ThemeProvider } from "@/shared/ui/theme-provider"
-import { AppQueryProvider } from "@/shared/ui/query-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 

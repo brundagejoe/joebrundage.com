@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,7 +14,10 @@ import {
 } from "@/shared/ui/alert-dialog"
 import { Button } from "@/shared/ui/button"
 
-type AiFeatureGateButtonProps = Omit<React.ComponentProps<typeof Button>, "onClick"> & {
+type AiFeatureGateButtonProps = Omit<
+  React.ComponentProps<typeof Button>,
+  "onClick"
+> & {
   canUseAi: boolean
   onAllowedClick: () => void
   featureLabel?: string

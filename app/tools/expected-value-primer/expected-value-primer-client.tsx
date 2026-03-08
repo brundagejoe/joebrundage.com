@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog"
-import { AiFeatureGateButton } from "@/shared/ui/ai-feature-gate-button"
+import { AiFeatureGateButton } from "@/features/ai-feature-gate"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
