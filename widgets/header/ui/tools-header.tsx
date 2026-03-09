@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { LoaderCircleIcon } from "lucide-react"
 
 import { TOOLS, type ToolDefinition } from "@/shared/config"
 import { buttonVariants } from "@/shared/ui/button"
@@ -17,12 +18,16 @@ import {
 
 export function ToolsHeader() {
   const router = useRouter()
+  const pathname = usePathname()
   const inputRef = React.useRef<HTMLInputElement | null>(null)
   const openFromShortcutRef = React.useRef(false)
   const suppressReopenRef = React.useRef(false)
   const [query, setQuery] = React.useState("")
   const [value, setValue] = React.useState<ToolDefinition | null>(null)
   const [open, setOpen] = React.useState(false)
+  const [pendingTool, setPendingTool] = React.useState<ToolDefinition | null>(
+    null
+  )
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -42,6 +47,12 @@ export function ToolsHeader() {
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [])
+
+  React.useEffect(() => {
+    if (pendingTool && pathname === pendingTool.href) {
+      setPendingTool(null)
+    }
+  }, [pathname, pendingTool])
 
   const filteredTools = React.useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -72,6 +83,7 @@ export function ToolsHeader() {
     const closeMenu = () => setOpen(false)
 
     suppressReopenRef.current = true
+    setPendingTool(nextValue)
     setValue(nextValue)
     closeMenu()
     blurActiveElement()
@@ -126,6 +138,7 @@ export function ToolsHeader() {
                 className="w-full rounded-none border-input bg-input/30 text-foreground focus-within:border-ring focus-within:ring-0 [&_input]:font-mono [&_input]:tracking-wide [&_input]:placeholder:text-muted-foreground [&_input]:text-base md:[&_input]:text-sm"
                 placeholder="Search tools by code or title (Cmd+K)"
                 showTrigger={false}
+                disabled={pendingTool !== null}
                 onBlur={() => setOpen(false)}
               />
               <ComboboxContent className="w-[min(88vw,900px)] rounded-none border border-border bg-popover text-popover-foreground shadow-2xl">
@@ -157,6 +170,20 @@ export function ToolsHeader() {
             </Combobox>
           </div>
         </div>
+        {pendingTool ? (
+          <div
+            className="flex h-8 items-center justify-between border-t border-border bg-card px-1 text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground"
+            aria-live="polite"
+          >
+            <div className="flex items-center gap-2">
+              <LoaderCircleIcon className="size-3.5 animate-spin text-primary" />
+              <span>
+                Loading {pendingTool.code} {pendingTool.title}
+              </span>
+            </div>
+            <span>Switching tool...</span>
+          </div>
+        ) : null}
       </div>
     </header>
   )
