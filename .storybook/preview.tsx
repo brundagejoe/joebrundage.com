@@ -21,6 +21,7 @@ const preview: Preview = {
             "Button",
             "Badge",
             "Card",
+            "Chart",
             "Input",
             "Textarea",
             "Label",
