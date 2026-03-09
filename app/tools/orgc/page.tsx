@@ -829,34 +829,40 @@ from:right --> to:left`}
 
           <Card>
             <CardHeader>
-              <CardTitle>Validation</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              {analysis.issues.length === 0 ? (
-                <p className="text-emerald-600">No issues found.</p>
-              ) : (
-                <ul className="space-y-1">
-                  {analysis.issues.map((issue, index) => (
-                    <li
-                      key={`${issue.kind}-${index}`}
-                      className={issue.kind === "error" ? "text-destructive" : "text-amber-700"}
-                    >
-                      [{issue.kind.toUpperCase()}] {issue.message}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {copyStatus ? (
-                <p
-                  className={
-                    copyStatus.kind === "error" ? "text-destructive" : "text-emerald-600"
-                  }
-                >
-                  {copyStatus.message}
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
+            <CardTitle>Validation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {analysis.issues.length === 0 ? (
+              <p
+                className="text-emerald-600"
+              >
+                No issues found.
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                {analysis.issues.map((issue, index) => (
+                  <li
+                    key={`${issue.kind}-${index}`}
+                    className={issue.kind === "error" ? "text-destructive" : "text-amber-700"}
+                  >
+                    [{issue.kind.toUpperCase()}] {issue.message}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {copyStatus ? (
+              <p
+                className={
+                  copyStatus.kind === "error"
+                    ? "text-destructive"
+                    : "text-emerald-600"
+                }
+              >
+                {copyStatus.message}
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
 
           <Card>
             <CardHeader>
