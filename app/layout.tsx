@@ -4,6 +4,7 @@ import "./globals.css"
 import { AppQueryProvider } from "@/shared/lib/query"
 import { ThemeProvider } from "@/shared/lib/theme"
 import { HeaderRouter } from "@/widgets/header"
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -76,6 +77,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </AppQueryProvider>
+        <Analytics />
       </body>
     </html>
   )
