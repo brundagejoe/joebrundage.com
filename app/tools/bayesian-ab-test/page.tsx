@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   Area,
   CartesianGrid,
@@ -34,8 +35,6 @@ type Inputs = {
   conversionsA: string
   visitorsB: string
   conversionsB: string
-  priorAlpha: string
-  priorBeta: string
   thresholdPercent: string
   meaningfulLiftPercent: string
 }
@@ -104,6 +103,8 @@ const LANCZOS_COEFFICIENTS = [
 
 const MONTE_CARLO_SAMPLES = 12000
 const POSTERIOR_CHART_POINTS = 96
+const FIXED_PRIOR_ALPHA = 1
+const FIXED_PRIOR_BETA = 1
 
 const POSTERIOR_CHART_CONFIG = {
   variantA: {
@@ -778,10 +779,102 @@ function getInitialInputs(): Inputs {
     conversionsA: "660",
     visitorsB: "11850",
     conversionsB: "714",
-    priorAlpha: "1",
-    priorBeta: "1",
     thresholdPercent: "95",
     meaningfulLiftPercent: "10",
+  }
+}
+
+function getInputsFromSearchParams(searchParams: URLSearchParams): Inputs {
+  const defaults = getInitialInputs()
+
+  return {
+    visitorsA: searchParams.get("visitorsA") ?? defaults.visitorsA,
+    conversionsA: searchParams.get("conversionsA") ?? defaults.conversionsA,
+    visitorsB: searchParams.get("visitorsB") ?? defaults.visitorsB,
+    conversionsB: searchParams.get("conversionsB") ?? defaults.conversionsB,
+    thresholdPercent:
+      searchParams.get("thresholdPercent") ?? defaults.thresholdPercent,
+    meaningfulLiftPercent:
+      searchParams.get("meaningfulLiftPercent") ?? defaults.meaningfulLiftPercent,
+  }
+}
+
+function createSearchParamsFromInputs(inputs: Inputs): URLSearchParams {
+  const searchParams = new URLSearchParams()
+
+  searchParams.set("visitorsA", inputs.visitorsA)
+  searchParams.set("conversionsA", inputs.conversionsA)
+  searchParams.set("visitorsB", inputs.visitorsB)
+  searchParams.set("conversionsB", inputs.conversionsB)
+  searchParams.set("thresholdPercent", inputs.thresholdPercent)
+  searchParams.set("meaningfulLiftPercent", inputs.meaningfulLiftPercent)
+
+  return searchParams
+}
+
+function validateAndCalculate(inputs: Inputs):
+  | { error: string; result: null }
+  | { error: null; result: AnalysisResult } {
+  const visitorsA = parsePositiveWholeNumber(inputs.visitorsA)
+  const conversionsA = parseWholeNumber(inputs.conversionsA)
+  const visitorsB = parsePositiveWholeNumber(inputs.visitorsB)
+  const conversionsB = parseWholeNumber(inputs.conversionsB)
+  const decisionThreshold = parsePercent(inputs.thresholdPercent)
+  const practicalThreshold = parsePercent(inputs.meaningfulLiftPercent)
+
+  if (
+    visitorsA === null ||
+    conversionsA === null ||
+    visitorsB === null ||
+    conversionsB === null
+  ) {
+    return {
+      error: "Traffic and conversions must be whole numbers.",
+      result: null,
+    }
+  }
+
+  if (conversionsA > visitorsA || conversionsB > visitorsB) {
+    return {
+      error: "Conversions cannot exceed visitors.",
+      result: null,
+    }
+  }
+
+  if (
+    decisionThreshold === null ||
+    decisionThreshold <= 50 ||
+    decisionThreshold >= 100
+  ) {
+    return {
+      error: "Decision threshold must be a percent between 50 and 100.",
+      result: null,
+    }
+  }
+
+  if (
+    practicalThreshold === null ||
+    practicalThreshold < 0 ||
+    practicalThreshold >= 100
+  ) {
+    return {
+      error: "Minimum meaningful lift must be a percent between 0 and 100.",
+      result: null,
+    }
+  }
+
+  return {
+    error: null,
+    result: calculateAnalysis({
+      visitorsA,
+      conversionsA,
+      visitorsB,
+      conversionsB,
+      priorAlpha: FIXED_PRIOR_ALPHA,
+      priorBeta: FIXED_PRIOR_BETA,
+      decisionThreshold: decisionThreshold / 100,
+      meaningfulLift: practicalThreshold / 100,
+    }),
   }
 }
 
@@ -791,81 +884,106 @@ function getInitialResult(): AnalysisResult {
     conversionsA: 660,
     visitorsB: 11850,
     conversionsB: 714,
-    priorAlpha: 1,
-    priorBeta: 1,
+    priorAlpha: FIXED_PRIOR_ALPHA,
+    priorBeta: FIXED_PRIOR_BETA,
     decisionThreshold: 0.95,
     meaningfulLift: 0.1,
   })
 }
 
 export default function BayesianAbTestPage() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [inputs, setInputs] = React.useState<Inputs>(getInitialInputs)
+  const [hasInitializedFromUrl, setHasInitializedFromUrl] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [result, setResult] = React.useState<AnalysisResult>(getInitialResult)
+
+  React.useEffect(() => {
+    const nextInputs = searchParams
+      ? getInputsFromSearchParams(searchParams)
+      : getInitialInputs()
+    const nextState = validateAndCalculate(nextInputs)
+
+    setInputs(nextInputs)
+    setError(nextState.error)
+
+    if (nextState.result) {
+      setResult(nextState.result)
+    }
+
+    setHasInitializedFromUrl(true)
+  }, [searchParams])
 
   const meaningfulLiftPercent = parsePercent(inputs.meaningfulLiftPercent)
   const meaningfulLift =
     meaningfulLiftPercent === null ? 0.1 : meaningfulLiftPercent / 100
 
+  if (!hasInitializedFromUrl) {
+    return (
+      <div className="min-h-screen bg-background pt-16">
+        <section className="mx-auto max-w-7xl px-6 py-8">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl font-semibold">Bayesian A/B Test Calculator</h2>
+            <p className="mt-2 leading-relaxed text-muted-foreground">
+              Loading shared calculator state...
+            </p>
+          </div>
+          <div className="mt-6 grid gap-6 xl:grid-cols-[420px_1fr]">
+            <Card className="xl:sticky xl:top-24">
+              <CardHeader>
+                <CardTitle>Inputs</CardTitle>
+                <CardDescription>Loading URL parameters.</CardDescription>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="h-64 animate-pulse rounded-md bg-muted/50" />
+              </CardContent>
+            </Card>
+            <div className="grid gap-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Decision Summary</CardTitle>
+                    <CardDescription>Preparing analysis.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <div className="h-64 animate-pulse rounded-md bg-muted/50" />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Posterior distribution</CardTitle>
+                    <CardDescription>Preparing chart.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <div className="h-64 animate-pulse rounded-md bg-muted/50" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    )
+  }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const nextState = validateAndCalculate(inputs)
 
-    const visitorsA = parsePositiveWholeNumber(inputs.visitorsA)
-    const conversionsA = parseWholeNumber(inputs.conversionsA)
-    const visitorsB = parsePositiveWholeNumber(inputs.visitorsB)
-    const conversionsB = parseWholeNumber(inputs.conversionsB)
-    const priorAlpha = parsePositiveWholeNumber(inputs.priorAlpha)
-    const priorBeta = parsePositiveWholeNumber(inputs.priorBeta)
-    const decisionThreshold = parsePercent(inputs.thresholdPercent)
-    const practicalThreshold = parsePercent(inputs.meaningfulLiftPercent)
+    setError(nextState.error)
 
-    if (
-      visitorsA === null ||
-      conversionsA === null ||
-      visitorsB === null ||
-      conversionsB === null ||
-      priorAlpha === null ||
-      priorBeta === null
-    ) {
-      setError("Traffic, conversions, and prior parameters must be whole numbers.")
+    if (!nextState.result) {
       return
     }
 
-    if (conversionsA > visitorsA || conversionsB > visitorsB) {
-      setError("Conversions cannot exceed visitors.")
-      return
-    }
-
-    if (
-      decisionThreshold === null ||
-      decisionThreshold <= 50 ||
-      decisionThreshold >= 100
-    ) {
-      setError("Decision threshold must be a percent between 50 and 100.")
-      return
-    }
-
-    if (
-      practicalThreshold === null ||
-      practicalThreshold < 0 ||
-      practicalThreshold >= 100
-    ) {
-      setError("Minimum meaningful lift must be a percent between 0 and 100.")
-      return
-    }
-
-    setError(null)
-    setResult(
-      calculateAnalysis({
-        visitorsA,
-        conversionsA,
-        visitorsB,
-        conversionsB,
-        priorAlpha,
-        priorBeta,
-        decisionThreshold: decisionThreshold / 100,
-        meaningfulLift: practicalThreshold / 100,
-      })
+    setResult(nextState.result)
+    router.replace(
+      `${pathname}?${createSearchParamsFromInputs(inputs).toString()}`,
+      {
+        scroll: false,
+      }
     )
   }
 
@@ -981,37 +1099,15 @@ export default function BayesianAbTestPage() {
               <Separator />
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
-                <div className="grid gap-2">
-                  <Label htmlFor="prior-alpha">Prior alpha</Label>
-                  <Input
-                    id="prior-alpha"
-                    type="text"
-                    inputMode="numeric"
-                    value={inputs.priorAlpha ?? ""}
-                    onChange={(event) =>
-                      setInputs((previous) => ({
-                        ...previous,
-                        priorAlpha: event.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="prior-beta">Prior beta</Label>
-                  <Input
-                    id="prior-beta"
-                    type="text"
-                    inputMode="numeric"
-                    value={inputs.priorBeta ?? ""}
-                    onChange={(event) =>
-                      setInputs((previous) => ({
-                        ...previous,
-                        priorBeta: event.target.value,
-                      }))
-                    }
-                    required
-                  />
+                <div className="rounded-md border border-border/70 bg-muted/35 p-4">
+                  <p className="text-sm font-medium">Prior</p>
+                  <p className="mt-2 text-base text-foreground">
+                    Beta({FIXED_PRIOR_ALPHA}, {FIXED_PRIOR_BETA})
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Priors are fixed at alpha = {FIXED_PRIOR_ALPHA} and beta ={" "}
+                    {FIXED_PRIOR_BETA} for both variants.
+                  </p>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="threshold">Decision threshold %</Label>
@@ -1088,7 +1184,7 @@ export default function BayesianAbTestPage() {
                     </div>
                     <div className="rounded-md border border-border p-4">
                       <p className="text-sm font-medium">Experiment maturity</p>
-                      <div className="mt-2 flex items-center gap-2">
+                      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
                         <p className="text-2xl font-semibold">
                           {result.experimentMaturity}
                         </p>
