@@ -9,6 +9,11 @@ export const TOOLS: ToolDefinition[] = [
   { code: "NCK", title: "N Choose K Calculator", href: "/tools/nck" },
   { code: "ORGC", title: "Org Chart Composer", href: "/tools/orgc" },
   {
+    code: "BABT",
+    title: "Bayesian A/B Test Calculator",
+    href: "/tools/bayesian-ab-test",
+  },
+  {
     code: "HASH",
     title: "Hash Collision Probability Calculator",
     href: "/tools/hash-collisions",
