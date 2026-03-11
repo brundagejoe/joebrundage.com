@@ -48,6 +48,13 @@ type PosteriorPoint = {
 
 type EvidenceStrength = "Low" | "Moderate" | "Strong"
 type ExperimentMaturity = "Early" | "Building" | "Mature"
+type ChosenVariant = "Variant A" | "Variant B"
+
+type WaitingScenario = {
+  extraVisitorsPerVariant: number
+  expectedRegretAfterWaiting: number
+  valueOfWaiting: number
+}
 
 type AnalysisResult = {
   posteriorAlphaA: number
@@ -88,6 +95,9 @@ type AnalysisResult = {
   experimentMaturity: ExperimentMaturity
   maturityProgress: number
   decisionStatus: "Ship Variant B" | "Keep Variant A" | "Continue test" | "Inconclusive"
+  chosenVariantNow: ChosenVariant
+  expectedRegretIfShipNow: number
+  waitingScenarios: WaitingScenario[]
 }
 
 const LANCZOS_COEFFICIENTS = [
@@ -103,6 +113,8 @@ const LANCZOS_COEFFICIENTS = [
 
 const MONTE_CARLO_SAMPLES = 12000
 const POSTERIOR_CHART_POINTS = 96
+const WAITING_SCENARIOS = [1000, 2000, 5000, 10000]
+const WAITING_VALUE_SIMULATIONS = 1500
 const FIXED_PRIOR_ALPHA = 1
 const FIXED_PRIOR_BETA = 1
 
@@ -192,8 +204,16 @@ function formatPercentagePoints(value: number, digits = 2): string {
   return `${points >= 0 ? "+" : ""}${points.toFixed(digits)} pp`
 }
 
+function formatUnsignedPercentagePoints(value: number, digits = 2): string {
+  return `${(value * 100).toFixed(digits)} pp`
+}
+
 function formatCount(value: number): string {
   return Math.round(value).toLocaleString("en-US")
+}
+
+function formatConversionsPerHundredThousand(value: number, digits = 1): string {
+  return `${(value * 100000).toFixed(digits)} per 100k`
 }
 
 function logGamma(z: number): number {
@@ -279,6 +299,44 @@ function sampleBeta(alpha: number, beta: number, random: () => number): number {
   const x = sampleGamma(alpha, random)
   const y = sampleGamma(beta, random)
   return x / (x + y)
+}
+
+function sampleBinomialApprox(
+  trials: number,
+  probability: number,
+  random: () => number
+): number {
+  const boundedTrials = Math.max(0, Math.round(trials))
+  const boundedProbability = clamp(probability, 0, 1)
+
+  if (boundedTrials === 0 || boundedProbability === 0) {
+    return 0
+  }
+
+  if (boundedProbability === 1) {
+    return boundedTrials
+  }
+
+  if (boundedTrials <= 50) {
+    let successes = 0
+    for (let index = 0; index < boundedTrials; index += 1) {
+      if (random() < boundedProbability) {
+        successes += 1
+      }
+    }
+    return successes
+  }
+
+  const mean = boundedTrials * boundedProbability
+  const standardDeviation = Math.sqrt(
+    boundedTrials * boundedProbability * (1 - boundedProbability)
+  )
+
+  return clamp(
+    Math.round(mean + sampleStandardNormal(random) * standardDeviation),
+    0,
+    boundedTrials
+  )
 }
 
 function quantile(sortedValues: number[], probability: number): number {
@@ -614,6 +672,67 @@ function determineDecisionStatus({
   return "Inconclusive"
 }
 
+function calculateWaitingScenarios({
+  posteriorAlphaA,
+  posteriorBetaA,
+  posteriorAlphaB,
+  posteriorBetaB,
+  expectedRegretIfShipNow,
+}: {
+  posteriorAlphaA: number
+  posteriorBetaA: number
+  posteriorAlphaB: number
+  posteriorBetaB: number
+  expectedRegretIfShipNow: number
+}): WaitingScenario[] {
+  const random = makeDeterministicRandom(
+    posteriorAlphaA * 11 +
+      posteriorBetaA * 13 +
+      posteriorAlphaB * 17 +
+      posteriorBetaB * 19
+  )
+
+  return WAITING_SCENARIOS.map((extraVisitorsPerVariant) => {
+    let regretSum = 0
+
+    for (let index = 0; index < WAITING_VALUE_SIMULATIONS; index += 1) {
+      const trueRateA = sampleBeta(posteriorAlphaA, posteriorBetaA, random)
+      const trueRateB = sampleBeta(posteriorAlphaB, posteriorBetaB, random)
+      const extraConversionsA = sampleBinomialApprox(
+        extraVisitorsPerVariant,
+        trueRateA,
+        random
+      )
+      const extraConversionsB = sampleBinomialApprox(
+        extraVisitorsPerVariant,
+        trueRateB,
+        random
+      )
+      const futureMeanA =
+        (posteriorAlphaA + extraConversionsA) /
+        (posteriorAlphaA + posteriorBetaA + extraVisitorsPerVariant)
+      const futureMeanB =
+        (posteriorAlphaB + extraConversionsB) /
+        (posteriorAlphaB + posteriorBetaB + extraVisitorsPerVariant)
+      const regretIfChooseA = Math.max(trueRateB - trueRateA, 0)
+      const regretIfChooseB = Math.max(trueRateA - trueRateB, 0)
+
+      regretSum += futureMeanB >= futureMeanA ? regretIfChooseB : regretIfChooseA
+    }
+
+    const expectedRegretAfterWaiting = regretSum / WAITING_VALUE_SIMULATIONS
+
+    return {
+      extraVisitorsPerVariant,
+      expectedRegretAfterWaiting,
+      valueOfWaiting: Math.max(
+        0,
+        expectedRegretIfShipNow - expectedRegretAfterWaiting
+      ),
+    }
+  })
+}
+
 function calculateAnalysis({
   visitorsA,
   conversionsA,
@@ -670,6 +789,10 @@ function calculateAnalysis({
   const sortedAbsoluteDiffs = [...absoluteDiffs].sort((left, right) => left - right)
   const expectedLossIfShipA = mean(absoluteDiffs.map((difference) => Math.max(difference, 0)))
   const expectedLossIfShipB = mean(absoluteDiffs.map((difference) => Math.max(-difference, 0)))
+  const chosenVariantNow =
+    expectedLossIfShipB <= expectedLossIfShipA ? "Variant B" : "Variant A"
+  const expectedRegretIfShipNow =
+    chosenVariantNow === "Variant B" ? expectedLossIfShipB : expectedLossIfShipA
   const visitorsPerVariant = Math.round((visitorsA + visitorsB) / 2)
   const totalConversions = conversionsA + conversionsB
   const recommendedConversionsPerVariant = 200
@@ -699,6 +822,13 @@ function calculateAnalysis({
     ),
     decisionThreshold,
     evidenceStrength,
+  })
+  const waitingScenarios = calculateWaitingScenarios({
+    posteriorAlphaA,
+    posteriorBetaA,
+    posteriorAlphaB,
+    posteriorBetaB,
+    expectedRegretIfShipNow,
   })
 
   return {
@@ -770,6 +900,9 @@ function calculateAnalysis({
     experimentMaturity,
     maturityProgress,
     decisionStatus,
+    chosenVariantNow,
+    expectedRegretIfShipNow,
+    waitingScenarios,
   }
 }
 
@@ -930,7 +1063,7 @@ export default function BayesianAbTestPage() {
               Loading shared calculator state...
             </p>
           </div>
-          <div className="mt-6 grid gap-6 xl:grid-cols-[420px_1fr]">
+          <div className="mt-6 grid items-start gap-6 xl:grid-cols-[420px_1fr]">
             <Card className="xl:sticky xl:top-24">
               <CardHeader>
                 <CardTitle>Inputs</CardTitle>
@@ -941,7 +1074,7 @@ export default function BayesianAbTestPage() {
               </CardContent>
             </Card>
             <div className="grid gap-6">
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="grid items-start gap-6 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
                     <CardTitle>Decision Summary</CardTitle>
@@ -1019,7 +1152,10 @@ export default function BayesianAbTestPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 grid gap-6 xl:grid-cols-[420px_1fr]">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-6 grid items-start gap-6 xl:grid-cols-[420px_1fr]"
+        >
           <Card className="xl:sticky xl:top-24">
             <CardHeader>
               <CardTitle>Inputs</CardTitle>
@@ -1160,7 +1296,7 @@ export default function BayesianAbTestPage() {
           </Card>
 
           <div className="grid gap-6">
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid items-start gap-6 lg:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle>Decision Summary</CardTitle>
@@ -1325,184 +1461,284 @@ export default function BayesianAbTestPage() {
               </CardContent>
             </Card>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Risk and Loss</CardTitle>
-                  <CardDescription>
-                    Downside probabilities plus expected cost of shipping the wrong
-                    version.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4 pb-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid items-start gap-6 lg:grid-cols-2">
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Risk and Loss</CardTitle>
+                    <CardDescription>
+                      Downside probabilities plus expected cost of shipping the wrong
+                      version.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 pb-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-md border border-border p-4">
+                        <p className="text-sm font-medium">Expected loss if shipping B</p>
+                        <p className="mt-2 text-2xl font-semibold">
+                          {formatPercent(result.expectedLossIfShipB)}
+                        </p>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Average conversion-rate regret from choosing B.
+                        </p>
+                      </div>
+                      <div className="rounded-md border border-border p-4">
+                        <p className="text-sm font-medium">Expected loss if shipping A</p>
+                        <p className="mt-2 text-2xl font-semibold">
+                          {formatPercent(result.expectedLossIfShipA)}
+                        </p>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Average conversion-rate regret from choosing A.
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="rounded-md border border-border p-4">
-                      <p className="text-sm font-medium">Expected loss if shipping B</p>
-                      <p className="mt-2 text-2xl font-semibold">
-                        {formatPercent(result.expectedLossIfShipB)}
+                      <p className="text-sm font-medium">Probability treatment is harmful</p>
+                      <p className="mt-2 text-3xl font-semibold">
+                        {formatPercent(result.probabilityTreatmentHarmful)}
                       </p>
                       <p className="mt-2 text-sm text-muted-foreground">
-                        Average conversion-rate regret from choosing B.
+                        Probability harm &gt; 5%: {formatPercent(result.probabilityHarmFivePercent)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Probability harm &gt; 10%: {formatPercent(result.probabilityHarmTenPercent)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Probability relative harm &gt; {formatPercent(meaningfulLift, 0)}:{" "}
+                        {formatPercent(result.probabilityMeaningfulHarm)}
                       </p>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Meaningful Impact</CardTitle>
+                    <CardDescription>
+                      Threshold-based probabilities translated into business terms.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 pb-4">
                     <div className="rounded-md border border-border p-4">
-                      <p className="text-sm font-medium">Expected loss if shipping A</p>
+                      <p className="text-sm text-muted-foreground">
+                        Probability B improves conversion &gt; 1%
+                      </p>
+                      <p className="mt-2 text-xl font-semibold">
+                        {formatPercent(result.probabilityImprovesOnePercent)}
+                      </p>
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Probability B improves conversion &gt; 5%
+                      </p>
+                      <p className="mt-1 text-xl font-semibold">
+                        {formatPercent(result.probabilityImprovesFivePercent)}
+                      </p>
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Probability B reduces conversion &gt; 5%
+                      </p>
+                      <p className="mt-1 text-xl font-semibold">
+                        {formatPercent(result.probabilityHarmFivePercent)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-sm text-muted-foreground">
+                        Probability relative lift &gt; {formatPercent(meaningfulLift, 0)}
+                      </p>
+                      <p className="mt-2 text-xl font-semibold">
+                        {formatPercent(result.probabilityMeaningfulLift)}
+                      </p>
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Probability relative lift &lt; -{formatPercent(meaningfulLift, 0)}
+                      </p>
+                      <p className="mt-1 text-xl font-semibold">
+                        {formatPercent(result.probabilityMeaningfulHarm)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sample Size Context</CardTitle>
+                    <CardDescription>
+                      Current maturity, practical target, and estimated remaining data.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 pb-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-md border border-border p-4">
+                        <p className="text-sm font-medium">Visitors per variant</p>
+                        <p className="mt-2 text-2xl font-semibold">
+                          {formatCount(result.visitorsPerVariant)}
+                        </p>
+                      </div>
+                      <div className="rounded-md border border-border p-4">
+                        <p className="text-sm font-medium">Total conversions</p>
+                        <p className="mt-2 text-2xl font-semibold">
+                          {formatCount(result.totalConversions)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-sm font-medium">Sequential monitoring guidance</p>
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-primary transition-[width]"
+                          style={{ width: `${(result.maturityProgress * 100).toFixed(0)}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Recommended conversions per variant: ~
+                        {formatCount(result.recommendedConversionsPerVariant)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Estimated additional visitors for a stable estimate: ~
+                        {formatCount(result.additionalVisitorsForStableEstimate)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Smallest detectable effect with current sample: ~
+                        {formatPercent(result.detectableEffectRelative, 0)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Statistical Context</CardTitle>
+                    <CardDescription>
+                      A familiar frequentist reference point next to the Bayesian readout.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 pb-4">
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-sm font-medium">Null reference</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        If there were no real difference, a result this extreme would occur
+                        about {formatPercent(result.pValueTwoSided)} of the time.
+                      </p>
+                    </div>
+
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-sm font-medium">Posterior means</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Variant A: {formatPercent(result.posteriorMeanA, 3)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Variant B: {formatPercent(result.posteriorMeanB, 3)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Beta A: ({formatCount(result.posteriorAlphaA)},{" "}
+                        {formatCount(result.posteriorBetaA)}) and Beta B: (
+                        {formatCount(result.posteriorAlphaB)},{" "}
+                        {formatCount(result.posteriorBetaB)})
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cost of Acting vs Waiting</CardTitle>
+                    <CardDescription>
+                      Approximate decision regret now, plus how much more traffic is
+                      likely to reduce it.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 pb-4">
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-sm font-medium">If you ship now</p>
                       <p className="mt-2 text-2xl font-semibold">
-                        {formatPercent(result.expectedLossIfShipA)}
+                        {formatUnsignedPercentagePoints(
+                          result.expectedRegretIfShipNow,
+                          4
+                        )}
                       </p>
                       <p className="mt-2 text-sm text-muted-foreground">
-                        Average conversion-rate regret from choosing A.
+                        Bayes action today: {result.chosenVariantNow}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        That is about{" "}
+                        {formatConversionsPerHundredThousand(
+                          result.expectedRegretIfShipNow
+                        )}{" "}
+                        expected conversions of regret on eventual traffic.
                       </p>
                     </div>
-                  </div>
 
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-sm font-medium">Probability treatment is harmful</p>
-                    <p className="mt-2 text-3xl font-semibold">
-                      {formatPercent(result.probabilityTreatmentHarmful)}
-                    </p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Probability harm &gt; 5%: {formatPercent(result.probabilityHarmFivePercent)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Probability harm &gt; 10%: {formatPercent(result.probabilityHarmTenPercent)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Probability relative harm &gt; {formatPercent(meaningfulLift, 0)}:{" "}
-                      {formatPercent(result.probabilityMeaningfulHarm)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="overflow-x-auto rounded-md border border-border">
+                      <table className="w-full min-w-[560px] text-sm">
+                        <thead className="bg-muted/40 text-left">
+                          <tr>
+                            <th className="px-4 py-3 font-medium">
+                              Extra visitors / variant
+                            </th>
+                            <th className="px-4 py-3 font-medium">
+                              Expected regret after waiting
+                            </th>
+                            <th className="px-4 py-3 font-medium">Value of waiting</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-t border-border">
+                            <td className="px-4 py-3 font-medium">Ship now</td>
+                            <td className="px-4 py-3">
+                              {formatUnsignedPercentagePoints(
+                                result.expectedRegretIfShipNow,
+                                4
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">-</td>
+                          </tr>
+                          {result.waitingScenarios.map((scenario) => (
+                            <tr
+                              key={scenario.extraVisitorsPerVariant}
+                              className="border-t border-border"
+                            >
+                              <td className="px-4 py-3 font-medium">
+                                +{formatCount(scenario.extraVisitorsPerVariant)}
+                              </td>
+                              <td className="px-4 py-3">
+                                {formatUnsignedPercentagePoints(
+                                  scenario.expectedRegretAfterWaiting,
+                                  4
+                                )}
+                              </td>
+                              <td className="px-4 py-3">
+                                {formatUnsignedPercentagePoints(
+                                  scenario.valueOfWaiting,
+                                  4
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Meaningful Impact</CardTitle>
-                  <CardDescription>
-                    Threshold-based probabilities translated into business terms.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4 pb-4">
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-sm text-muted-foreground">
-                      Probability B improves conversion &gt; 1%
-                    </p>
-                    <p className="mt-2 text-xl font-semibold">
-                      {formatPercent(result.probabilityImprovesOnePercent)}
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Probability B improves conversion &gt; 5%
-                    </p>
-                    <p className="mt-1 text-xl font-semibold">
-                      {formatPercent(result.probabilityImprovesFivePercent)}
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Probability B reduces conversion &gt; 5%
-                    </p>
-                    <p className="mt-1 text-xl font-semibold">
-                      {formatPercent(result.probabilityHarmFivePercent)}
-                    </p>
-                  </div>
-
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-sm text-muted-foreground">
-                      Probability relative lift &gt; {formatPercent(meaningfulLift, 0)}
-                    </p>
-                    <p className="mt-2 text-xl font-semibold">
-                      {formatPercent(result.probabilityMeaningfulLift)}
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Probability relative lift &lt; -{formatPercent(meaningfulLift, 0)}
-                    </p>
-                    <p className="mt-1 text-xl font-semibold">
-                      {formatPercent(result.probabilityMeaningfulHarm)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sample Size Context</CardTitle>
-                  <CardDescription>
-                    Current maturity, practical target, and estimated remaining data.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4 pb-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-md border border-border p-4">
-                      <p className="text-sm font-medium">Visitors per variant</p>
-                      <p className="mt-2 text-2xl font-semibold">
-                        {formatCount(result.visitorsPerVariant)}
-                      </p>
+                      <p className="text-sm font-medium">Business translation</p>
+                      <div className="mt-2 grid gap-1 text-sm text-muted-foreground">
+                        {result.waitingScenarios.map((scenario) => (
+                          <p key={`translation-${scenario.extraVisitorsPerVariant}`}>
+                            Wait for +{formatCount(scenario.extraVisitorsPerVariant)} per
+                            arm: about{" "}
+                            {formatConversionsPerHundredThousand(
+                              scenario.valueOfWaiting
+                            )}{" "}
+                            fewer expected lost conversions.
+                          </p>
+                        ))}
+                      </div>
                     </div>
-                    <div className="rounded-md border border-border p-4">
-                      <p className="text-sm font-medium">Total conversions</p>
-                      <p className="mt-2 text-2xl font-semibold">
-                        {formatCount(result.totalConversions)}
-                      </p>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-sm font-medium">Sequential monitoring guidance</p>
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-primary transition-[width]"
-                        style={{ width: `${(result.maturityProgress * 100).toFixed(0)}%` }}
-                      />
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Recommended conversions per variant: ~
-                      {formatCount(result.recommendedConversionsPerVariant)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Estimated additional visitors for a stable estimate: ~
-                      {formatCount(result.additionalVisitorsForStableEstimate)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Smallest detectable effect with current sample: ~
-                      {formatPercent(result.detectableEffectRelative, 0)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Statistical Context</CardTitle>
-                  <CardDescription>
-                    A familiar frequentist reference point next to the Bayesian readout.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4 pb-4">
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-sm font-medium">Null reference</p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      If there were no real difference, a result this extreme would occur
-                      about {formatPercent(result.pValueTwoSided)} of the time.
-                    </p>
-                  </div>
-
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-sm font-medium">Posterior means</p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Variant A: {formatPercent(result.posteriorMeanA, 3)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Variant B: {formatPercent(result.posteriorMeanB, 3)}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Beta A: ({formatCount(result.posteriorAlphaA)},{" "}
-                      {formatCount(result.posteriorBetaA)}) and Beta B: (
-                      {formatCount(result.posteriorAlphaB)},{" "}
-                      {formatCount(result.posteriorBetaB)})
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
             </div>
           </div>
         </form>
