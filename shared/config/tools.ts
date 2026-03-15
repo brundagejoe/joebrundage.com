@@ -19,6 +19,11 @@ export const TOOLS: ToolDefinition[] = [
     href: "/tools/bayesian-ab-testing-primer",
   },
   {
+    code: "BBI",
+    title: "Beta-Bernoulli Inference",
+    href: "/tools/beta-bernoulli-inference",
+  },
+  {
     code: "HASH",
     title: "Hash Collision Probability Calculator",
     href: "/tools/hash-collisions",
