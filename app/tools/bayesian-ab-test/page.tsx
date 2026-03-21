@@ -212,8 +212,18 @@ function formatCount(value: number): string {
   return Math.round(value).toLocaleString("en-US")
 }
 
-function formatConversionsPerHundredThousand(value: number, digits = 1): string {
-  return `${(value * 100000).toFixed(digits)} per 100k`
+function formatExpectedMissedConversions(
+  regretRate: number,
+  visitors: number,
+  digits?: number
+): string {
+  const missedConversions = regretRate * visitors
+  const resolvedDigits =
+    digits ?? (missedConversions < 1 ? 2 : missedConversions < 10 ? 1 : 0)
+
+  return `${missedConversions.toFixed(resolvedDigits)} per ${visitors.toLocaleString(
+    "en-US"
+  )} visitors`
 }
 
 function logGamma(z: number): number {
@@ -1663,10 +1673,13 @@ export default function BayesianAbTestPage() {
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         That is about{" "}
-                        {formatConversionsPerHundredThousand(
-                          result.expectedRegretIfShipNow
+                        {formatExpectedMissedConversions(
+                          result.expectedRegretIfShipNow,
+                          10000,
+                          1
                         )}{" "}
-                        expected conversions of regret on eventual traffic.
+                        in expected missed conversions if the chosen variant
+                        turns out not to be the true best one.
                       </p>
                     </div>
 
@@ -1727,10 +1740,12 @@ export default function BayesianAbTestPage() {
                           <p key={`translation-${scenario.extraVisitorsPerVariant}`}>
                             Wait for +{formatCount(scenario.extraVisitorsPerVariant)} per
                             arm: about{" "}
-                            {formatConversionsPerHundredThousand(
-                              scenario.valueOfWaiting
+                            {formatExpectedMissedConversions(
+                              scenario.valueOfWaiting,
+                              10000,
+                              1
                             )}{" "}
-                            fewer expected lost conversions.
+                            fewer expected missed conversions on future traffic.
                           </p>
                         ))}
                       </div>
