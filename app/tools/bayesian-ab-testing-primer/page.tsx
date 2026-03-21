@@ -757,7 +757,7 @@ export default function BayesianAbTestingPrimerPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-4">
-              <ChartContainer config={BETA_CHART_CONFIG} preset="terminal">
+              <ChartContainer config={BETA_CHART_CONFIG}>
                 <ComposedChart data={chartData}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis
@@ -923,7 +923,7 @@ export default function BayesianAbTestingPrimerPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pb-4">
-              <ChartContainer config={SECTION_TWO_CHART_CONFIG} preset="terminal">
+              <ChartContainer config={SECTION_TWO_CHART_CONFIG}>
                 <ComposedChart data={sectionTwoChart.points}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis
@@ -1184,7 +1184,7 @@ export default function BayesianAbTestingPrimerPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-4">
-              <ChartContainer config={SECTION_THREE_CHART_CONFIG} preset="terminal">
+              <ChartContainer config={SECTION_THREE_CHART_CONFIG}>
                 <ComposedChart data={sectionThree.points}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis
@@ -1439,7 +1439,7 @@ export default function BayesianAbTestingPrimerPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-4">
-              <ChartContainer config={SECTION_THREE_CHART_CONFIG} preset="terminal">
+              <ChartContainer config={SECTION_THREE_CHART_CONFIG}>
                 <ComposedChart data={sectionFour.points}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis
@@ -1657,7 +1657,7 @@ export default function BayesianAbTestingPrimerPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pb-4">
-              <ChartContainer config={SECTION_FIVE_CHART_CONFIG} preset="terminal">
+              <ChartContainer config={SECTION_FIVE_CHART_CONFIG}>
                 <ComposedChart data={sectionFive}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis
@@ -1977,7 +1977,7 @@ export default function BayesianAbTestingPrimerPage() {
             </CardHeader>
 
             <CardContent className="grid gap-6 pb-6 md:grid-cols-[minmax(0,1fr)_280px]">
-              <ChartContainer config={SECTION_THREE_CHART_CONFIG} preset="terminal">
+              <ChartContainer config={SECTION_THREE_CHART_CONFIG}>
                 <ComposedChart data={sectionSix.points}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis

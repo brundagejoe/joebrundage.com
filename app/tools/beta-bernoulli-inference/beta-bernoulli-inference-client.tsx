@@ -845,7 +845,7 @@ export function BetaBernoulliInferenceClient() {
               <CardContent className="grid gap-4">
                 {summary ? (
                   <>
-                    <ChartContainer config={CHART_CONFIG} preset="terminal">
+                    <ChartContainer config={CHART_CONFIG}>
                       <ComposedChart data={chartData}>
                         <CartesianGrid vertical={false} strokeDasharray="3 3" />
                         <XAxis

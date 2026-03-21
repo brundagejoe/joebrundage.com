@@ -1411,7 +1411,7 @@ export default function BayesianAbTestPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 pb-4">
-                <ChartContainer config={POSTERIOR_CHART_CONFIG} preset="terminal">
+                <ChartContainer config={POSTERIOR_CHART_CONFIG}>
                   <ComposedChart data={result.chartData}>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" />
                     <XAxis

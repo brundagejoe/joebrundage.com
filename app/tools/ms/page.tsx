@@ -97,7 +97,7 @@ export default async function MoneyStuffToolPage() {
   }
 
   return (
-    <div className="terminal min-h-screen bg-background pt-16 font-mono">
+    <div className="min-h-screen bg-background pt-16">
       <section className="mx-auto max-w-4xl px-6 py-8">
         <div className="max-w-4xl">
           <h2 className="text-xl font-bold tracking-wide">MONEY STUFF</h2>

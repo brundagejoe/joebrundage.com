@@ -2,7 +2,11 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { AppQueryProvider } from "@/shared/lib/query"
-import { ThemeProvider } from "@/shared/lib/theme"
+import {
+  SITE_THEME_STORAGE_KEY,
+  ThemeProvider,
+  TOOLS_THEME_STORAGE_KEY,
+} from "@/shared/lib/theme"
 import { HeaderRouter } from "@/widgets/header"
 import { Analytics } from "@vercel/analytics/react"
 
@@ -36,24 +40,21 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('theme') || 'system';
-                  var resolvedTheme = theme;
                   var isToolsRoute = window.location.pathname === '/tools' || window.location.pathname.startsWith('/tools/');
+                  var storageKey = isToolsRoute ? '${TOOLS_THEME_STORAGE_KEY}' : '${SITE_THEME_STORAGE_KEY}';
+                  var defaultTheme = 'system';
+                  var theme = localStorage.getItem(storageKey) || defaultTheme;
+
                   if (!isToolsRoute && theme === 'terminal') {
                     theme = 'light';
-                    resolvedTheme = 'light';
-                    localStorage.setItem('theme', 'light');
+                    localStorage.setItem('${SITE_THEME_STORAGE_KEY}', 'light');
                   }
-                  if (isToolsRoute) {
-                    resolvedTheme = 'terminal';
-                  }
-                  if (theme === 'system') {
-                    resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  }
-                  if (isToolsRoute) {
-                    resolvedTheme = 'terminal';
-                  }
-                  document.documentElement.classList.remove('terminal');
+
+                  var resolvedTheme = theme === 'system'
+                    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : theme;
+
+                  document.documentElement.classList.remove('dark', 'terminal');
                   if (resolvedTheme === 'terminal') {
                     document.documentElement.classList.add('dark');
                     document.documentElement.classList.add('terminal');

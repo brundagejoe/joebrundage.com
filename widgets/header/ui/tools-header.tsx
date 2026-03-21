@@ -5,6 +5,8 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LoaderCircleIcon } from "lucide-react"
 
+import { useAppTheme } from "@/shared/lib/theme"
+import { cn } from "@/shared/lib/utils"
 import { TOOLS, type ToolDefinition } from "@/shared/config"
 import { buttonVariants } from "@/shared/ui/button"
 import {
@@ -15,19 +17,27 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/shared/ui/combobox"
+import { ThemeToggle } from "./theme-toggle"
 
 export function ToolsHeader() {
   const router = useRouter()
   const pathname = usePathname()
+  const { resolvedAppTheme } = useAppTheme()
   const inputRef = React.useRef<HTMLInputElement | null>(null)
   const openFromShortcutRef = React.useRef(false)
   const suppressReopenRef = React.useRef(false)
+  const [mounted, setMounted] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [value, setValue] = React.useState<ToolDefinition | null>(null)
   const [open, setOpen] = React.useState(false)
   const [pendingTool, setPendingTool] = React.useState<ToolDefinition | null>(
     null
   )
+  const isTerminalTheme = mounted && resolvedAppTheme === "terminal"
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -100,19 +110,29 @@ export function ToolsHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background">
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 border-b border-border bg-background",
+        !isTerminalTheme && "bg-background/92 backdrop-blur supports-[backdrop-filter]:bg-background/82"
+      )}
+    >
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center gap-3">
           <Link
             href="/"
-            className={`${buttonVariants({
-              variant: "outline",
-              size: "sm",
-            })} rounded-none font-mono uppercase tracking-wide`}
+            className={cn(
+              buttonVariants({
+                variant: isTerminalTheme ? "outline" : "ghost",
+                size: "sm",
+              }),
+              isTerminalTheme
+                ? "rounded-none font-mono uppercase tracking-wide"
+                : "rounded-full px-4"
+              )}
           >
             Home
           </Link>
-          <div className="flex-1 max-w-3xl">
+          <div className="min-w-0 flex-1 max-w-3xl">
             <Combobox<ToolDefinition>
               open={open}
               onOpenChange={(nextOpen) => {
@@ -135,14 +155,31 @@ export function ToolsHeader() {
               autoHighlight
             >
               <ComboboxInput
-                className="w-full rounded-none border-input bg-input/30 text-foreground focus-within:border-ring focus-within:ring-0 [&_input]:font-mono [&_input]:tracking-wide [&_input]:placeholder:text-muted-foreground [&_input]:text-base md:[&_input]:text-sm"
+                className={cn(
+                  "w-full border-input bg-input/30 text-foreground focus-within:border-ring focus-within:ring-0 [&_input]:placeholder:text-muted-foreground [&_input]:text-base md:[&_input]:text-sm",
+                  isTerminalTheme
+                    ? "rounded-none [&_input]:font-mono [&_input]:tracking-wide"
+                    : "rounded-full border bg-background/80 px-2 shadow-sm"
+                )}
                 placeholder="Search tools by code or title (Cmd+K)"
                 showTrigger={false}
                 disabled={pendingTool !== null}
                 onBlur={() => setOpen(false)}
               />
-              <ComboboxContent className="w-[min(88vw,900px)] rounded-none border border-border bg-popover text-popover-foreground shadow-2xl">
-                <div className="border-b border-border px-4 py-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground">
+              <ComboboxContent
+                className={cn(
+                  "w-[min(88vw,900px)] border border-border bg-popover text-popover-foreground shadow-2xl",
+                  isTerminalTheme ? "rounded-none" : "rounded-3xl"
+                )}
+              >
+                <div
+                  className={cn(
+                    "border-b border-border px-4 py-2 text-xs font-semibold text-muted-foreground",
+                    isTerminalTheme
+                      ? "tracking-[0.08em]"
+                      : "tracking-[0.12em] uppercase"
+                  )}
+                >
                   FUNCTIONS
                 </div>
                 <ComboboxList>
@@ -150,9 +187,19 @@ export function ToolsHeader() {
                     <ComboboxItem
                       key={item.code}
                       value={item}
-                      className="rounded-none py-2.5 pl-4 pr-3 data-highlighted:bg-chart-1 data-highlighted:text-primary-foreground"
+                      className={cn(
+                        "py-2.5 pl-4 pr-3 data-highlighted:bg-chart-1 data-highlighted:text-primary-foreground",
+                        isTerminalTheme
+                          ? "rounded-none"
+                          : "w-auto rounded-2xl mx-1 my-0.5"
+                      )}
                     >
-                      <div className="grid w-full grid-cols-[88px_1fr] items-center gap-2 font-mono">
+                      <div
+                        className={cn(
+                          "grid w-full grid-cols-[88px_1fr] items-center gap-2",
+                          isTerminalTheme && "font-mono"
+                        )}
+                      >
                         <span className="text-sm leading-none font-semibold text-foreground">
                           {item.code}
                         </span>
@@ -169,10 +216,18 @@ export function ToolsHeader() {
               </ComboboxContent>
             </Combobox>
           </div>
+          <div className="ml-auto shrink-0">
+            <ThemeToggle includeTerminal />
+          </div>
         </div>
         {pendingTool ? (
           <div
-            className="flex h-8 items-center justify-between border-t border-border bg-card px-1 text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground"
+            className={cn(
+              "flex h-8 items-center justify-between border-t border-border bg-card text-xs text-muted-foreground",
+              isTerminalTheme
+                ? "px-1 font-mono uppercase tracking-[0.12em]"
+                : "px-3"
+            )}
             aria-live="polite"
           >
             <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import type { CSSProperties } from "react"
+import { useTheme } from "next-themes"
 import {
   Legend as RechartsLegend,
   ResponsiveContainer,
@@ -16,9 +17,11 @@ import {
 
 import {
   CHART_THEME_KEYS,
+  getChartContainerClassName,
   getChartThemePreset,
   type ChartThemeKey,
 } from "@/shared/lib/chart-theme"
+import { resolveAppTheme } from "@/shared/lib/theme"
 import { cn } from "@/shared/lib/utils"
 
 export type ChartConfig = Record<
@@ -149,7 +152,7 @@ function formatValue(value: TooltipValueType | undefined) {
 type ChartContainerProps = React.ComponentProps<"div"> & {
   config: ChartConfig
   children: React.ComponentProps<typeof ResponsiveContainer>["children"]
-  preset?: ChartThemeKey
+  preset?: ChartThemeKey | "current"
 }
 
 function mergeStyles(
@@ -168,11 +171,16 @@ function mergeStyles(
 
 export const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
   ({ id, className, children, config, preset, style, ...props }, ref) => {
+    const { resolvedTheme, theme } = useTheme()
     const reactId = React.useId()
     const chartId = React.useMemo(
       () => `chart-${id ?? reactId.replace(/:/g, "")}`,
       [id, reactId]
     )
+    const effectivePreset =
+      preset && preset !== "current"
+        ? preset
+        : resolveAppTheme(theme, resolvedTheme)
 
     return (
       <ChartContext.Provider value={{ config }}>
@@ -183,9 +191,10 @@ export const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerPro
           className={cn(
             "relative aspect-[16/9] w-full overflow-hidden rounded-3xl border bg-[var(--chart-surface)] p-3 shadow-sm",
             "border-[var(--chart-frame)] text-xs text-[var(--chart-axis)]",
+            getChartContainerClassName(effectivePreset),
             className
           )}
-          style={mergeStyles(preset, style)}
+          style={mergeStyles(effectivePreset, style)}
           {...props}
         >
           <style dangerouslySetInnerHTML={{ __html: createChartStyle(chartId, config) }} />
