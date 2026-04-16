@@ -5,7 +5,6 @@ export type ToolDefinition = {
 }
 
 export const TOOLS: ToolDefinition[] = [
-  { code: "ART", title: "Alphabetical Art Finder", href: "/tools/art" },
   { code: "MS", title: "Money Stuff", href: "/tools/ms" },
   { code: "NCK", title: "N Choose K Calculator", href: "/tools/nck" },
   { code: "ORGC", title: "Org Chart Composer", href: "/tools/orgc" },
