@@ -40,4 +40,5 @@ export const TOOLS: ToolDefinition[] = [
     href: "/tools/expected-value-primer",
   },
   { code: "META", title: "Meta Analyzer", href: "/tools/meta-analyzer" },
+  { code: "PZA", title: "Pizza Calculator", href: "/tools/pizza" },
 ]
