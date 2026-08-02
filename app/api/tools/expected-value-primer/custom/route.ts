@@ -185,10 +185,10 @@ ${situation}`
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5-mini",
+        model: "gpt-5.6-luna",
         input,
         reasoning: {
-          effort: "minimal",
+          effort: "none",
         },
         text: {
           format: {
