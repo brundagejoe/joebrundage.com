@@ -317,7 +317,8 @@ Example: Bayes Primer custom generation
 ### OpenAI Responses API Conventions
 
 - Use the Responses API endpoint: `https://api.openai.com/v1/responses`.
-- Default model for new lightweight generation paths: `gpt-5-mini` (unless a task says otherwise).
+- Default model for new lightweight generation paths: `gpt-5.6-luna` (unless a task says otherwise).
+- The 5.6 family rejects `reasoning.effort: "minimal"`; use `"none"` for these generation paths. Valid values are `none`, `low`, `medium`, `high`, `xhigh`, `max`.
 - Prefer structured output with JSON schema:
   - Provide `text.format.type = "json_schema"` and a strict schema.
   - Parse structured fields first; only use text parsing as fallback.
