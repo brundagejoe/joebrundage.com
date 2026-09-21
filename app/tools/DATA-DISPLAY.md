@@ -1,8 +1,13 @@
 # Data Display Guide
 
 How to build a tool page that presents quantitative results, in the house style.
-The reference implementation is `app/tools/bayesian-ab-test/`. Read it before
-building a new one.
+Two reference implementations: `app/tools/bayesian-ab-test/` (a calculator) and
+`app/tools/bayesian-ab-testing-primer/` (a long-form explainer). Read the
+closer one before building a new page.
+
+Shared pieces live in `shared/ui/plate.tsx` (`Section`, `Row`, `Caption`,
+`ProbabilityStrip`) and `shared/lib/plot.ts` (scales, ticks, path builders).
+Use them rather than copying — a third copy is how a style rots.
 
 This style is **opt-in**. Most tools use the default shadcn look described in
 `app/tools/AGENTS.md`. Reach for this one when a page's job is to *show a
@@ -58,7 +63,23 @@ Give every important quantity a second, visual encoding:
 
 If a figure would only restate a number the reader already has, cut the figure.
 
-## 4. Plot the quantity the decision turns on
+## 4. Small multiples share one scale
+
+A row of small charts is the best way to show a sequence — six weeks of a test,
+one panel each — because the reader sees the whole trajectory at once instead
+of stepping through it. It only works if **every panel is drawn on the same x
+and y scale**. Per-panel scales make panels look alike that are not, which is
+the exact opposite of the point.
+
+`PosteriorPairFigure` takes a `domain`, and `WeekSmallMultiples` computes the
+union domain and the shared density maximum across all weeks before rendering
+any of them. If you find yourself writing "on a shared reading" in a caption,
+check that it is true.
+
+A row of small multiples can double as the selector for a detail view below,
+which keeps the interaction without hiding the sequence.
+
+## 5. Plot the quantity the decision turns on
 
 This is the mistake most worth avoiding. The old page charted variant A's rate
 and variant B's rate on separate curves, and left the *difference between them*
@@ -67,7 +88,7 @@ and variant B's rate on separate curves, and left the *difference between them*
 Work out what question the page exists to answer, then plot that. Supporting
 quantities can be tables or small secondary figures.
 
-## 5. Label directly; never rely on a tooltip
+## 6. Label directly; never rely on a tooltip
 
 A legend makes the reader look away and match colors. A tooltip makes them hunt.
 Put the label next to the thing:
@@ -82,7 +103,7 @@ threshold label when the threshold sits too close to zero
 (`thresholdLabelFits`), and flips a label's anchor rather than letting it run
 off the frame. A label that overlaps the data is worse than no label.
 
-## 6. Captions are sentences that carry content
+## 7. Captions are sentences that carry content
 
 Not `"Posterior win probability, practical significance, and status."` That is a
 dashboard panel title and it says nothing.
@@ -99,7 +120,7 @@ conclusion in plain language, then show the evidence.
 
 ---
 
-## 7. Typography
+## 8. Typography
 
 Serif for reading, sans for pointing. This is what Tufte's own books do — Bembo
 for the text, Gill Sans for the figure labels.
@@ -135,7 +156,7 @@ Two things to remember when mixing:
 The `terminal` theme overrides all of these back to its mono face. Any new
 `.plate-*` class must be added to that override or it will break the theme.
 
-## 8. Color
+## 9. Color
 
 Draw SVG in `currentColor` with opacity, never a fixed hex or a theme token.
 One set of geometry then works in light, dark, and terminal with no palette per
@@ -149,7 +170,7 @@ Use opacity to rank things: data ~0.75–1.0, rules and axes ~0.35, secondary
 fills ~0.1. Hue should encode something or be absent. The reference page uses
 none.
 
-## 9. Charts: hand-rolled SVG, not Recharts
+## 10. Charts: hand-rolled SVG, not Recharts
 
 Recharts is fine for a conventional dashboard chart and is still the right
 choice elsewhere in this repo. It fights you on everything in this guide —
@@ -172,7 +193,7 @@ a zero baseline that shows it barely moving *is the finding*. Figure 4 on the
 reference page looks empty on purpose: waiting buys you almost nothing, and the
 empty space says so.
 
-## 10. Floating-point math and hydration
+## 11. Floating-point math and hydration
 
 A page like this computes a lot during render — transcendental functions, Monte
 Carlo sampling, scale arithmetic. **Those results are not bit-identical between
@@ -192,24 +213,35 @@ Two defenses, and you want both:
    `hasInitializedFromUrl`-style flag set in `useEffect`. These pages read their
    state from the URL client-side anyway, so the server has nothing true to say
    about the results.
-2. **Round coordinates at the path builders.** `linePath` and `areaPath` round
-   to 2 decimals. Sub-pixel precision buys nothing visually and it keeps the
-   markup small.
+2. **Round at the scale, not at each attribute.** `makeScale` rounds its own
+   output, so every coordinate derived from it is stable at 2 decimals without
+   touching a single SVG attribute. `linePath` and `areaPath` round too.
+   `ProbabilityStrip` rounds its inline percentages.
 
-Rounding alone is not sufficient: a seeded Monte Carlo run can diverge by far
-more than a rounding step when a float difference flips a rejection-sampling
-branch. Gate on mount.
+Which defense you need depends on the math. Deterministic grid integration (the
+primer) drifts only in the last bits, so rounding is enough and the page server
+renders in full. A **seeded Monte Carlo** run (the calculator) can diverge far
+more than a rounding step, because one float difference flips a
+rejection-sampling branch and the sample streams part ways — that page gates on
+mount. Verify rather than assume: the CDP snippet in the checklist prints the
+real console.
 
-## 11. Tables
+Never verify hydration by looking at the dev-overlay badge alone. Read the
+console.
+
+## 12. Tables
 
 No vertical rules. One rule under the head, one at the bottom, one above a
 total or difference row. Numerals right-aligned, `tabular-nums`, `pl-5` between
 columns so headers don't run together.
 
-## 12. Page skeleton
+## 13. Page skeleton
+
+A calculator has a sticky input rail; an explainer does not:
 
 ```
-[13–15rem input rail]  [44rem reading column]  [12rem margin notes]
+calculator  [13–15rem input rail]  [44rem reading column]  [12rem margin]
+explainer                          [44rem reading column]  [12rem margin]
 ```
 
 - **Rail** — sticky at `lg`. Bare inputs with a bottom hairline, no boxes;
@@ -219,8 +251,19 @@ columns so headers don't run together.
   and collapses it inline below. Notes go here; parentheticals in the main text
   are a smell.
 
+Controls for an explainer sit in a `ControlStrip` directly under their figure,
+not in a sidebar card — the figure wants the width. Use a native
+`<input type="range" class="plate-range">`: `accent-color: currentColor` keeps
+it monochrome, where the shared `Slider` would put the only saturated color on
+the page.
+
 Split the file. `model.ts` for math and types, `figures.tsx` for the SVG,
-`page.tsx` for layout and copy. `page.tsx` should be readable as prose.
+`page.tsx` for layout and copy — plus `math.tsx` when there is MathML, because
+a single formula runs to forty lines of markup and will otherwise bury the
+prose. `page.tsx` should be readable as prose.
+
+Set display math with space, not a box: no border, no tint. MathML's default
+italic serif sits well next to Garamond.
 
 ---
 
@@ -238,6 +281,9 @@ Split the file. `model.ts` for math and types, `figures.tsx` for the SVG,
 - [ ] Axes are range frames; no gridlines unless a reader must read values off
       the plot.
 - [ ] Tables have no vertical rules and use tabular numerals.
+- [ ] Small multiples share one x and y scale across every panel.
+- [ ] No `uppercase` on a cell containing Greek — `text-transform` turns α and
+      β into Α and Β, which read as Latin A and B. Spell them out.
 - [ ] Computed figures render after mount; no hydration mismatch. Check with
       the CDP console snippet rather than trusting the dev-overlay badge.
 - [ ] `npm run check` passes.
@@ -253,7 +299,14 @@ was non-monotone — pure Monte Carlo noise from too few simulations and a share
 RNG stream. The table made it look like rounding; the line chart made it look
 like nonsense, because it was.
 
-When a new figure looks wrong, check the data before you adjust the figure.
+When a new figure looks wrong, check the data before you adjust the figure. The
+primer's loss projection came out as a sawtooth: `createLossCurveData` was
+rounding expected conversions to whole numbers at each projected N, quantising a
+smooth curve. A Beta takes non-integer parameters, so the rounding was pure
+loss. The old chart hid it; the new one could not.
+
+An axis that is not at zero will also lie about magnitude. The projection's x
+axis now sits exactly at loss = 0, so the height of each curve reads directly.
 
 The same happened with hydration. The old page rounded every number through
 `formatPercent(x, 2)` and let Recharts draw only after it measured its

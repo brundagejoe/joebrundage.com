@@ -6,10 +6,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   LiftDistributionFigure,
   ProbabilityStaircase,
-  ProbabilityStrip,
   RateDistributionFigure,
   RegretDecayFigure,
 } from "./figures"
+
+import { Caption, ProbabilityStrip, Row, Section } from "@/shared/ui/plate"
 import {
   createSearchParamsFromInputs,
   FIXED_PRIOR_ALPHA,
@@ -33,43 +34,6 @@ const VERDICT_HEADLINE: Record<AnalysisResult["decisionStatus"], string> = {
   "Keep Variant A": "Keep A.",
   "Continue test": "Keep the test running.",
   Inconclusive: "No call yet.",
-}
-
-function Section({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="plate-label mt-14 border-t border-current/20 pt-2 text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
-      {children}
-    </h2>
-  )
-}
-
-function Row({
-  children,
-  note,
-}: {
-  children: React.ReactNode
-  note?: React.ReactNode
-}) {
-  return (
-    <div className="grid gap-x-8 gap-y-3 xl:grid-cols-[minmax(0,44rem)_12rem]">
-      <div className="min-w-0">{children}</div>
-      {note ? (
-        <aside className="text-[0.84rem] leading-relaxed opacity-60 xl:pt-1">
-          {note}
-        </aside>
-      ) : (
-        <div aria-hidden />
-      )}
-    </div>
-  )
-}
-
-function Caption({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="mt-3 max-w-[40rem] text-[0.9rem] leading-relaxed opacity-65">
-      {children}
-    </p>
-  )
 }
 
 function Field({

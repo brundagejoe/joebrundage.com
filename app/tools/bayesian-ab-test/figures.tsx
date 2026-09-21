@@ -2,80 +2,15 @@
 
 import * as React from "react"
 
+import {
+  areaPath,
+  linePath,
+  makeScale,
+  niceTicks,
+  signedPercent,
+} from "@/shared/lib/plot"
+
 import type { LiftDensityPoint, PosteriorPoint } from "./model"
-
-type Scale = (value: number) => number
-
-function makeScale(
-  domain: readonly [number, number],
-  range: readonly [number, number]
-): Scale {
-  const span = domain[1] - domain[0] || 1
-  return (value) =>
-    range[0] + ((value - domain[0]) / span) * (range[1] - range[0])
-}
-
-function niceTicks(lower: number, upper: number, target: number): number[] {
-  const span = upper - lower
-  if (!Number.isFinite(span) || span <= 0) {
-    return [lower]
-  }
-
-  const rough = span / target
-  const magnitude = 10 ** Math.floor(Math.log10(rough))
-  const step =
-    [1, 2, 2.5, 5, 10].find((multiple) => multiple * magnitude >= rough)! *
-    magnitude
-
-  const ticks: number[] = []
-  for (
-    let tick = Math.ceil(lower / step) * step;
-    tick <= upper + step / 1e6;
-    tick += step
-  ) {
-    ticks.push(Math.abs(tick) < step / 1e6 ? 0 : tick)
-  }
-  return ticks
-}
-
-/* Sub-pixel precision buys nothing and makes float drift between runtimes
-   visible in the markup. */
-function round(value: number): number {
-  return Math.round(value * 100) / 100
-}
-
-function areaPath(
-  points: { x: number; y: number }[],
-  baseline: number
-): string {
-  if (points.length === 0) {
-    return ""
-  }
-
-  const line = points
-    .map(
-      (point, index) =>
-        `${index === 0 ? "M" : "L"}${round(point.x)} ${round(point.y)}`
-    )
-    .join(" ")
-
-  return `${line} L${round(points[points.length - 1].x)} ${baseline} L${round(points[0].x)} ${baseline} Z`
-}
-
-function linePath(points: { x: number; y: number }[]): string {
-  return points
-    .map(
-      (point, index) =>
-        `${index === 0 ? "M" : "L"}${round(point.x)} ${round(point.y)}`
-    )
-    .join(" ")
-}
-
-function signedPercent(value: number, digits = 1): string {
-  const points = value * 100
-  const sign = points > 0 ? "+" : points < 0 ? "−" : ""
-  return `${sign}${Math.abs(points).toFixed(digits)}%`
-}
 
 export function LiftDistributionFigure({
   points,
@@ -572,31 +507,5 @@ export function ProbabilityStaircase({
       </div>
       <div className="border-t border-current/20" />
     </div>
-  )
-}
-
-export function ProbabilityStrip({
-  probability,
-  threshold,
-}: {
-  probability: number
-  threshold: number
-}) {
-  return (
-    <span className="relative mx-1 inline-block h-[0.9em] w-[5rem] align-baseline">
-      <span className="absolute inset-x-0 top-1/2 block h-px -translate-y-1/2 bg-current opacity-20" />
-      <span
-        className="absolute top-1/2 block h-px -translate-y-1/2 bg-current opacity-55"
-        style={{ width: `${probability * 100}%` }}
-      />
-      <span
-        className="absolute top-0 block h-full w-px bg-current opacity-35"
-        style={{ left: `${threshold * 100}%` }}
-      />
-      <span
-        className="absolute top-1/2 block size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
-        style={{ left: `${probability * 100}%` }}
-      />
-    </span>
   )
 }
