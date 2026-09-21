@@ -2,418 +2,71 @@
 
 import * as React from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+
+import { Caption, ProbabilityStrip, Row, Section } from "@/shared/ui/plate"
+
+import { PosteriorFigure, ThresholdSweepFigure } from "./figures"
 import {
-  Area,
-  CartesianGrid,
-  ComposedChart,
-  Line,
-  ReferenceLine,
-  XAxis,
-  YAxis,
-} from "recharts"
+  buildReport,
+  createSearchParamsFromInputs,
+  DEFAULT_INPUTS,
+  describeQuery,
+  EXAMPLES,
+  formatCount,
+  formatPercent,
+  formatRateRange,
+  getInputsFromSearchParams,
+  parsePositiveNumber,
+  parseQuery,
+  parseWholeNumber,
+  type HypothesisMode,
+  type ToolInputs,
+} from "./model"
 
-import { Badge } from "@/shared/ui/badge"
-import { Button } from "@/shared/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card"
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/shared/ui/chart"
-import { Input } from "@/shared/ui/input"
-import { Label } from "@/shared/ui/label"
-import { Separator } from "@/shared/ui/separator"
-import {
-  betaEqualTailInterval,
-  betaMean,
-  betaMode,
-  betaProbabilityBetween,
-  betaPdf,
-  clamp,
-  updateBetaPosterior,
-} from "@/shared/lib/bayes"
-
-type HypothesisMode = "around" | "above" | "below"
-
-type ToolInputs = {
-  trials: string
-  successes: string
-  priorAlpha: string
-  priorBeta: string
-  queryMode: HypothesisMode
-  targetRate: string
-  tolerancePercent: string
-}
-
-type Query =
-  | {
-      mode: "around"
-      targetRate: number
-      tolerance: number
-      lower: number
-      upper: number
-    }
-  | {
-      mode: "above" | "below"
-      targetRate: number
-    }
-
-type ComputedPosteriorSummary = {
-  trials: number
-  successes: number
-  failures: number
-  priorAlpha: number
-  priorBeta: number
-  posteriorAlpha: number
-  posteriorBeta: number
-  posteriorMean: number
-  posteriorMode: number | null
-  credibleInterval: {
-    lower: number
-    upper: number
-  }
-  query: Query
-  queryProbability: number
-  explanation: string
-}
-
-type ChartPoint = {
-  probabilityPercent: number
-  priorDensity: number
-  posteriorDensity: number
-  shadedDensity: number | null
-}
-
-const DEFAULT_INPUTS: ToolInputs = {
-  trials: "20",
-  successes: "11",
-  priorAlpha: "1",
-  priorBeta: "1",
-  queryMode: "around",
-  targetRate: "50%",
-  tolerancePercent: "5",
-}
-
-const EXAMPLES: Array<{
-  label: string
-  description: string
-  inputs: ToolInputs
-}> = [
-  {
-    label: "Weak evidence near 50%",
-    description: "A small sample with only a modest deviation from parity.",
-    inputs: {
-      trials: "20",
-      successes: "11",
-      priorAlpha: "1",
-      priorBeta: "1",
-      queryMode: "around",
-      targetRate: "50%",
-      tolerancePercent: "5",
-    },
-  },
-  {
-    label: "Strong evidence above baseline",
-    description: "A larger sample where the posterior leans above a practical threshold.",
-    inputs: {
-      trials: "120",
-      successes: "78",
-      priorAlpha: "1",
-      priorBeta: "1",
-      queryMode: "above",
-      targetRate: "60%",
-      tolerancePercent: "5",
-    },
-  },
-  {
-    label: "Extreme small sample",
-    description: "An eye-catching early result that is still highly uncertain.",
-    inputs: {
-      trials: "5",
-      successes: "5",
-      priorAlpha: "1",
-      priorBeta: "1",
-      queryMode: "above",
-      targetRate: "70%",
-      tolerancePercent: "5",
-    },
-  },
-  {
-    label: "Skeptical prior",
-    description: "The same style of question under a stronger prior centered near 50%.",
-    inputs: {
-      trials: "40",
-      successes: "26",
-      priorAlpha: "8",
-      priorBeta: "8",
-      queryMode: "above",
-      targetRate: "55%",
-      tolerancePercent: "5",
-    },
-  },
+const MODES: { mode: HypothesisMode; label: string }[] = [
+  { mode: "around", label: "Around" },
+  { mode: "above", label: "Above" },
+  { mode: "below", label: "Below" },
 ]
 
-const CHART_CONFIG = {
-  priorDensity: {
-    label: "Prior",
-    theme: {
-      light: "oklch(0.58 0.04 215)",
-      dark: "oklch(0.72 0.03 215)",
-      terminal: "rgb(148 163 184)",
-    },
-  },
-  posteriorDensity: {
-    label: "Posterior",
-    theme: {
-      light: "oklch(0.56 0.18 251)",
-      dark: "oklch(0.74 0.12 251)",
-      terminal: "rgb(166 206 255)",
-    },
-  },
-  shadedDensity: {
-    label: "Hypothesis region",
-    theme: {
-      light: "oklch(0.8 0.08 45 / 0.48)",
-      dark: "oklch(0.45 0.09 45 / 0.5)",
-      terminal: "rgba(252 129 74 / 0.3)",
-    },
-  },
-} satisfies ChartConfig
-
-function parseWholeNumber(value: string): number | null {
-  if (!/^\d+$/.test(value.trim())) {
-    return null
-  }
-
-  const parsed = Number(value)
-  if (!Number.isSafeInteger(parsed) || parsed < 0) {
-    return null
-  }
-
-  return parsed
-}
-
-function parsePositiveNumber(value: string): number | null {
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return null
-  }
-
-  return parsed
-}
-
-function parseRateToken(rawValue: string): number | null {
-  const trimmed = rawValue.trim()
-  if (!trimmed) {
-    return null
-  }
-
-  const hasPercent = trimmed.endsWith("%")
-  const numericPart = hasPercent ? trimmed.slice(0, -1).trim() : trimmed
-  const parsed = Number(numericPart)
-
-  if (!Number.isFinite(parsed) || parsed < 0) {
-    return null
-  }
-
-  if (hasPercent || parsed > 1) {
-    if (parsed > 100) {
-      return null
-    }
-
-    return parsed / 100
-  }
-
-  return parsed
-}
-
-function formatPercent(value: number, digits = 2): string {
-  return `${(value * 100).toFixed(digits)}%`
-}
-
-function formatRateRange(lower: number, upper: number): string {
-  return `${formatPercent(lower, 1)} to ${formatPercent(upper, 1)}`
-}
-
-function formatCount(value: number): string {
-  return Math.round(value).toLocaleString("en-US")
-}
-
-function getInputsFromSearchParams(searchParams: URLSearchParams): ToolInputs {
-  const mode = searchParams.get("queryMode")
-  const queryMode: HypothesisMode =
-    mode === "above" || mode === "below" || mode === "around"
-      ? mode
-      : DEFAULT_INPUTS.queryMode
-
-  return {
-    trials: searchParams.get("trials") ?? DEFAULT_INPUTS.trials,
-    successes: searchParams.get("successes") ?? DEFAULT_INPUTS.successes,
-    priorAlpha: searchParams.get("priorAlpha") ?? DEFAULT_INPUTS.priorAlpha,
-    priorBeta: searchParams.get("priorBeta") ?? DEFAULT_INPUTS.priorBeta,
-    queryMode,
-    targetRate: searchParams.get("targetRate") ?? DEFAULT_INPUTS.targetRate,
-    tolerancePercent:
-      searchParams.get("tolerancePercent") ?? DEFAULT_INPUTS.tolerancePercent,
-  }
-}
-
-function createSearchParamsFromInputs(inputs: ToolInputs): URLSearchParams {
-  const searchParams = new URLSearchParams()
-
-  searchParams.set("trials", inputs.trials)
-  searchParams.set("successes", inputs.successes)
-  searchParams.set("priorAlpha", inputs.priorAlpha)
-  searchParams.set("priorBeta", inputs.priorBeta)
-  searchParams.set("queryMode", inputs.queryMode)
-  searchParams.set("targetRate", inputs.targetRate)
-
-  if (inputs.queryMode === "around") {
-    searchParams.set("tolerancePercent", inputs.tolerancePercent)
-  }
-
-  return searchParams
-}
-
-function parseQuery(
-  queryMode: HypothesisMode,
-  targetRateInput: string,
-  tolerancePercentInput: string
-): { query: Query | null; error: string | null } {
-  const targetRate = parseRateToken(targetRateInput)
-
-  if (targetRate === null || targetRate < 0 || targetRate > 1) {
-    return {
-      query: null,
-      error: "Target rate must stay between 0% and 100%.",
-    }
-  }
-
-  if (queryMode === "around") {
-    const toleranceValue = Number(tolerancePercentInput)
-
-    if (
-      !Number.isFinite(toleranceValue) ||
-      toleranceValue <= 0 ||
-      toleranceValue > 50
-    ) {
-      return {
-        query: null,
-        error: "Tolerance must be a number between 0 and 50.",
-      }
-    }
-
-    const tolerance = toleranceValue / 100
-    return {
-      query: {
-        mode: "around",
-        targetRate,
-        tolerance,
-        lower: clamp(targetRate - tolerance, 0, 1),
-        upper: clamp(targetRate + tolerance, 0, 1),
-      },
-      error: null,
-    }
-  }
-
-  return {
-    query: {
-      mode: queryMode,
-      targetRate,
-    },
-    error: null,
-  }
-}
-
-function computeQueryProbability(
-  alpha: number,
-  beta: number,
-  query: Query
-): number {
-  if (query.mode === "around") {
-    return betaProbabilityBetween(query.lower, query.upper, alpha, beta)
-  }
-
-  if (query.mode === "above") {
-    return 1 - betaProbabilityBetween(0, query.targetRate, alpha, beta)
-  }
-
-  return betaProbabilityBetween(0, query.targetRate, alpha, beta)
-}
-
-function describeQuery(query: Query): string {
-  if (query.mode === "around") {
-    return `around ${formatPercent(query.targetRate, 1)} (${formatRateRange(query.lower, query.upper)})`
-  }
-
-  return `${query.mode === "above" ? "above" : "below"} ${formatPercent(query.targetRate, 1)}`
-}
-
-function createExplanation(summary: ComputedPosteriorSummary): string {
-  if (summary.query.mode === "around") {
-    return `The posterior assigns ${formatPercent(summary.queryProbability)} probability to the event rate landing between ${formatRateRange(summary.query.lower, summary.query.upper)}.`
-  }
-
-  return `The posterior assigns ${formatPercent(summary.queryProbability)} probability to the event rate being ${summary.query.mode} ${formatPercent(summary.query.targetRate, 1)}.`
-}
-
-function createChartData(summary: ComputedPosteriorSummary): ChartPoint[] {
-  const points = 180
-
-  return Array.from({ length: points }, (_, index) => {
-    const probability = index / (points - 1)
-    const boundedProbability = clamp(probability, 1e-4, 1 - 1e-4)
-    const priorDensity = betaPdf(
-      boundedProbability,
-      summary.priorAlpha,
-      summary.priorBeta
-    )
-    const posteriorDensity = betaPdf(
-      boundedProbability,
-      summary.posteriorAlpha,
-      summary.posteriorBeta
-    )
-    const isShaded =
-      summary.query.mode === "around"
-        ? probability >= summary.query.lower && probability <= summary.query.upper
-        : summary.query.mode === "above"
-          ? probability >= summary.query.targetRate
-          : probability <= summary.query.targetRate
-
-    return {
-      probabilityPercent: probability * 100,
-      priorDensity,
-      posteriorDensity,
-      shadedDensity: isShaded ? posteriorDensity : null,
-    }
-  })
-}
-
-function getMetricTone(probability: number): string {
-  if (probability >= 0.8) {
-    return "The posterior leans strongly toward this hypothesis."
-  }
-
-  if (probability >= 0.6) {
-    return "The posterior favors this hypothesis, but uncertainty remains material."
-  }
-
-  if (probability >= 0.4) {
-    return "The posterior is still fairly split across plausible rates."
-  }
-
-  if (probability >= 0.2) {
-    return "The posterior currently leans against this hypothesis."
-  }
-
-  return "Only a small portion of the posterior mass supports this hypothesis."
+function Field({
+  id,
+  label,
+  suffix,
+  value,
+  onChange,
+}: {
+  id: string
+  label: string
+  suffix?: string
+  value: string
+  onChange: (next: string) => void
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className="grid grid-cols-[1fr_auto] items-baseline gap-3 border-b border-current/20 py-1.5 transition-colors has-[:focus]:border-current/70"
+    >
+      <span className="plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60">
+        {label}
+      </span>
+      <span className="flex items-baseline gap-1">
+        <input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          className="plate-data w-[5rem] bg-transparent text-right text-[0.95rem] outline-none"
+          value={value ?? ""}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        {suffix ? (
+          <span className="w-2 text-[0.8rem] opacity-50">{suffix}</span>
+        ) : (
+          <span className="w-2" aria-hidden />
+        )}
+      </span>
+    </label>
+  )
 }
 
 export function BetaBernoulliInferenceClient() {
@@ -432,12 +85,7 @@ export function BetaBernoulliInferenceClient() {
     setInputs((current) => {
       const currentSerialized = createSearchParamsFromInputs(current).toString()
       const nextSerialized = createSearchParamsFromInputs(nextInputs).toString()
-
-      if (currentSerialized === nextSerialized) {
-        return current
-      }
-
-      return nextInputs
+      return currentSerialized === nextSerialized ? current : nextInputs
     })
   }, [searchParams])
 
@@ -488,48 +136,16 @@ export function BetaBernoulliInferenceClient() {
     }
   }, [inputs])
 
-  const summary = React.useMemo<ComputedPosteriorSummary | null>(() => {
+  const report = React.useMemo(() => {
     if (validation.error || !validation.value) {
       return null
     }
-
     const { trials, successes, priorAlpha, priorBeta, query } = validation.value
-    const failures = trials - successes
-    const posterior = updateBetaPosterior({
-      alpha: priorAlpha,
-      beta: priorBeta,
-      trials,
-      successes,
-    })
-    const queryProbability = computeQueryProbability(
-      posterior.alpha,
-      posterior.beta,
-      query
-    )
-
-    const result: ComputedPosteriorSummary = {
-      trials,
-      successes,
-      failures,
-      priorAlpha,
-      priorBeta,
-      posteriorAlpha: posterior.alpha,
-      posteriorBeta: posterior.beta,
-      posteriorMean: betaMean(posterior.alpha, posterior.beta),
-      posteriorMode: betaMode(posterior.alpha, posterior.beta),
-      credibleInterval: betaEqualTailInterval(posterior.alpha, posterior.beta),
-      query,
-      queryProbability,
-      explanation: "",
-    }
-
-    return {
-      ...result,
-      explanation: createExplanation(result),
-    }
+    return buildReport(trials, successes, priorAlpha, priorBeta, query)
   }, [validation])
 
-  const chartData = React.useMemo(() => (summary ? createChartData(summary) : []), [summary])
+  const setInput = (key: keyof ToolInputs) => (next: string) =>
+    setInputs((current) => ({ ...current, [key]: next }))
 
   const applyInputs = React.useCallback(
     (nextInputs: ToolInputs) => {
@@ -547,385 +163,387 @@ export function BetaBernoulliInferenceClient() {
     applyInputs(inputs)
   }
 
+  const observedRate =
+    report && report.trials > 0 ? report.successes / report.trials : null
+  const modeWord =
+    report?.query.mode === "around"
+      ? "within reach of"
+      : (report?.query.mode ?? "above")
+
   return (
-    <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-6xl px-6 py-8">
-        <div className="max-w-3xl">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Beta-Bernoulli Inference
-          </h1>
-          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Start with a Beta prior, update it with Bernoulli observations, and
-            inspect how the posterior mass shifts around a structured rate
-            hypothesis.
-          </p>
-        </div>
+    <div className="plate min-h-screen bg-background pt-16">
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <form
+          onSubmit={handleSubmit}
+          className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[15rem_minmax(0,1fr)]"
+        >
+          <div className="lg:sticky lg:top-24">
+            <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+              The setup
+            </p>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Inference Setup</CardTitle>
-                <CardDescription>
-                  Define the prior, the observed outcomes, and the hypothesis you
-                  want the posterior to answer.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form className="grid gap-6" onSubmit={handleSubmit}>
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <div className="grid gap-2">
-                      <Label htmlFor="bernoulli-trials">Trials</Label>
-                      <Input
-                        id="bernoulli-trials"
-                        inputMode="numeric"
-                        value={inputs.trials}
-                        onChange={(event) =>
-                          setInputs((current) => ({
-                            ...current,
-                            trials: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="bernoulli-successes">Successes</Label>
-                      <Input
-                        id="bernoulli-successes"
-                        inputMode="numeric"
-                        value={inputs.successes}
-                        onChange={(event) =>
-                          setInputs((current) => ({
-                            ...current,
-                            successes: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="bernoulli-target-rate">Target rate</Label>
-                      <Input
-                        id="bernoulli-target-rate"
-                        placeholder="0.6 or 60%"
-                        value={inputs.targetRate}
-                        onChange={(event) =>
-                          setInputs((current) => ({
-                            ...current,
-                            targetRate: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="bernoulli-alpha">Prior alpha</Label>
-                      <Input
-                        id="bernoulli-alpha"
-                        inputMode="decimal"
-                        value={inputs.priorAlpha}
-                        onChange={(event) =>
-                          setInputs((current) => ({
-                            ...current,
-                            priorAlpha: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="bernoulli-beta">Prior beta</Label>
-                      <Input
-                        id="bernoulli-beta"
-                        inputMode="decimal"
-                        value={inputs.priorBeta}
-                        onChange={(event) =>
-                          setInputs((current) => ({
-                            ...current,
-                            priorBeta: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    {inputs.queryMode === "around" ? (
-                      <div className="grid gap-2">
-                        <Label htmlFor="bernoulli-tolerance">
-                          Tolerance (%)
-                        </Label>
-                        <Input
-                          id="bernoulli-tolerance"
-                          inputMode="decimal"
-                          value={inputs.tolerancePercent}
-                          onChange={(event) =>
-                            setInputs((current) => ({
-                              ...current,
-                              tolerancePercent: event.target.value,
-                            }))
-                          }
-                        />
-                      </div>
-                    ) : null}
-                  </div>
+            <div className="mt-3 grid">
+              <p className="plate-label mt-2 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+                What you saw
+              </p>
+              <Field
+                id="bernoulli-trials"
+                label="Trials"
+                value={inputs.trials}
+                onChange={setInput("trials")}
+              />
+              <Field
+                id="bernoulli-successes"
+                label="Successes"
+                value={inputs.successes}
+                onChange={setInput("successes")}
+              />
 
-                  <div className="grid gap-2">
-                    <Label>Hypothesis</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {([
-                        { mode: "around", label: "Around rate" },
-                        { mode: "above", label: "Above rate" },
-                        { mode: "below", label: "Below rate" },
-                      ] as const).map((option) => (
-                        <Button
-                          key={option.mode}
-                          type="button"
-                          variant={
-                            inputs.queryMode === option.mode ? "default" : "outline"
-                          }
-                          onClick={() =>
-                            setInputs((current) => ({
-                              ...current,
-                              queryMode: option.mode,
-                            }))
-                          }
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+              <p className="plate-label mt-6 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+                What you believed first
+              </p>
+              <Field
+                id="bernoulli-alpha"
+                label="Prior alpha"
+                value={inputs.priorAlpha}
+                onChange={setInput("priorAlpha")}
+              />
+              <Field
+                id="bernoulli-beta"
+                label="Prior beta"
+                value={inputs.priorBeta}
+                onChange={setInput("priorBeta")}
+              />
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button type="submit">Apply setup</Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => applyInputs(DEFAULT_INPUTS)}
-                    >
-                      Reset defaults
-                    </Button>
-                  </div>
-                </form>
-
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
-                  <p>
-                    Use <code>around</code> for a rate band, or <code>above</code> /{" "}
-                    <code>below</code> for posterior tail probability.
-                  </p>
-                  <p>
-                    Target rate accepts either decimals like <code>0.6</code> or
-                    percentages like <code>60%</code>.
-                  </p>
-                </div>
-
-                {validation.error ? (
-                  <p className="mt-3 text-sm text-destructive">{validation.error}</p>
-                ) : null}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Presets</CardTitle>
-                <CardDescription>
-                  Load common Beta-Bernoulli setups to compare how prior choice and
-                  sample size change the posterior.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-3">
-                {EXAMPLES.map((example) => (
+              <p className="plate-label mt-6 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+                What you want to know
+              </p>
+              <div className="flex gap-4 border-b border-current/20 py-2">
+                {MODES.map((option) => (
                   <button
-                    key={example.label}
+                    key={option.mode}
                     type="button"
-                    className="rounded-2xl border border-border/70 p-4 text-left transition-colors hover:bg-muted/40"
-                    onClick={() => applyInputs(example.inputs)}
+                    aria-pressed={inputs.queryMode === option.mode}
+                    onClick={() =>
+                      setInputs((current) => ({
+                        ...current,
+                        queryMode: option.mode,
+                      }))
+                    }
+                    className={
+                      "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] transition-opacity " +
+                      (inputs.queryMode === option.mode
+                        ? "opacity-100 underline underline-offset-4"
+                        : "opacity-45 hover:opacity-75")
+                    }
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-medium">{example.label}</p>
-                      <Badge variant="outline">{example.inputs.queryMode}</Badge>
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {example.description}
-                    </p>
+                    {option.label}
                   </button>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+              <Field
+                id="bernoulli-target-rate"
+                label="Rate"
+                value={inputs.targetRate}
+                onChange={setInput("targetRate")}
+              />
+              {inputs.queryMode === "around" ? (
+                <Field
+                  id="bernoulli-tolerance"
+                  label="Give or take"
+                  suffix="%"
+                  value={inputs.tolerancePercent}
+                  onChange={setInput("tolerancePercent")}
+                />
+              ) : null}
+            </div>
+
+            <button
+              type="submit"
+              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] opacity-75 transition-opacity hover:opacity-100"
+            >
+              Recompute
+            </button>
+
+            {validation.error ? (
+              <p className="mt-3 text-[0.84rem] text-destructive">
+                {validation.error}
+              </p>
+            ) : null}
+
+            <p className="plate-label mt-8 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              Or start from
+            </p>
+            <div className="mt-1">
+              {EXAMPLES.map((example) => (
+                <button
+                  key={example.label}
+                  type="button"
+                  onClick={() => applyInputs(example.inputs)}
+                  className="block w-full border-b border-current/15 py-2 text-left text-[0.86rem] opacity-70 transition-opacity hover:opacity-100"
+                >
+                  {example.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Posterior Summary</CardTitle>
-                <CardDescription>
-                  The posterior is the updated distribution over the underlying
-                  Bernoulli success probability.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                {summary ? (
-                  <>
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <div className="rounded-2xl border border-border/70 p-4">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Posterior mean
-                        </p>
-                        <p className="mt-2 text-2xl font-semibold">
-                          {formatPercent(summary.posteriorMean)}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border/70 p-4">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Hypothesis probability
-                        </p>
-                        <p className="mt-2 text-2xl font-semibold">
-                          {formatPercent(summary.queryProbability)}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border/70 p-4">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          95% credible interval
-                        </p>
-                        <p className="mt-2 text-lg font-semibold">
+          <div className="min-w-0">
+            <Row
+              note={
+                <>
+                  Rates accept either form: <span className="italic">0.6</span>{" "}
+                  or <span className="italic">60%</span>.
+                </>
+              }
+            >
+              <h1 className="text-[2.4rem] leading-tight">
+                Beta-Bernoulli Inference
+              </h1>
+              <p className="mt-4 max-w-[38rem]">
+                You have a run of yes-or-no outcomes and a belief about the rate
+                behind them. Combining the two gives a distribution over that
+                rate, not a single estimate — and from the distribution you can
+                read off the answer to any question you care to ask of it.
+              </p>
+            </Row>
+
+            {!report ? (
+              <>
+                <Section>No reading yet</Section>
+                <Row>
+                  <p className="mt-4 max-w-[38rem] opacity-70">
+                    Fix the setup on the left and the posterior will appear
+                    here.
+                  </p>
+                </Row>
+              </>
+            ) : (
+              <>
+                <Section>The reading</Section>
+                <Row
+                  note={
+                    <>
+                      The strip runs 0 to 100%. Its tick marks an even chance.
+                    </>
+                  }
+                >
+                  <p className="mt-4 flex max-w-[38rem] flex-wrap items-baseline gap-x-2 text-[1.5rem] leading-[1.45]">
+                    <span>
+                      The rate is {modeWord}{" "}
+                      {formatPercent(report.query.targetRate, 1)} with
+                      probability
+                    </span>
+                    <span className="plate-figures">
+                      {formatPercent(report.queryProbability, 1)}
+                    </span>
+                    <ProbabilityStrip
+                      probability={report.queryProbability}
+                      threshold={0.5}
+                    />
+                  </p>
+                  <p className="mt-3 max-w-[38rem] text-[1.5rem] leading-[1.45]">
+                    Its most likely value is{" "}
+                    <span className="plate-figures">
+                      {formatPercent(report.posteriorMean, 1)}
+                    </span>
+                    , and the data are consistent with anything from{" "}
+                    <span className="plate-figures">
+                      {formatRateRange(
+                        report.credibleInterval.lower,
+                        report.credibleInterval.upper
+                      )}
+                    </span>
+                    .
+                  </p>
+                  <p className="mt-5 max-w-[38rem] opacity-80">
+                    That comes from{" "}
+                    <span className="plate-figures">
+                      {formatCount(report.successes)}
+                    </span>{" "}
+                    successes in{" "}
+                    <span className="plate-figures">
+                      {formatCount(report.trials)}
+                    </span>{" "}
+                    trials — an observed{" "}
+                    <span className="plate-figures">
+                      {observedRate === null
+                        ? "n/a"
+                        : formatPercent(observedRate, 1)}
+                    </span>{" "}
+                    — pulled toward the prior, which carries the weight of about{" "}
+                    <span className="plate-figures">
+                      {formatCount(report.priorWeight)}
+                    </span>{" "}
+                    earlier observations.
+                  </p>
+                </Row>
+
+                <Section>
+                  Figure 1 &nbsp;&middot;&nbsp; Before and after the data
+                </Section>
+                <Row
+                  note={
+                    <>
+                      The shaded area is the hypothesis. Everything else on this
+                      page is a summary of it.
+                    </>
+                  }
+                >
+                  <div className="mt-6">
+                    <PosteriorFigure
+                      points={report.chart}
+                      query={report.query}
+                      queryProbability={report.queryProbability}
+                      posteriorMean={report.posteriorMean}
+                      intervalLower={report.credibleInterval.lower}
+                      intervalUpper={report.credibleInterval.upper}
+                    />
+                  </div>
+                  <Caption>
+                    The dashed curve is the prior, the solid one the posterior
+                    after {formatCount(report.trials)} trials. The shaded region
+                    is the part of the posterior that satisfies{" "}
+                    {describeQuery(report.query)}, and its area is the{" "}
+                    {formatPercent(report.queryProbability, 1)} quoted above.
+                    The prior is drawn to its own height so its shape stays
+                    legible; only the posterior is on the density scale.
+                  </Caption>
+                </Row>
+
+                <Section>
+                  Figure 2 &nbsp;&middot;&nbsp; How much the answer depends on
+                  the line
+                </Section>
+                <Row
+                  note={
+                    <>
+                      A steep curve at your target means the answer is sensitive
+                      to where you drew the line. A flat one means it is not.
+                    </>
+                  }
+                >
+                  <div className="mt-6">
+                    <ThresholdSweepFigure
+                      points={report.sweep}
+                      targetRate={report.query.targetRate}
+                      probability={report.queryProbability}
+                      mode={report.query.mode}
+                    />
+                  </div>
+                  <Caption>
+                    The same question asked at every possible target rate, with
+                    yours marked. Reading across: the probability that the true
+                    rate is {describeQuery(report.query)} is{" "}
+                    {formatPercent(report.queryProbability, 1)}. The dotted
+                    leaders run to the axis that decodes each coordinate. Move
+                    the target and the answer slides along this curve.
+                  </Caption>
+                </Row>
+
+                <Section>
+                  Figure 3 &nbsp;&middot;&nbsp; What the data changed
+                </Section>
+                <Row
+                  note={
+                    <>
+                      A Beta prior behaves like α&nbsp;&minus;&nbsp;1 successes
+                      and β&nbsp;&minus;&nbsp;1 failures already on the books.
+                    </>
+                  }
+                >
+                  <table className="plate-data mt-6 w-full max-w-[34rem] text-[0.85rem]">
+                    <thead>
+                      <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                        <th className="py-1 text-left font-medium">Belief</th>
+                        <th className="py-1 pl-5 text-right font-medium">
+                          Alpha
+                        </th>
+                        <th className="py-1 pl-5 text-right font-medium">
+                          Beta
+                        </th>
+                        <th className="py-1 pl-5 text-right font-medium">
+                          Mean
+                        </th>
+                        <th className="py-1 pl-5 text-right font-medium">
+                          95% interval
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-1.5">Prior</td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {report.priorAlpha.toFixed(2)}
+                        </td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {report.priorBeta.toFixed(2)}
+                        </td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {formatPercent(report.priorMean, 1)}
+                        </td>
+                        <td className="py-1.5 pl-5 text-right">
                           {formatRateRange(
-                            summary.credibleInterval.lower,
-                            summary.credibleInterval.upper
+                            report.priorInterval.lower,
+                            report.priorInterval.upper
                           )}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border/70 p-4">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          MAP estimate
-                        </p>
-                        <p className="mt-2 text-lg font-semibold">
-                          {summary.posteriorMode === null
-                            ? "Not defined"
-                            : formatPercent(summary.posteriorMode)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    <div className="grid gap-2">
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline">
-                          Query: {describeQuery(summary.query)}
-                        </Badge>
-                        <Badge variant="outline">
-                          Failures: {formatCount(summary.failures)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm leading-relaxed text-foreground">
-                        {summary.explanation}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {getMetricTone(summary.queryProbability)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Prior: Beta({summary.priorAlpha.toFixed(2)},{" "}
-                        {summary.priorBeta.toFixed(2)}). Posterior: Beta(
-                        {summary.posteriorAlpha.toFixed(2)},{" "}
-                        {summary.posteriorBeta.toFixed(2)}).
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Enter a valid setup to compute the posterior.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Beta Distribution Chart</CardTitle>
-                <CardDescription>
-                  The shaded area shows the part of the posterior that satisfies
-                  the current hypothesis.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                {summary ? (
-                  <>
-                    <ChartContainer config={CHART_CONFIG}>
-                      <ComposedChart data={chartData}>
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                        <XAxis
-                          dataKey="probabilityPercent"
-                          tickFormatter={(value: number) => `${value.toFixed(0)}%`}
-                          minTickGap={24}
-                        />
-                        <YAxis hide />
-                        <ChartTooltip
-                          content={({ active, label, payload }) => (
-                            <ChartTooltipContent
-                              active={active}
-                              label={label}
-                              payload={payload}
-                              formatter={(value) =>
-                                typeof value === "number" ? value.toFixed(2) : value
-                              }
-                              labelFormatter={(label) =>
-                                `Success probability ${Number(label).toFixed(1)}%`
-                              }
-                            />
+                        </td>
+                      </tr>
+                      <tr className="border-b border-current/25">
+                        <td className="py-1.5">Posterior</td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {report.posteriorAlpha.toFixed(2)}
+                        </td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {report.posteriorBeta.toFixed(2)}
+                        </td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {formatPercent(report.posteriorMean, 1)}
+                        </td>
+                        <td className="py-1.5 pl-5 text-right">
+                          {formatRateRange(
+                            report.credibleInterval.lower,
+                            report.credibleInterval.upper
                           )}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="shadedDensity"
-                          fill="var(--color-shadedDensity)"
-                          stroke="none"
-                          isAnimationActive={false}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="priorDensity"
-                          stroke="var(--color-priorDensity)"
-                          strokeDasharray="6 6"
-                          dot={false}
-                          isAnimationActive={false}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="posteriorDensity"
-                          stroke="var(--color-posteriorDensity)"
-                          strokeWidth={2}
-                          dot={false}
-                          isAnimationActive={false}
-                        />
-                        <ReferenceLine
-                          x={summary.posteriorMean * 100}
-                          stroke="var(--color-posteriorDensity)"
-                          strokeDasharray="4 4"
-                        />
-                        <ReferenceLine
-                          x={summary.query.targetRate * 100}
-                          stroke="var(--color-shadedDensity)"
-                          strokeDasharray="2 6"
-                        />
-                      </ComposedChart>
-                    </ChartContainer>
-
-                    <div className="grid gap-2 text-sm text-muted-foreground">
-                      <p>
-                        The dashed gray curve is the prior, and the solid blue curve
-                        is the posterior after observing the data.
-                      </p>
-                      <p>
-                        The blue reference line marks the posterior mean. The orange
-                        reference line marks the hypothesis target rate.
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    The chart appears once the setup is valid.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 opacity-70" colSpan={3}>
+                          Most likely single value (MAP)
+                        </td>
+                        <td className="py-1.5 pl-5 text-right" colSpan={2}>
+                          {report.posteriorMode === null
+                            ? "not defined"
+                            : formatPercent(report.posteriorMode, 1)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <Caption>
+                    {formatCount(report.successes)} successes and{" "}
+                    {formatCount(report.failures)} failures moved the mean from{" "}
+                    {formatPercent(report.priorMean, 1)} to{" "}
+                    {formatPercent(report.posteriorMean, 1)} and narrowed the
+                    interval from{" "}
+                    {(
+                      (report.priorInterval.upper -
+                        report.priorInterval.lower) *
+                      100
+                    ).toFixed(1)}{" "}
+                    points wide to{" "}
+                    {(
+                      (report.credibleInterval.upper -
+                        report.credibleInterval.lower) *
+                      100
+                    ).toFixed(1)}
+                    .
+                  </Caption>
+                </Row>
+              </>
+            )}
           </div>
-        </div>
-      </section>
+        </form>
+      </div>
     </div>
   )
 }

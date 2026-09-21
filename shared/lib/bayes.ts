@@ -122,18 +122,26 @@ export function betaCdf(x: number, alpha: number, beta: number): number {
   }
 
   const boundedX = clamp(x, 1e-12, 1 - 1e-12)
-  const logFront =
+  const logNumerator =
     alpha * Math.log(boundedX) +
     beta * Math.log(1 - boundedX) -
-    Math.log(alpha) -
     logBeta(alpha, beta)
-  const front = Math.exp(logFront)
 
+  /* The two branches divide by different parameters: I(x;a,b) = front/a * cf,
+     and the reflected form 1 - I(1-x;b,a) = 1 - front/b * cf. Using alpha in
+     both makes the CDF jump at the switch point. */
   if (boundedX < (alpha + 1) / (alpha + beta + 2)) {
-    return front * betaContinuedFraction(boundedX, alpha, beta)
+    return (
+      Math.exp(logNumerator - Math.log(alpha)) *
+      betaContinuedFraction(boundedX, alpha, beta)
+    )
   }
 
-  return 1 - front * betaContinuedFraction(1 - boundedX, beta, alpha)
+  return (
+    1 -
+    Math.exp(logNumerator - Math.log(beta)) *
+      betaContinuedFraction(1 - boundedX, beta, alpha)
+  )
 }
 
 export function betaQuantile(
