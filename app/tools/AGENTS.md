@@ -29,6 +29,15 @@ The tools header combobox reads from this file. Do not hardcode tool lists in th
    - keyboard open (`Cmd+K` / `Ctrl+K`)
 5. Run `npx tsc --noEmit --pretty false` and report any unrelated pre-existing failures separately.
 
+## Presenting Results
+
+For tools whose job is to show a quantitative result and explain it
+(calculators, model readouts, analyses), there is a second, opt-in visual style
+documented in `app/tools/DATA-DISPLAY.md`. Read it before building one, and use
+`app/tools/bayesian-ab-test/` as the reference implementation. Form-heavy
+utilities and single-value converters should stay on the default shadcn look
+described here.
+
 ## Conventions
 
 - Keep tool codes uppercase and concise.

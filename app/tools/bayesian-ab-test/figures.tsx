@@ -1,0 +1,602 @@
+"use client"
+
+import * as React from "react"
+
+import type { LiftDensityPoint, PosteriorPoint } from "./model"
+
+type Scale = (value: number) => number
+
+function makeScale(
+  domain: readonly [number, number],
+  range: readonly [number, number]
+): Scale {
+  const span = domain[1] - domain[0] || 1
+  return (value) =>
+    range[0] + ((value - domain[0]) / span) * (range[1] - range[0])
+}
+
+function niceTicks(lower: number, upper: number, target: number): number[] {
+  const span = upper - lower
+  if (!Number.isFinite(span) || span <= 0) {
+    return [lower]
+  }
+
+  const rough = span / target
+  const magnitude = 10 ** Math.floor(Math.log10(rough))
+  const step =
+    [1, 2, 2.5, 5, 10].find((multiple) => multiple * magnitude >= rough)! *
+    magnitude
+
+  const ticks: number[] = []
+  for (
+    let tick = Math.ceil(lower / step) * step;
+    tick <= upper + step / 1e6;
+    tick += step
+  ) {
+    ticks.push(Math.abs(tick) < step / 1e6 ? 0 : tick)
+  }
+  return ticks
+}
+
+/* Sub-pixel precision buys nothing and makes float drift between runtimes
+   visible in the markup. */
+function round(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
+function areaPath(
+  points: { x: number; y: number }[],
+  baseline: number
+): string {
+  if (points.length === 0) {
+    return ""
+  }
+
+  const line = points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"}${round(point.x)} ${round(point.y)}`
+    )
+    .join(" ")
+
+  return `${line} L${round(points[points.length - 1].x)} ${baseline} L${round(points[0].x)} ${baseline} Z`
+}
+
+function linePath(points: { x: number; y: number }[]): string {
+  return points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"}${round(point.x)} ${round(point.y)}`
+    )
+    .join(" ")
+}
+
+function signedPercent(value: number, digits = 1): string {
+  const points = value * 100
+  const sign = points > 0 ? "+" : points < 0 ? "−" : ""
+  return `${sign}${Math.abs(points).toFixed(digits)}%`
+}
+
+export function LiftDistributionFigure({
+  points,
+  median,
+  intervalLower,
+  intervalUpper,
+  innerLower,
+  innerUpper,
+  meaningfulLift,
+}: {
+  points: LiftDensityPoint[]
+  median: number
+  intervalLower: number
+  intervalUpper: number
+  innerLower: number
+  innerUpper: number
+  meaningfulLift: number
+}) {
+  const width = 720
+  const height = 300
+  const plotTop = 36
+  const plotBottom = 194
+  const intervalY = 214
+  const axisY = 258
+
+  const lifts = points.map((point) => point.relativeLift)
+  const domainLower = Math.min(...lifts, -meaningfulLift * 1.15, intervalLower)
+  const domainUpper = Math.max(...lifts, meaningfulLift * 1.15, intervalUpper)
+  const x = makeScale([domainLower, domainUpper], [14, width - 14])
+  const y = makeScale([0, 1], [plotBottom, plotTop])
+
+  const curve = points.map((point) => ({
+    x: x(point.relativeLift),
+    y: y(point.density),
+  }))
+  const harmCurve = curve.filter((_, index) => lifts[index] <= 0)
+  if (harmCurve.length > 0) {
+    harmCurve.push({ x: x(0), y: plotBottom })
+  }
+
+  const ticks = niceTicks(domainLower, domainUpper, 7)
+  const curveStart = x(lifts[0])
+  const curveEnd = x(lifts[lifts.length - 1])
+  const thresholdLabelFits = x(meaningfulLift) - x(0) > 96
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="plate-chart h-auto w-full overflow-visible"
+      role="img"
+      aria-label="Posterior distribution of variant B's relative lift over variant A"
+    >
+      <path d={areaPath(curve, plotBottom)} fill="currentColor" opacity={0.1} />
+      <path
+        d={areaPath(harmCurve, plotBottom)}
+        fill="currentColor"
+        opacity={0.22}
+      />
+      <path
+        d={linePath(curve)}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.25}
+        opacity={0.75}
+      />
+
+      <line
+        x1={x(0)}
+        x2={x(0)}
+        y1={plotTop - 14}
+        y2={plotBottom}
+        stroke="currentColor"
+        strokeWidth={1}
+        opacity={0.6}
+      />
+      <text
+        x={x(0)}
+        y={plotTop - 19}
+        textAnchor="middle"
+        fontSize={12}
+        fill="currentColor"
+        opacity={0.62}
+      >
+        no difference
+      </text>
+
+      {[
+        { side: "lower", bound: -meaningfulLift },
+        { side: "upper", bound: meaningfulLift },
+      ].map(({ side, bound }) => (
+        <line
+          key={side}
+          x1={x(bound)}
+          x2={x(bound)}
+          y1={plotTop - 14}
+          y2={plotBottom}
+          stroke="currentColor"
+          strokeWidth={1}
+          strokeDasharray="2 4"
+          opacity={0.45}
+        />
+      ))}
+      {thresholdLabelFits ? (
+        <text
+          x={x(meaningfulLift)}
+          y={plotTop - 19}
+          textAnchor="middle"
+          fontSize={12}
+          fill="currentColor"
+          opacity={0.62}
+        >
+          {signedPercent(meaningfulLift, 0)} meaningful
+        </text>
+      ) : null}
+
+      <line
+        x1={curveStart}
+        x2={curveEnd}
+        y1={plotBottom}
+        y2={plotBottom}
+        stroke="currentColor"
+        strokeWidth={1}
+        opacity={0.35}
+      />
+
+      <line
+        x1={x(intervalLower)}
+        x2={x(intervalUpper)}
+        y1={intervalY}
+        y2={intervalY}
+        stroke="currentColor"
+        strokeWidth={1}
+        opacity={0.75}
+      />
+      <line
+        x1={x(innerLower)}
+        x2={x(innerUpper)}
+        y1={intervalY}
+        y2={intervalY}
+        stroke="currentColor"
+        strokeWidth={5}
+        opacity={0.35}
+      />
+      <circle cx={x(median)} cy={intervalY} r={3.5} fill="currentColor" />
+      <text
+        x={x(intervalLower) - 8}
+        y={intervalY + 4}
+        textAnchor="end"
+        fontSize={12}
+        fill="currentColor"
+        opacity={0.62}
+      >
+        {signedPercent(intervalLower)}
+      </text>
+      <text
+        x={x(intervalUpper) + 8}
+        y={intervalY + 4}
+        fontSize={12}
+        fill="currentColor"
+        opacity={0.62}
+      >
+        {signedPercent(intervalUpper)}
+      </text>
+      <text
+        x={x(median)}
+        y={intervalY + 20}
+        textAnchor="middle"
+        fontSize={12}
+        fill="currentColor"
+        opacity={0.5}
+      >
+        central 95% of the distribution
+      </text>
+
+      <line
+        x1={x(ticks[0])}
+        x2={x(ticks[ticks.length - 1])}
+        y1={axisY}
+        y2={axisY}
+        stroke="currentColor"
+        strokeWidth={1}
+        opacity={0.35}
+      />
+      {ticks.map((tick) => (
+        <g key={tick}>
+          <line
+            x1={x(tick)}
+            x2={x(tick)}
+            y1={axisY}
+            y2={axisY + 5}
+            stroke="currentColor"
+            strokeWidth={1}
+            opacity={0.35}
+          />
+          <text
+            x={x(tick)}
+            y={axisY + 20}
+            textAnchor="middle"
+            fontSize={12}
+            fill="currentColor"
+            opacity={0.7}
+          >
+            {signedPercent(tick, 0)}
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+export function RateDistributionFigure({
+  points,
+  meanA,
+  meanB,
+}: {
+  points: PosteriorPoint[]
+  meanA: number
+  meanB: number
+}) {
+  const width = 420
+  const height = 200
+  const plotTop = 26
+  const plotBottom = 148
+  const axisY = 162
+
+  const rates = points.map((point) => point.conversionRatePercent)
+  const peak = Math.max(
+    ...points.flatMap((point) => [point.variantA, point.variantB]),
+    1
+  )
+  const x = makeScale(
+    [Math.min(...rates), Math.max(...rates)],
+    [12, width - 12]
+  )
+  const y = makeScale([0, peak], [plotBottom, plotTop])
+
+  const curveA = points.map((point) => ({
+    x: x(point.conversionRatePercent),
+    y: y(point.variantA),
+  }))
+  const curveB = points.map((point) => ({
+    x: x(point.conversionRatePercent),
+    y: y(point.variantB),
+  }))
+  const ticks = niceTicks(Math.min(...rates), Math.max(...rates), 5)
+
+  const label = (
+    name: string,
+    mean: number,
+    curve: { x: number; y: number }[],
+    opacity: number
+  ) => {
+    const apex = curve.reduce((best, point) =>
+      point.y < best.y ? point : best
+    )
+    return (
+      <text
+        x={apex.x}
+        y={apex.y - 8}
+        textAnchor="middle"
+        fontSize={12}
+        fill="currentColor"
+        opacity={opacity}
+      >
+        {name} {mean.toFixed(2)}%
+      </text>
+    )
+  }
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="plate-chart h-auto w-full overflow-visible"
+      role="img"
+      aria-label="Posterior conversion rates for variants A and B"
+    >
+      <path
+        d={areaPath(curveA, plotBottom)}
+        fill="currentColor"
+        opacity={0.07}
+      />
+      <path
+        d={areaPath(curveB, plotBottom)}
+        fill="currentColor"
+        opacity={0.07}
+      />
+      <path
+        d={linePath(curveA)}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1}
+        strokeDasharray="4 3"
+        opacity={0.7}
+      />
+      <path
+        d={linePath(curveB)}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        opacity={0.9}
+      />
+
+      {label("A", meanA * 100, curveA, 0.7)}
+      {label("B", meanB * 100, curveB, 0.95)}
+
+      <line
+        x1={x(ticks[0])}
+        x2={x(ticks[ticks.length - 1])}
+        y1={axisY}
+        y2={axisY}
+        stroke="currentColor"
+        strokeWidth={1}
+        opacity={0.35}
+      />
+      {ticks.map((tick) => (
+        <g key={tick}>
+          <line
+            x1={x(tick)}
+            x2={x(tick)}
+            y1={axisY}
+            y2={axisY + 5}
+            stroke="currentColor"
+            strokeWidth={1}
+            opacity={0.35}
+          />
+          <text
+            x={x(tick)}
+            y={axisY + 20}
+            textAnchor="middle"
+            fontSize={12}
+            fill="currentColor"
+            opacity={0.7}
+          >
+            {tick.toFixed(1)}%
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+export function RegretDecayFigure({
+  points,
+}: {
+  points: { extraVisitors: number; regret: number }[]
+}) {
+  const width = 420
+  const height = 158
+  const plotTop = 28
+  const plotBottom = 106
+  const axisY = 120
+
+  const maxVisitors = Math.max(...points.map((point) => point.extraVisitors), 1)
+  const maxRegret = Math.max(...points.map((point) => point.regret), 1e-9)
+  const x = makeScale([0, maxVisitors], [16, width - 52])
+  const y = makeScale([0, maxRegret], [plotBottom, plotTop])
+
+  const curve = points.map((point) => ({
+    x: x(point.extraVisitors),
+    y: y(point.regret),
+  }))
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="plate-chart h-auto w-full overflow-visible"
+      role="img"
+      aria-label="Expected regret as a function of additional traffic per variant"
+    >
+      <path
+        d={linePath(curve)}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.25}
+        opacity={0.8}
+      />
+      {curve.map((point, index) => (
+        <circle
+          key={points[index].extraVisitors}
+          cx={point.x}
+          cy={point.y}
+          r={2.5}
+          fill="currentColor"
+          opacity={0.8}
+        />
+      ))}
+
+      <text
+        x={curve[0].x}
+        y={curve[0].y - 11}
+        fontSize={12}
+        fill="currentColor"
+        opacity={0.7}
+      >
+        {(points[0].regret * 100).toFixed(3)} pp today
+      </text>
+      <text
+        x={curve[curve.length - 1].x + 7}
+        y={curve[curve.length - 1].y + 4}
+        fontSize={12}
+        fill="currentColor"
+        opacity={0.7}
+      >
+        {(points[points.length - 1].regret * 100).toFixed(3)}
+      </text>
+
+      <line
+        x1={x(0)}
+        x2={x(maxVisitors)}
+        y1={axisY}
+        y2={axisY}
+        stroke="currentColor"
+        strokeWidth={1}
+        opacity={0.35}
+      />
+      {points.map((point) => (
+        <g key={point.extraVisitors}>
+          <line
+            x1={x(point.extraVisitors)}
+            x2={x(point.extraVisitors)}
+            y1={axisY}
+            y2={axisY + 5}
+            stroke="currentColor"
+            strokeWidth={1}
+            opacity={0.35}
+          />
+          <text
+            x={x(point.extraVisitors)}
+            y={axisY + 20}
+            textAnchor="middle"
+            fontSize={12}
+            fill="currentColor"
+            opacity={0.7}
+          >
+            {point.extraVisitors === 0
+              ? "now"
+              : `+${point.extraVisitors / 1000}k`}
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+export function ProbabilityStaircase({
+  rows,
+  threshold,
+}: {
+  rows: { label: string; probability: number; emphasis?: boolean }[]
+  threshold: number
+}) {
+  return (
+    <div className="mt-6">
+      <div className="plate-label grid grid-cols-[minmax(0,1fr)_minmax(8rem,17rem)_3.75rem] items-end gap-x-4 pb-2 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-55">
+        <span>Statement</span>
+        <span className="relative">
+          <span className="absolute left-0">0%</span>
+          <span className="absolute right-0">100%</span>
+        </span>
+        <span className="text-right">Chance</span>
+      </div>
+      <div className="border-t border-current/20 pt-1">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="grid grid-cols-[minmax(0,1fr)_minmax(8rem,17rem)_3.75rem] items-center gap-x-4 py-[0.3rem]"
+          >
+            <span className={row.emphasis ? "" : "opacity-80"}>
+              {row.label}
+            </span>
+            <span className="relative block h-3">
+              <span className="absolute inset-x-0 top-1/2 block h-px -translate-y-1/2 bg-current opacity-15" />
+              <span
+                className="absolute top-1/2 block h-px -translate-y-1/2 bg-current opacity-45"
+                style={{ left: 0, width: `${row.probability * 100}%` }}
+              />
+              <span
+                className="absolute top-0 block h-3 w-px bg-current opacity-30"
+                style={{ left: `${threshold * 100}%` }}
+              />
+              <span
+                className="absolute top-1/2 block size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+                style={{
+                  left: `${row.probability * 100}%`,
+                  opacity: row.emphasis ? 1 : 0.7,
+                }}
+              />
+            </span>
+            <span className="plate-data text-right text-[0.9rem]">
+              {(row.probability * 100).toFixed(1)}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="border-t border-current/20" />
+    </div>
+  )
+}
+
+export function ProbabilityStrip({
+  probability,
+  threshold,
+}: {
+  probability: number
+  threshold: number
+}) {
+  return (
+    <span className="relative mx-1 inline-block h-[0.9em] w-[5rem] align-baseline">
+      <span className="absolute inset-x-0 top-1/2 block h-px -translate-y-1/2 bg-current opacity-20" />
+      <span
+        className="absolute top-1/2 block h-px -translate-y-1/2 bg-current opacity-55"
+        style={{ width: `${probability * 100}%` }}
+      />
+      <span
+        className="absolute top-0 block h-full w-px bg-current opacity-35"
+        style={{ left: `${threshold * 100}%` }}
+      />
+      <span
+        className="absolute top-1/2 block size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+        style={{ left: `${probability * 100}%` }}
+      />
+    </span>
+  )
+}

@@ -233,3 +233,45 @@
     @apply bg-background text-foreground;
   }
 }
+
+.plate {
+  font-family: var(--font-plate-serif), Palatino, "Palatino Linotype",
+    "Iowan Old Style", Georgia, serif;
+  font-variant-numeric: lining-nums;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+.plate :is(h1, h2, h3) {
+  font-weight: 400;
+}
+
+/* Numerals inside running prose: serif, so they read as part of the sentence. */
+.plate-figures {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Tracked uppercase labels — section heads, table heads, the input rail. */
+.plate-label {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Numerals read as data: scanned down a column, not read in order. */
+.plate-data {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Chart text. Sets face only — SVG fontSize attributes stay in charge of size. */
+.plate-chart {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.terminal :is(.plate, .plate-label, .plate-data, .plate-chart) {
+  font-family: var(--app-font-mono);
+}
+
+.terminal .plate {
+  font-size: 0.9375rem;
+}
