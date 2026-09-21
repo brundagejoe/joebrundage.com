@@ -59,10 +59,17 @@ export function ToolsHeader() {
   }, [])
 
   React.useEffect(() => {
-    if (pendingTool && pathname === pendingTool.href) {
-      setPendingTool(null)
+    setPendingTool(null)
+  }, [pathname])
+
+  React.useEffect(() => {
+    if (!pendingTool) {
+      return
     }
-  }, [pathname, pendingTool])
+    /* Never leave the search latched if the navigation does not land. */
+    const timer = window.setTimeout(() => setPendingTool(null), 5000)
+    return () => window.clearTimeout(timer)
+  }, [pendingTool])
 
   const filteredTools = React.useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -132,6 +139,10 @@ export function ToolsHeader() {
           >
             Home
           </Link>
+          {/* No onBlur close here: on touch the input blurs the moment a
+              finger lands on an option, and closing then unmounts the option
+              before its click is dispatched — the tap does nothing. Base UI
+              dismisses the popup on outside press by itself. */}
           <div className="min-w-0 flex-1 max-w-3xl">
             <Combobox<ToolDefinition>
               open={open}
@@ -163,8 +174,6 @@ export function ToolsHeader() {
                 )}
                 placeholder="Search tools by code or title (Cmd+K)"
                 showTrigger={false}
-                disabled={pendingTool !== null}
-                onBlur={() => setOpen(false)}
               />
               <ComboboxContent
                 className={cn(
