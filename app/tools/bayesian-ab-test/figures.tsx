@@ -7,6 +7,7 @@ import {
   linePath,
   makeScale,
   niceTicks,
+  round,
   signedPercent,
 } from "@/shared/lib/plot"
 
@@ -462,13 +463,21 @@ export function ProbabilityStaircase({
   rows: { label: string; probability: number; emphasis?: boolean }[]
   threshold: number
 }) {
+  /* Narrow screens give the statement its own line, with the track and value
+     beneath it. Squeezing all three into one row leaves the label a column so
+     thin that every word wraps onto its own line. */
+  const columns =
+    "sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(8rem,17rem)_3.75rem] sm:gap-x-4"
+
   return (
     <div className="mt-6">
-      <div className="plate-label grid grid-cols-[minmax(0,1fr)_minmax(8rem,17rem)_3.75rem] items-end gap-x-4 pb-2 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-55">
+      <div
+        className={`plate-label grid grid-cols-[1fr_auto] items-end gap-x-4 pb-2 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-55 ${columns}`}
+      >
         <span>Statement</span>
-        <span className="relative">
-          <span className="absolute left-0">0%</span>
-          <span className="absolute right-0">100%</span>
+        <span className="relative hidden h-4 sm:block">
+          <span className="absolute bottom-0 left-0">0%</span>
+          <span className="absolute right-0 bottom-0">100%</span>
         </span>
         <span className="text-right">Chance</span>
       </div>
@@ -476,32 +485,34 @@ export function ProbabilityStaircase({
         {rows.map((row) => (
           <div
             key={row.label}
-            className="grid grid-cols-[minmax(0,1fr)_minmax(8rem,17rem)_3.75rem] items-center gap-x-4 py-[0.3rem]"
+            className={`py-2 sm:items-center sm:py-[0.3rem] ${columns}`}
           >
             <span className={row.emphasis ? "" : "opacity-80"}>
               {row.label}
             </span>
-            <span className="relative block h-3">
-              <span className="absolute inset-x-0 top-1/2 block h-px -translate-y-1/2 bg-current opacity-15" />
-              <span
-                className="absolute top-1/2 block h-px -translate-y-1/2 bg-current opacity-45"
-                style={{ left: 0, width: `${row.probability * 100}%` }}
-              />
-              <span
-                className="absolute top-0 block h-3 w-px bg-current opacity-30"
-                style={{ left: `${threshold * 100}%` }}
-              />
-              <span
-                className="absolute top-1/2 block size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
-                style={{
-                  left: `${row.probability * 100}%`,
-                  opacity: row.emphasis ? 1 : 0.7,
-                }}
-              />
-            </span>
-            <span className="plate-data text-right text-[0.9rem]">
-              {(row.probability * 100).toFixed(1)}
-            </span>
+            <div className="mt-1.5 flex items-center gap-3 sm:mt-0 sm:contents">
+              <span className="relative block h-3 flex-1 sm:flex-none">
+                <span className="absolute inset-x-0 top-1/2 block h-px -translate-y-1/2 bg-current opacity-15" />
+                <span
+                  className="absolute top-1/2 block h-px -translate-y-1/2 bg-current opacity-45"
+                  style={{ left: 0, width: `${round(row.probability * 100)}%` }}
+                />
+                <span
+                  className="absolute top-0 block h-3 w-px bg-current opacity-30"
+                  style={{ left: `${round(threshold * 100)}%` }}
+                />
+                <span
+                  className="absolute top-1/2 block size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+                  style={{
+                    left: `${round(row.probability * 100)}%`,
+                    opacity: row.emphasis ? 1 : 0.7,
+                  }}
+                />
+              </span>
+              <span className="plate-data w-[3rem] shrink-0 text-right text-[0.9rem] sm:w-auto">
+                {(row.probability * 100).toFixed(1)}
+              </span>
+            </div>
           </div>
         ))}
       </div>

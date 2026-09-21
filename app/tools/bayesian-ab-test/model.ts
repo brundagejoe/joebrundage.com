@@ -540,9 +540,29 @@ function createPosteriorChartData({
   })
 }
 
-const LIFT_DENSITY_BINS = 120
+const LIFT_DENSITY_POINTS = 160
+const LIFT_INTEGRATION_STEPS = 400
 
-function createLiftDensity(sortedRelativeLifts: number[]): LiftDensityPoint[] {
+/**
+ * Density of B's relative lift over A, computed exactly rather than
+ * histogrammed from the Monte Carlo samples. Writing B = A(1 + r), the ratio
+ * density is f(r) = ∫ a · f_A(a) · f_B(a(1+r)) da, which is one Simpson
+ * integral per grid point. A histogram of 12k draws carries ~10% sampling
+ * noise per bin, and on a wide posterior that reads as a jagged curve.
+ */
+function createLiftDensity({
+  posteriorAlphaA,
+  posteriorBetaA,
+  posteriorAlphaB,
+  posteriorBetaB,
+  sortedRelativeLifts,
+}: {
+  posteriorAlphaA: number
+  posteriorBetaA: number
+  posteriorAlphaB: number
+  posteriorBetaB: number
+  sortedRelativeLifts: number[]
+}): LiftDensityPoint[] {
   const lower = quantile(sortedRelativeLifts, 0.002)
   const upper = quantile(sortedRelativeLifts, 0.998)
   const span = upper - lower
@@ -555,41 +575,54 @@ function createLiftDensity(sortedRelativeLifts: number[]): LiftDensityPoint[] {
     ]
   }
 
-  const binWidth = span / LIFT_DENSITY_BINS
-  const counts = new Array<number>(LIFT_DENSITY_BINS).fill(0)
+  /* A's posterior occupies a narrow slice of [0,1], so integrate only where it
+     has mass instead of sweeping the whole unit interval. */
+  const totalA = posteriorAlphaA + posteriorBetaA
+  const meanA = posteriorAlphaA / totalA
+  const sdA = Math.sqrt(
+    (posteriorAlphaA * posteriorBetaA) / (totalA * totalA * (totalA + 1))
+  )
+  const aLow = Math.max(1e-9, meanA - 10 * sdA)
+  const aHighBase = Math.min(1 - 1e-9, meanA + 10 * sdA)
 
-  for (const lift of sortedRelativeLifts) {
-    if (lift < lower || lift > upper) {
-      continue
+  const lifts = Array.from(
+    { length: LIFT_DENSITY_POINTS },
+    (_, index) => lower + (span * index) / (LIFT_DENSITY_POINTS - 1)
+  )
+
+  const densities = lifts.map((relativeLift) => {
+    const ratio = 1 + relativeLift
+    if (ratio <= 0) {
+      return 0
     }
-    const index = clamp(
-      Math.floor((lift - lower) / binWidth),
-      0,
-      LIFT_DENSITY_BINS - 1
-    )
-    counts[index] += 1
-  }
 
-  const smoothed = counts.map((_, index) => {
+    const aHigh = Math.min(aHighBase, (1 - 1e-9) / ratio)
+    if (aHigh <= aLow) {
+      return 0
+    }
+
+    const step = (aHigh - aLow) / LIFT_INTEGRATION_STEPS
     let total = 0
-    let weight = 0
-    for (let offset = -2; offset <= 2; offset += 1) {
-      const neighbour = counts[index + offset]
-      if (neighbour === undefined) {
-        continue
-      }
-      const kernel = 3 - Math.abs(offset)
-      total += neighbour * kernel
-      weight += kernel
+
+    for (let index = 0; index <= LIFT_INTEGRATION_STEPS; index += 1) {
+      const a = aLow + step * index
+      const weight =
+        index === 0 || index === LIFT_INTEGRATION_STEPS ? 1 : index % 2 ? 4 : 2
+      total +=
+        weight *
+        a *
+        betaPdf(a, posteriorAlphaA, posteriorBetaA) *
+        betaPdf(a * ratio, posteriorAlphaB, posteriorBetaB)
     }
-    return total / weight
+
+    return (total * step) / 3
   })
 
-  const peak = Math.max(...smoothed, 1)
+  const peak = Math.max(...densities, Number.MIN_VALUE)
 
-  return smoothed.map((density, index) => ({
-    relativeLift: lower + binWidth * (index + 0.5),
-    density: density / peak,
+  return lifts.map((relativeLift, index) => ({
+    relativeLift,
+    density: densities[index] / peak,
   }))
 }
 
@@ -885,9 +918,9 @@ function calculateAnalysis({
     probabilityHarmTenPercent: mean(
       relativeLifts.map((lift) => (lift < -0.1 ? 1 : 0))
     ),
-    probabilityTreatmentHarmful: mean(
-      relativeLifts.map((lift) => (lift < 0 ? 1 : 0))
-    ),
+    /* The exact complement of the closed-form win probability. Estimating it
+       separately from the samples left the two halves summing to 99.3%. */
+    probabilityTreatmentHarmful: probabilityABeatsB,
     expectedLossIfShipA,
     expectedLossIfShipB,
     observedAbsoluteDifference: observedRateB - observedRateA,
@@ -913,7 +946,13 @@ function calculateAnalysis({
       samplesA,
       samplesB,
     }),
-    liftDensity: createLiftDensity(sortedRelativeLifts),
+    liftDensity: createLiftDensity({
+      posteriorAlphaA,
+      posteriorBetaA,
+      posteriorAlphaB,
+      posteriorBetaB,
+      sortedRelativeLifts,
+    }),
     liftMedian: quantile(sortedRelativeLifts, 0.5),
     liftInnerIntervalLower: quantile(sortedRelativeLifts, 0.25),
     liftInnerIntervalUpper: quantile(sortedRelativeLifts, 0.75),
