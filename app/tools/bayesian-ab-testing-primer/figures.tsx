@@ -256,13 +256,14 @@ export function PosteriorPairFigure({
   domain?: readonly [number, number]
 }) {
   const width = widthProp ?? (compact ? 200 : 720)
-  const plotTop = compact ? 10 : 26
+  const plotTop = compact ? 10 : 44
   const plotBottom = height - (compact ? 22 : 60)
   const axisY = plotBottom + (compact ? 8 : 16)
 
   const probabilities = points.map((point) => point.probability)
   const extent =
-    domain ?? ([Math.min(...probabilities), Math.max(...probabilities)] as const)
+    domain ??
+    ([Math.min(...probabilities), Math.max(...probabilities)] as const)
   const x = makeScale(extent, [compact ? 4 : 14, width - (compact ? 4 : 14)])
   const y = makeScale([0, maxDensity || 1], [plotBottom, plotTop])
 
@@ -281,6 +282,18 @@ export function PosteriorPairFigure({
 
   const apexOf = (curve: { x: number; y: number }[]) =>
     curve.reduce((best, point) => (point.y < best.y ? point : best))
+  const apexControl = apexOf(control)
+  const apexVariant = apexOf(variant)
+
+  /* Equal rates put both peaks in the same place, which would stack the two
+     direct labels on top of each other. Share an x and offset vertically.
+     The trigger is the width the labels actually need. */
+  const labelSpan = ((controlLabel.length + variantLabel.length) / 2) * 6.8 + 6
+  const stacked = Math.abs(apexControl.x - apexVariant.x) < labelSpan
+  const sharedX = Math.min(
+    Math.max((apexControl.x + apexVariant.x) / 2, 40),
+    width - 40
+  )
 
   return (
     <svg
@@ -313,8 +326,8 @@ export function PosteriorPairFigure({
       {!compact ? (
         <>
           <text
-            x={apexOf(control).x}
-            y={apexOf(control).y - 8}
+            x={stacked ? sharedX : apexControl.x}
+            y={apexControl.y - 8 - (stacked ? 16 : 0)}
             textAnchor="middle"
             fontSize={13}
             fill="currentColor"
@@ -323,8 +336,8 @@ export function PosteriorPairFigure({
             {controlLabel}
           </text>
           <text
-            x={apexOf(variant).x}
-            y={apexOf(variant).y - 8}
+            x={stacked ? sharedX : apexVariant.x}
+            y={apexVariant.y - 8}
             textAnchor="middle"
             fontSize={13}
             fill="currentColor"

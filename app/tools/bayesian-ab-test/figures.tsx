@@ -232,10 +232,10 @@ export function RateDistributionFigure({
   meanB: number
 }) {
   const width = 420
-  const height = 200
-  const plotTop = 26
-  const plotBottom = 148
-  const axisY = 162
+  const height = 212
+  const plotTop = 44
+  const plotBottom = 156
+  const axisY = 170
 
   const rates = points.map((point) => point.conversionRatePercent)
   const peak = Math.max(
@@ -258,28 +258,39 @@ export function RateDistributionFigure({
   }))
   const ticks = niceTicks(Math.min(...rates), Math.max(...rates), 5)
 
+  const apexOf = (curve: { x: number; y: number }[]) =>
+    curve.reduce((best, point) => (point.y < best.y ? point : best))
+  const apexA = apexOf(curveA)
+  const apexB = apexOf(curveB)
+
+  /* With equal rates both curves peak at the same place and the two direct
+     labels land on top of each other. Stack them over the shared peak
+     instead, B nearest the curves since it is the solid one. The trigger is
+     the width the labels actually need, not a fixed guess: measured apex
+     separations run ~4 units for equal rates and 60+ once they differ. */
+  const textA = `A ${(meanA * 100).toFixed(2)}%`
+  const textB = `B ${(meanB * 100).toFixed(2)}%`
+  const labelSpan = ((textA.length + textB.length) / 2) * 6.4 + 6
+  const stacked = Math.abs(apexA.x - apexB.x) < labelSpan
+  const sharedX = Math.min(Math.max((apexA.x + apexB.x) / 2, 36), width - 36)
+
   const label = (
-    name: string,
-    mean: number,
-    curve: { x: number; y: number }[],
-    opacity: number
-  ) => {
-    const apex = curve.reduce((best, point) =>
-      point.y < best.y ? point : best
-    )
-    return (
-      <text
-        x={apex.x}
-        y={apex.y - 8}
-        textAnchor="middle"
-        fontSize={12}
-        fill="currentColor"
-        opacity={opacity}
-      >
-        {name} {mean.toFixed(2)}%
-      </text>
-    )
-  }
+    text: string,
+    apex: { x: number; y: number },
+    opacity: number,
+    stackOffset: number
+  ) => (
+    <text
+      x={stacked ? sharedX : apex.x}
+      y={apex.y - 8 - (stacked ? stackOffset : 0)}
+      textAnchor="middle"
+      fontSize={12}
+      fill="currentColor"
+      opacity={opacity}
+    >
+      {text}
+    </text>
+  )
 
   return (
     <svg
@@ -314,8 +325,8 @@ export function RateDistributionFigure({
         opacity={0.9}
       />
 
-      {label("A", meanA * 100, curveA, 0.7)}
-      {label("B", meanB * 100, curveB, 0.95)}
+      {label(textA, apexA, 0.7, 15)}
+      {label(textB, apexB, 0.95, 0)}
 
       <line
         x1={x(ticks[0])}
