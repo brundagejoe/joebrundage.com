@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation"
 import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { ChangePasswordForm } from "@/app/change-password/change-password-form"
 
 export default async function ChangePasswordPage() {
@@ -14,18 +13,12 @@ export default async function ChangePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 px-6">
-      <div className="mx-auto max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle>Change password</CardTitle>
-            <CardDescription>Update your password while logged in.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChangePasswordForm />
-          </CardContent>
-        </Card>
+    <main className="min-h-screen px-6 pt-24 pb-24">
+      <div className="mx-auto max-w-[24rem]">
+        <h1 className="text-[2.4rem] leading-tight font-normal">Change password</h1>
+        <p className="mt-3 opacity-70">Update your password while logged in.</p>
+        <ChangePasswordForm />
       </div>
-    </div>
+    </main>
   )
 }

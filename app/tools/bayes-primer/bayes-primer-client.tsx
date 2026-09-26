@@ -12,156 +12,106 @@ import {
 } from "@/shared/ui/alert-dialog"
 import { AiFeatureGateButton } from "@/features/ai-feature-gate"
 import { Button } from "@/shared/ui/button"
-import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
+import { Caption, ProbabilityStrip, Row, Section } from "@/shared/ui/plate"
 import { Textarea } from "@/shared/ui/textarea"
 import { useCustomScenarioGeneration } from "@/shared/lib/ai"
 
-type BuiltInExampleKey = "medical" | "spam" | "librarian"
-type ExampleKey = BuiltInExampleKey | "custom"
+import { FrequencyFigure, PriorSweepFigure } from "./figures"
+import { BayesRuleFormula, EvidenceFormula } from "./math"
+import {
+  calculatePosterior,
+  customExampleFromResponse,
+  EXAMPLES,
+  formatCount,
+  formatPercent,
+  formatShortPercent,
+  inputsFromExample,
+  parsePercentInput,
+  populationCounts,
+  POPULATION,
+  sweepPriors,
+  validateInputs,
+  type CustomGenerationResponse,
+  type ExampleConfig,
+  type ExampleKey,
+  type Inputs,
+  type Result,
+} from "./model"
 
-type ExampleConfig = {
-  key: ExampleKey
-  title: string
-  description: string
-  priorPercent: number
-  truePositivePercent: number
-  falsePositivePercent: number
-  priorLabel: string
-  likelihoodLabel: string
-  falsePositiveLabel: string
-}
-
-type Inputs = {
-  priorPercent: string
-  truePositivePercent: string
-  falsePositivePercent: string
-}
-
-type Result = {
-  prior: number
-  likelihood: number
-  falsePositive: number
-  posterior: number
-  evidence: number
-}
-
-type CustomGenerationResponse = {
-  title: string
-  description: string
-  priorLabel: string
-  likelihoodLabel: string
-  falsePositiveLabel: string
-  priorPercent: number
-  truePositivePercent: number
-  falsePositivePercent: number
-}
-
-const EXAMPLES: ExampleConfig[] = [
-  {
-    key: "medical",
-    title: "Medical screening",
-    description:
-      "A rare condition with a good test can still produce many false alarms.",
-    priorPercent: 1,
-    truePositivePercent: 99,
-    falsePositivePercent: 5,
-    priorLabel: "Chance a randomly selected person truly has the condition.",
-    likelihoodLabel:
-      "If a person has the condition, chance the test reports positive.",
-    falsePositiveLabel:
-      "If a person does not have the condition, chance the test still reports positive.",
-  },
-  {
-    key: "spam",
-    title: "Email spam word",
-    description:
-      "A suspicious word appears in most spam, but can still appear in normal mail.",
-    priorPercent: 20,
-    truePositivePercent: 80,
-    falsePositivePercent: 10,
-    priorLabel:
-      "Chance an incoming message is spam before looking at this word.",
-    likelihoodLabel:
-      "If the message is spam, chance this suspicious word appears.",
-    falsePositiveLabel:
-      "If the message is not spam, chance this word still appears.",
-  },
-  {
-    key: "librarian",
-    title: "Librarian stereotype",
-    description:
-      "A quiet, bookish description can feel diagnostic, but base rates still matter.",
-    priorPercent: 5,
-    truePositivePercent: 70,
-    falsePositivePercent: 20,
-    priorLabel: "Chance a random person is a librarian before any description.",
-    likelihoodLabel:
-      "If the person is a librarian, chance they match the description.",
-    falsePositiveLabel:
-      "If the person is not a librarian, chance they still match the description.",
-  },
-]
-
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min
-  }
-  if (value < min) {
-    return min
-  }
-  if (value > max) {
-    return max
-  }
-  return value
-}
-
-function parsePercentInput(value: string): number | null {
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) {
-    return null
-  }
-  return parsed
-}
-
-function formatPercent(value: number): string {
-  return `${(value * 100).toFixed(2)}%`
-}
-
-function formatCount(value: number): string {
-  return Math.round(value).toLocaleString()
-}
-
-function calculatePosterior({
-  priorPercent,
-  truePositivePercent,
-  falsePositivePercent,
+function PercentControl({
+  id,
+  label,
+  hint,
+  value,
+  onChange,
 }: {
-  priorPercent: number
-  truePositivePercent: number
-  falsePositivePercent: number
-}): Result {
-  const prior = clamp(priorPercent / 100, 0.000001, 0.999999)
-  const likelihood = clamp(truePositivePercent / 100, 0.000001, 0.999999)
-  const falsePositive = clamp(falsePositivePercent / 100, 0.000001, 0.999999)
-  const evidence = prior * likelihood + (1 - prior) * falsePositive
-  const posterior = (prior * likelihood) / evidence
+  id: string
+  label: string
+  hint: string
+  value: string
+  onChange: (next: string) => void
+}) {
+  const parsed = parsePercentInput(value)
+  const sliderValue = parsed === null ? 0 : Math.min(Math.max(parsed, 0), 100)
 
-  return {
-    prior,
-    likelihood,
-    falsePositive,
-    posterior,
-    evidence,
-  }
+  return (
+    <div className="grid content-start gap-1">
+      <div className="flex items-baseline justify-between gap-3">
+        <label
+          htmlFor={id}
+          className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.06em] opacity-60"
+        >
+          {label}
+        </label>
+        <span className="plate-data flex items-baseline text-[0.85rem]">
+          <input
+            id={id}
+            inputMode="decimal"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            aria-describedby={`${id}-hint`}
+            className="w-11 border-b border-current/20 bg-transparent text-right outline-none focus:border-current/70"
+            required
+          />
+          <span className="ml-0.5 opacity-60">%</span>
+        </span>
+      </div>
+      <input
+        type="range"
+        className="plate-range"
+        aria-label={label}
+        min={0}
+        max={100}
+        step={0.1}
+        value={sliderValue}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <p id={`${id}-hint`} className="text-[0.84rem] leading-snug opacity-60">
+        {hint}
+      </p>
+    </div>
+  )
 }
 
-function getInitialResult(): Result {
-  return calculatePosterior({
-    priorPercent: EXAMPLES[0].priorPercent,
-    truePositivePercent: EXAMPLES[0].truePositivePercent,
-    falsePositivePercent: EXAMPLES[0].falsePositivePercent,
-  })
+function ControlStrip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mt-5 grid gap-x-8 gap-y-5 border-t border-current/20 pt-4 sm:grid-cols-3">
+      {children}
+    </div>
+  )
+}
+
+function Prose({ children }: { children: React.ReactNode }) {
+  return <div className="max-w-[38rem] space-y-4">{children}</div>
+}
+
+function countNoun(value: number, noun: string): string {
+  return `${formatCount(value)} ${noun}${Math.round(value) === 1 ? "" : "s"}`
+}
+
+function Term({ children }: { children: React.ReactNode }) {
+  return <span className="italic">{children}</span>
 }
 
 type BayesPrimerClientProps = {
@@ -173,13 +123,13 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
     React.useState<ExampleKey>("medical")
   const [customExample, setCustomExample] =
     React.useState<ExampleConfig | null>(null)
-  const [inputs, setInputs] = React.useState<Inputs>({
-    priorPercent: String(EXAMPLES[0].priorPercent),
-    truePositivePercent: String(EXAMPLES[0].truePositivePercent),
-    falsePositivePercent: String(EXAMPLES[0].falsePositivePercent),
-  })
+  const [inputs, setInputs] = React.useState<Inputs>(() =>
+    inputsFromExample(EXAMPLES[0])
+  )
   const [error, setError] = React.useState<string | null>(null)
-  const [result, setResult] = React.useState<Result>(getInitialResult)
+  const [result, setResult] = React.useState<Result>(() =>
+    calculatePosterior(EXAMPLES[0])
+  )
 
   const customGeneration =
     useCustomScenarioGeneration<CustomGenerationResponse>({
@@ -199,57 +149,22 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
 
   const handleLoadExample = (example: ExampleConfig) => {
     setActiveExample(example.key)
-    setInputs({
-      priorPercent: String(example.priorPercent),
-      truePositivePercent: String(example.truePositivePercent),
-      falsePositivePercent: String(example.falsePositivePercent),
-    })
+    setInputs(inputsFromExample(example))
     setError(null)
-    setResult(
-      calculatePosterior({
-        priorPercent: example.priorPercent,
-        truePositivePercent: example.truePositivePercent,
-        falsePositivePercent: example.falsePositivePercent,
-      })
-    )
+    setResult(calculatePosterior(example))
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleInputChange = (field: keyof Inputs) => (next: string) => {
+    const nextInputs = { ...inputs, [field]: next }
+    setInputs(nextInputs)
 
-    const priorPercent = parsePercentInput(inputs.priorPercent)
-    const truePositivePercent = parsePercentInput(inputs.truePositivePercent)
-    const falsePositivePercent = parsePercentInput(inputs.falsePositivePercent)
-
-    if (
-      priorPercent === null ||
-      truePositivePercent === null ||
-      falsePositivePercent === null
-    ) {
-      setError("All fields must be valid numbers.")
-      return
+    const validated = validateInputs(nextInputs)
+    if (validated.ok) {
+      setError(null)
+      setResult(validated.result)
+    } else {
+      setError(validated.error)
     }
-
-    if (
-      priorPercent < 0 ||
-      priorPercent > 100 ||
-      truePositivePercent < 0 ||
-      truePositivePercent > 100 ||
-      falsePositivePercent < 0 ||
-      falsePositivePercent > 100
-    ) {
-      setError("All values must stay between 0 and 100.")
-      return
-    }
-
-    setError(null)
-    setResult(
-      calculatePosterior({
-        priorPercent,
-        truePositivePercent,
-        falsePositivePercent,
-      })
-    )
   }
 
   const handleGenerateCustom = async (
@@ -259,26 +174,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
 
     try {
       const data = await customGeneration.submit()
-
-      const generatedExample: ExampleConfig = {
-        key: "custom",
-        title: String(data.title ?? "Custom"),
-        description: String(data.description ?? "Custom scenario"),
-        priorLabel: String(
-          data.priorLabel ?? "Prior chance before seeing evidence."
-        ),
-        likelihoodLabel: String(
-          data.likelihoodLabel ??
-            "If the claim is true, chance the signal appears."
-        ),
-        falsePositiveLabel: String(
-          data.falsePositiveLabel ??
-            "If the claim is false, chance the signal still appears."
-        ),
-        priorPercent: Number(data.priorPercent ?? 10),
-        truePositivePercent: Number(data.truePositivePercent ?? 80),
-        falsePositivePercent: Number(data.falsePositivePercent ?? 15),
-      }
+      const generatedExample = customExampleFromResponse(data)
 
       setCustomExample(generatedExample)
       handleLoadExample(generatedExample)
@@ -287,36 +183,84 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
     }
   }
 
-  const truePositivesPer10k = result.prior * result.likelihood * 10000
-  const falseNegativesPer10k = result.prior * (1 - result.likelihood) * 10000
-  const falsePositivesPer10k = (1 - result.prior) * result.falsePositive * 10000
-  const trueNegativesPer10k =
-    (1 - result.prior) * (1 - result.falsePositive) * 10000
-  const positivesPer10k = truePositivesPer10k + falsePositivesPer10k
+  const counts = populationCounts(result)
+  const sweep = React.useMemo(
+    () => sweepPriors(result.likelihood, result.falsePositive),
+    [result.likelihood, result.falsePositive]
+  )
+  const oneIn =
+    counts.truePositives > 0
+      ? counts.positives / counts.truePositives
+      : Infinity
+  const likelihoodRatio = result.likelihood / result.falsePositive
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-4xl px-6 py-8">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl font-semibold">Bayes Primer</h2>
-          <p className="text-muted-foreground leading-relaxed mt-2">
-            This tool is for intuition: start with a prior belief, observe
-            evidence, then see how Bayes&apos; rule updates the belief.
+      <article className="mx-auto max-w-[64rem] px-6 py-10">
+        <Row
+          note={
+            <>
+              The figures follow the numbers under them. Type a value or drag
+              its slider and every figure and sentence on the page updates.
+            </>
+          }
+        >
+          <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+            Tools
           </p>
+          <h1 className="mt-3 text-[2.4rem] leading-tight">Bayes Primer</h1>
+          <p className="mt-4 max-w-[38rem]">
+            Start with a prior belief, observe evidence, and let Bayes&apos;
+            rule update the belief. In the {selectedExample.title.toLowerCase()}{" "}
+            scenario, seeing the evidence moves the chance of <Term>H</Term>{" "}
+            from{" "}
+            <span className="plate-figures">{formatPercent(result.prior)}</span>{" "}
+            to{" "}
+            <span className="whitespace-nowrap">
+              <span className="plate-figures">
+                {formatPercent(result.posterior)}
+              </span>
+              <ProbabilityStrip
+                probability={result.posterior}
+                threshold={result.prior}
+              />
+              .
+            </span>
+          </p>
+        </Row>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+        <Section>Scenario</Section>
+        <Row
+          note={
+            <>
+              Custom asks a language model to write the three questions and
+              starting numbers for a situation you describe.
+            </>
+          }
+        >
+          <div className="mt-4 flex flex-wrap gap-2">
             {EXAMPLES.map((example) => (
               <Button
                 key={example.key}
                 type="button"
+                size="sm"
                 variant={activeExample === example.key ? "default" : "outline"}
+                aria-pressed={activeExample === example.key}
+                className={
+                  activeExample === example.key ? "border-current" : undefined
+                }
                 onClick={() => handleLoadExample(example)}
               >
                 {example.title}
               </Button>
             ))}
             <AiFeatureGateButton
+              size="sm"
               variant={activeExample === "custom" ? "default" : "outline"}
+              aria-pressed={activeExample === "custom"}
+              className={
+                activeExample === "custom" ? "border-current" : undefined
+              }
               canUseAi={canUseAiCustom}
               onAllowedClick={customGeneration.openDialog}
               featureLabel="custom Bayes scenarios"
@@ -324,124 +268,151 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
               {customExample?.title || "Custom"}
             </AiFeatureGateButton>
           </div>
+          <p className="mt-4 max-w-[38rem]">{selectedExample.description}</p>
+        </Row>
 
-          <p className="mt-3 text-sm text-muted-foreground">
-            {selectedExample.description}
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="prior-input">Prior P(H) %</Label>
-              <p className="text-xs text-muted-foreground">
-                {selectedExample.priorLabel}
-              </p>
-              <Input
-                id="prior-input"
-                inputMode="decimal"
-                value={inputs.priorPercent}
-                onChange={(event) =>
-                  setInputs((prev) => ({
-                    ...prev,
-                    priorPercent: event.target.value,
-                  }))
-                }
-                required
-              />
+        <Section>Ten thousand cases</Section>
+        <Row
+          note={
+            <>
+              Counting cases instead of multiplying probabilities is the whole
+              trick. The tick on the middle bar marks where <Term>H</Term> ends,
+              so each kind of positive stays under the group it came from.
+            </>
+          }
+        >
+          <Prose>
+            <p className="mt-4">
+              Picture {formatCount(POPULATION)} cases. Some fraction have{" "}
+              <Term>H</Term>, the thing you care about. The evidence shows up
+              often among those cases and, if it is any good, rarely among the
+              rest. After you see it, only the cases that show it are still in
+              play.
+            </p>
+          </Prose>
+          <div className="mt-8">
+            <div className="hidden sm:block">
+              <FrequencyFigure result={result} />
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="true-positive-input">
-                Evidence sensitivity P(E|H) %
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                {selectedExample.likelihoodLabel}
-              </p>
-              <Input
-                id="true-positive-input"
-                inputMode="decimal"
-                value={inputs.truePositivePercent}
-                onChange={(event) =>
-                  setInputs((prev) => ({
-                    ...prev,
-                    truePositivePercent: event.target.value,
-                  }))
-                }
-                required
-              />
+            <div className="sm:hidden">
+              <FrequencyFigure result={result} width={380} />
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="false-positive-input">
-                False positive rate P(E|not H) %
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                {selectedExample.falsePositiveLabel}
-              </p>
-              <Input
-                id="false-positive-input"
-                inputMode="decimal"
-                value={inputs.falsePositivePercent}
-                onChange={(event) =>
-                  setInputs((prev) => ({
-                    ...prev,
-                    falsePositivePercent: event.target.value,
-                  }))
-                }
-                required
-              />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button type="submit">Update Belief</Button>
-            </div>
-          </form>
-
+          </div>
+          <ControlStrip>
+            <PercentControl
+              id="prior-input"
+              label="Prior P(H)"
+              hint={selectedExample.priorLabel}
+              value={inputs.priorPercent}
+              onChange={handleInputChange("priorPercent")}
+            />
+            <PercentControl
+              id="true-positive-input"
+              label="Hit rate P(E|H)"
+              hint={selectedExample.likelihoodLabel}
+              value={inputs.truePositivePercent}
+              onChange={handleInputChange("truePositivePercent")}
+            />
+            <PercentControl
+              id="false-positive-input"
+              label="False alarm P(E|¬H)"
+              hint={selectedExample.falsePositiveLabel}
+              value={inputs.falsePositivePercent}
+              onChange={handleInputChange("falsePositivePercent")}
+            />
+          </ControlStrip>
           {error ? (
-            <p className="mt-4 text-sm text-destructive">{error}</p>
+            <p role="alert" className="mt-3 text-[0.9rem] text-destructive">
+              {error}
+            </p>
           ) : null}
+          <Caption>
+            The top bar splits the cases by <Term>H</Term>; the middle keeps
+            only those that show the evidence. The{" "}
+            {countNoun(counts.falseNegatives, "false negative")} and{" "}
+            {countNoun(counts.trueNegatives, "true negative")} drop out. The
+            bottom bar stretches the survivors back to full width, and its dark
+            share is the posterior:{" "}
+            {Number.isFinite(oneIn)
+              ? `about 1 in ${oneIn < 10 ? oneIn.toFixed(1) : formatCount(oneIn)} positives actually has H.`
+              : "no positive has H."}
+          </Caption>
+        </Row>
 
-          <div className="mt-6 flex flex-col gap-3 text-sm border-t border-border pt-4">
-            <p>
-              <span className="font-medium">Prior belief P(H):</span>{" "}
-              {formatPercent(result.prior)}
+        <Section>The rule</Section>
+        <Row
+          note={
+            <>
+              <Term>P(E)</Term> is the middle bar&apos;s filled length as a
+              share of the whole bar: everyone who shows the evidence, with or
+              without <Term>H</Term>.
+            </>
+          }
+        >
+          <Prose>
+            <p className="mt-4">
+              The bottom bar is Bayes&apos; rule drawn to scale. The posterior
+              is the true positives divided by everyone who shows the evidence:
             </p>
+          </Prose>
+          <BayesRuleFormula />
+          <Prose>
             <p>
-              <span className="font-medium">Posterior P(H|E):</span>{" "}
-              {formatPercent(result.posterior)}
+              The denominator counts both kinds of positive, those with{" "}
+              <Term>H</Term> and those without:
             </p>
+          </Prose>
+          <EvidenceFormula />
+          <Prose>
             <p>
-              <span className="font-medium">Bayes denominator P(E):</span>{" "}
-              {formatPercent(result.evidence)}
+              Here that comes to{" "}
+              <span className="plate-figures">
+                {formatPercent(result.evidence)}
+              </span>
+              . A rare <Term>H</Term> makes the second term large even when the
+              false positive rate is small, which is why a good test for a rare
+              condition still raises many false alarms.
             </p>
-          </div>
+          </Prose>
+        </Row>
 
-          <div className="mt-6 rounded-md border border-border p-4 text-sm">
-            <p className="font-medium">How the update works</p>
-            <p className="mt-2 text-muted-foreground">
-              Bayes rule: P(H|E) = P(E|H) * P(H) / P(E)
+        <Section>How much the prior matters</Section>
+        <Row
+          note={
+            <>
+              When <Term>P(E|H)</Term> is below <Term>P(E|¬H)</Term>, the
+              evidence counts against <Term>H</Term> and the curve drops below
+              the diagonal.
+            </>
+          }
+        >
+          <Prose>
+            <p className="mt-4">
+              Hold the evidence fixed and vary only the prior. The same evidence
+              that barely moves a rare hypothesis can make a common one nearly
+              certain.
             </p>
-            <p className="mt-2">
-              In this setup, <span className="font-medium">P(E)</span> = P(E|H)
-              * P(H) + P(E|not H) * (1 - P(H)).
-            </p>
-            <p className="mt-2 text-muted-foreground">
-              Out of 10,000 cases, about {formatCount(positivesPer10k)} test
-              positive.
-            </p>
-            <p className="mt-1 text-muted-foreground">
-              Of those positives, about {formatCount(truePositivesPer10k)} are
-              true positives and about {formatCount(falsePositivesPer10k)} are
-              false positives.
-            </p>
-            <p className="mt-1 text-muted-foreground">
-              Full 10,000-case breakdown: {formatCount(truePositivesPer10k)}{" "}
-              true positives, {formatCount(falsePositivesPer10k)} false
-              positives, {formatCount(falseNegativesPer10k)} false negatives,
-              and {formatCount(trueNegativesPer10k)} true negatives.
-            </p>
+          </Prose>
+          <div className="mt-8">
+            <div className="hidden sm:block">
+              <PriorSweepFigure points={sweep} result={result} />
+            </div>
+            <div className="sm:hidden">
+              <PriorSweepFigure points={sweep} result={result} width={380} />
+            </div>
           </div>
-        </div>
-      </section>
+          <Caption>
+            Posterior against prior for this evidence, which is{" "}
+            {likelihoodRatio >= 1
+              ? `${likelihoodRatio < 10 ? likelihoodRatio.toFixed(1) : formatCount(likelihoodRatio)} times as likely with H as without`
+              : `${(1 / likelihoodRatio).toFixed(1)} times as likely without H as with`}
+            . The dashed diagonal is no update at all; the vertical segment is
+            how far the evidence moves the current prior of{" "}
+            {formatShortPercent(result.prior)}. The prior axis is logarithmic so
+            that rare hypotheses, where the base rate matters most, get room.
+          </Caption>
+        </Row>
+      </article>
 
       <AlertDialog
         open={customGeneration.isDialogOpen}
@@ -477,7 +448,9 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
               />
             </div>
             {customGeneration.error ? (
-              <p className="text-sm text-destructive">{customGeneration.error}</p>
+              <p className="text-sm text-destructive">
+                {customGeneration.error}
+              </p>
             ) : null}
             <AlertDialogFooter>
               <AlertDialogCancel disabled={customGeneration.isGenerating}>

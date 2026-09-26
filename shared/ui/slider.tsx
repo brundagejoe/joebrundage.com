@@ -23,16 +23,16 @@ function Slider({
       >
         <SliderPrimitive.Track
           data-slot="slider-track"
-          className="bg-input relative h-2 w-full overflow-hidden rounded-full"
+          className="relative h-px w-full bg-current/20"
         >
           <SliderPrimitive.Indicator
             data-slot="slider-indicator"
-            className="bg-primary absolute h-full"
+            className="absolute h-full bg-current/60"
           />
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
-          className="border-primary bg-background ring-offset-background focus-visible:ring-ring/50 block size-4 rounded-full border shadow-sm transition-colors outline-none focus-visible:ring-[3px] data-disabled:pointer-events-none data-disabled:opacity-50"
+          className="block size-3 rounded-full bg-current transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 data-disabled:pointer-events-none data-disabled:opacity-50"
         />
       </SliderPrimitive.Control>
     </SliderPrimitive.Root>

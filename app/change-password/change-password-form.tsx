@@ -60,13 +60,13 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
-      <FieldSet className="gap-4">
-        <FieldGroup className="gap-4">
+    <form className="mt-10 space-y-8" onSubmit={handleSubmit}>
+      <FieldSet>
+        <FieldGroup className="gap-6">
           <div className="space-y-3">
             <Field className="gap-2">
               <FieldLabel htmlFor="password">New password</FieldLabel>
-              <InputGroup className="rounded-md">
+              <InputGroup>
                 <InputGroupInput
                   id="password"
                   type={showPasswords ? "text" : "password"}
@@ -79,7 +79,6 @@ export function ChangePasswordForm() {
                   <InputGroupButton
                     aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
                     onClick={() => setShowPasswords((current) => !current)}
-                    className="rounded-md"
                     size="icon-xs"
                   >
                     {showPasswords ? <EyeOff /> : <Eye />}
@@ -90,7 +89,7 @@ export function ChangePasswordForm() {
 
             <Field data-invalid={!!confirmPasswordError} className="gap-2">
               <FieldLabel htmlFor="confirm-password">Confirm new password</FieldLabel>
-              <InputGroup className="rounded-md">
+              <InputGroup>
                 <InputGroupInput
                   id="confirm-password"
                   type={showPasswords ? "text" : "password"}
@@ -104,7 +103,6 @@ export function ChangePasswordForm() {
                   <InputGroupButton
                     aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
                     onClick={() => setShowPasswords((current) => !current)}
-                    className="rounded-md"
                     size="icon-xs"
                   >
                     {showPasswords ? <EyeOff /> : <Eye />}
@@ -129,7 +127,7 @@ export function ChangePasswordForm() {
         </FieldGroup>
       </FieldSet>
 
-      <Button disabled={isSubmitting} type="submit" className="w-full rounded-md">
+      <Button disabled={isSubmitting} type="submit" className="w-full">
         {isSubmitting ? "Updating..." : "Update password"}
       </Button>
     </form>

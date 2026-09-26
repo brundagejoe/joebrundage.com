@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Inter } from "next/font/google"
+import { EB_Garamond, Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { AppQueryProvider } from "@/shared/lib/query"
 import {
@@ -11,6 +11,12 @@ import { HeaderRouter } from "@/widgets/header"
 import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+
+const ebGaramond = EB_Garamond({
+  subsets: ["latin"],
+  variable: "--font-plate-serif",
+  display: "swap",
+})
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +39,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -69,9 +79,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="plate antialiased">
         <AppQueryProvider>
           <ThemeProvider>
             <HeaderRouter />

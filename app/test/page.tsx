@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
 import { createSupabaseServerClient } from "@/shared/lib/supabase-server"
 import { Link } from "@/shared/ui/link"
 
@@ -14,23 +13,15 @@ export default async function TestPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 px-6">
-      <div className="mx-auto max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Success</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              You are logged in and allowed to view this protected test page.
-              {" "}
-              You can also{" "}
-              <Link href="/change-password">change your password</Link> while
-              logged in.
-            </p>
-          </CardContent>
-        </Card>
+    <main className="min-h-screen px-6 pt-24 pb-24">
+      <div className="mx-auto max-w-[38rem]">
+        <h1 className="text-[2.4rem] leading-tight font-normal">Success</h1>
+        <p className="mt-3 opacity-70">
+          You are logged in and allowed to view this protected test page. You
+          can also <Link href="/change-password">change your password</Link>{" "}
+          while logged in.
+        </p>
       </div>
-    </div>
+    </main>
   )
 }

@@ -1,6 +1,7 @@
 # Data Display Guide
 
-How to build a tool page that presents quantitative results, in the house style.
+The house style for every page on the site, and in detail how to build a page
+that presents quantitative results.
 Two reference implementations: `app/tools/bayesian-ab-test/` (a calculator) and
 `app/tools/bayesian-ab-testing-primer/` (a long-form explainer). Read the
 closer one before building a new page.
@@ -9,11 +10,19 @@ Shared pieces live in `shared/ui/plate.tsx` (`Section`, `Row`, `Caption`,
 `ProbabilityStrip`) and `shared/lib/plot.ts` (scales, ticks, path builders).
 Use them rather than copying — a third copy is how a style rots.
 
-This style is **opt-in**. Most tools use the default shadcn look described in
-`app/tools/AGENTS.md`. Reach for this one when a page's job is to *show a
-result and explain it* — a calculator, a model readout, an analysis. Don't use
-it for form-heavy utilities, converters, or anything whose output is a single
-value.
+This style applies site-wide. The root layout loads EB Garamond and puts
+`.plate` on `<body>`, and the primitives in `shared/ui` are already restyled to
+match (monochrome, square, hairline inputs), so a page gets the typography and
+controls without doing anything. What varies is how far a page goes:
+
+- **Result pages** (calculators, model readouts, explainers) take the full
+  treatment below: a reading column, figures, captions, a margin.
+- **Form-heavy and single-value pages** (converters, auth, Bookclub) take a
+  light pass: no boxes, `Section` labels and hairlines for structure, and the
+  shared primitives for controls. Don't invent a figure for a page whose
+  output is one number.
+
+There is no `Card` component. It was deleted on purpose; don't bring it back.
 
 The principles come from Edward Tufte, *The Visual Display of Quantitative
 Information*. Where a rule below has a reason attached, keep the reason: it is
@@ -131,7 +140,7 @@ column you scan for differences is data.
 
 | Class | Face | Use for |
 |---|---|---|
-| `.plate` | EB Garamond | Page wrapper. Sets the serif, lining figures, base size |
+| `.plate` | EB Garamond | On `<body>` in the root layout. Sets the serif, lining figures, base size |
 | `.plate-figures` | serif | Numerals **inside running prose** |
 | `.plate-label` | Inter | Tracked uppercase labels: section heads, table heads, rail |
 | `.plate-data` | Inter | Numerals in tables, input values, scanned columns |
@@ -170,13 +179,13 @@ Use opacity to rank things: data ~0.75–1.0, rules and axes ~0.35, secondary
 fills ~0.1. Hue should encode something or be absent. The reference page uses
 none.
 
-## 10. Charts: hand-rolled SVG, not Recharts
+## 10. Charts: hand-rolled SVG
 
-Recharts is fine for a conventional dashboard chart and is still the right
-choice elsewhere in this repo. It fights you on everything in this guide —
-range frames, direct labels, suppressing the grid, annotating in-plot.
+The repo no longer depends on a charting library. Recharts was removed because
+it fought everything in this guide — range frames, direct labels, suppressing
+the grid, annotating in-plot.
 
-For a figure in this style, write the SVG. The pattern is in `figures.tsx`:
+Write the SVG. The pattern is in `figures.tsx`:
 
 - `makeScale(domain, range)` — a linear scale, ~4 lines
 - `niceTicks(lower, upper, target)` — human-readable tick positions
@@ -254,8 +263,7 @@ explainer                          [44rem reading column]  [12rem margin]
 Controls for an explainer sit in a `ControlStrip` directly under their figure,
 not in a sidebar card — the figure wants the width. Use a native
 `<input type="range" class="plate-range">`: `accent-color: currentColor` keeps
-it monochrome, where the shared `Slider` would put the only saturated color on
-the page.
+it monochrome and it needs no client-side primitive.
 
 Split the file. `model.ts` for math and types, `figures.tsx` for the SVG,
 `page.tsx` for layout and copy — plus `math.tsx` when there is MathML, because

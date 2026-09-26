@@ -5,11 +5,15 @@ import * as React from "react"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
+import { Section } from "@/shared/ui/plate"
 
 type Result = {
   exact: number
   approximate: number
 }
+
+const LABEL_CLASS =
+  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
 
 function parseNonNegativeInteger(value: string): number | null {
   if (!/^\d+$/.test(value.trim())) {
@@ -112,19 +116,22 @@ export default function HashCollisionsToolPage() {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-4xl px-6 py-8">
-        <div className="max-w-xl">
-          <h2 className="text-2xl font-semibold">
-            Hash Collision Probability Tool
-          </h2>
-          <p className="text-muted-foreground leading-relaxed mt-2">
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="max-w-[44rem]">
+          <h1 className="text-[2.4rem] leading-tight">
+            Hash Collision Probability
+          </h1>
+          <p className="mt-4 max-w-[38rem]">
             Enter N buckets and K items. This uses the birthday-problem formulas
             from Kevin Galligan&apos;s article.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="n-input">N (number of buckets)</Label>
+          <Section>Inputs</Section>
+          <form onSubmit={handleSubmit} className="mt-4 grid gap-5">
+            <div className="grid gap-1">
+              <Label htmlFor="n-input" className={LABEL_CLASS}>
+                N (number of buckets)
+              </Label>
               <Input
                 id="n-input"
                 inputMode="numeric"
@@ -135,8 +142,10 @@ export default function HashCollisionsToolPage() {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="k-input">K (number of items)</Label>
+            <div className="grid gap-1">
+              <Label htmlFor="k-input" className={LABEL_CLASS}>
+                K (number of items)
+              </Label>
               <Input
                 id="k-input"
                 inputMode="numeric"
@@ -147,29 +156,48 @@ export default function HashCollisionsToolPage() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div>
               <Button type="submit">Calculate</Button>
             </div>
           </form>
 
           {error ? (
-            <p className="mt-4 text-sm text-destructive">{error}</p>
+            <p className="mt-4 text-[0.9rem] text-destructive">{error}</p>
           ) : null}
 
           {result ? (
-            <div className="mt-6 flex flex-col gap-3 text-sm border-t border-border pt-4">
-              <p>
-                <span className="font-medium">Probability (exact):</span>{" "}
-                {formatProbability(result.exact)}
-              </p>
-              <p>
-                <span className="font-medium">Probability (approximate):</span>{" "}
-                {formatProbability(result.approximate)}
-              </p>
-            </div>
+            <>
+              <Section>Probability of a collision</Section>
+              <table className="plate-data mt-3 w-full text-[0.95rem]">
+                <tbody>
+                  <tr className="border-b border-current/20">
+                    <th
+                      scope="row"
+                      className="py-2 pr-5 text-left font-normal opacity-70"
+                    >
+                      Exact
+                    </th>
+                    <td className="py-2 text-right">
+                      {formatProbability(result.exact)}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-current/20">
+                    <th
+                      scope="row"
+                      className="py-2 pr-5 text-left font-normal opacity-70"
+                    >
+                      Approximate
+                    </th>
+                    <td className="py-2 text-right">
+                      {formatProbability(result.approximate)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
           ) : null}
         </div>
-      </section>
+      </div>
     </div>
   )
 }

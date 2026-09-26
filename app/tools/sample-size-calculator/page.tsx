@@ -2,221 +2,60 @@
 
 import * as React from "react"
 
-import { Input } from "@/shared/ui/input"
-import { Label } from "@/shared/ui/label"
-import { Slider } from "@/shared/ui/slider"
+import { cn } from "@/shared/lib/utils"
+import { Caption, Row, Section } from "@/shared/ui/plate"
 
-type MdeMode = "absolute" | "relative"
+import { SampleSizeCurveFigure } from "./figures"
+import {
+  ALPHA_MAX,
+  ALPHA_MIN,
+  calculateBounds,
+  calculateSampleSize,
+  calculateSampleSizeCurve,
+  clamp,
+  DEFAULT_STATE,
+  formatCount,
+  formatMde,
+  formatPercent,
+  MDE_MODES,
+  parseNumberInput,
+  PERCENT_INPUT_MAX,
+  PERCENT_INPUT_MIN,
+  POWER_MAX,
+  POWER_MIN,
+  type CalculatorState,
+} from "./model"
 
-type CalculatorState = {
-  baselinePercent: number
-  mdePercent: number
-  mdeMode: MdeMode
-  powerPercent: number
-  alphaPercent: number
-}
-
-type PercentSliderConfig = {
-  key: string
-  label: string
-  min: number
-  max: number
-  step: number
-  value: number
-  onValueChange: (value: number) => void
-  formatValue: (value: number) => string
-}
-
-const MIN_PROBABILITY = 1e-6
-const MAX_PROBABILITY = 1 - MIN_PROBABILITY
-const PERCENT_INPUT_MIN = 0.01
-const PERCENT_INPUT_MAX = 99.99
-const POWER_MIN = 50
-const POWER_MAX = 99
-const ALPHA_MIN = 0.1
-const ALPHA_MAX = 20
-
-const DEFAULT_STATE: CalculatorState = {
-  baselinePercent: 20,
-  mdePercent: 10,
-  mdeMode: "relative",
-  powerPercent: 80,
-  alphaPercent: 5,
-}
-
-const MDE_MODES: Array<{ value: MdeMode; label: string }> = [
-  { value: "absolute", label: "Absolute" },
-  { value: "relative", label: "Relative" },
-]
-
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min
-  }
-  if (value < min) {
-    return min
-  }
-  if (value > max) {
-    return max
-  }
-  return value
-}
-
-function inverseNormalCdf(p: number): number {
-  // Acklam's approximation for the inverse standard normal CDF.
-  const a = [
-    -39.69683028665376,
-    220.9460984245205,
-    -275.9285104469687,
-    138.357751867269,
-    -30.66479806614716,
-    2.506628277459239,
-  ]
-  const b = [
-    -54.47609879822406,
-    161.5858368580409,
-    -155.6989798598866,
-    66.80131188771972,
-    -13.28068155288572,
-  ]
-  const c = [
-    -0.007784894002430293,
-    -0.3223964580411365,
-    -2.400758277161838,
-    -2.549732539343734,
-    4.374664141464968,
-    2.938163982698783,
-  ]
-  const d = [
-    0.007784695709041462,
-    0.3224671290700398,
-    2.445134137142996,
-    3.754408661907416,
-  ]
-
-  const probability = clamp(p, MIN_PROBABILITY, MAX_PROBABILITY)
-  const pLow = 0.02425
-  const pHigh = 1 - pLow
-
-  if (probability < pLow) {
-    const q = Math.sqrt(-2 * Math.log(probability))
-    return (
-      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
-      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
-    )
-  }
-
-  if (probability > pHigh) {
-    const q = Math.sqrt(-2 * Math.log(1 - probability))
-    return -(
-      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
-      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
-    )
-  }
-
-  const q = probability - 0.5
-  const r = q * q
-  return (
-    (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q
-  ) /
-    (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
-}
-
-function formatPercent(value: number): string {
-  const rounded = Math.round(value * 100) / 100
-  return `${rounded.toLocaleString()}%`
-}
-
-function parseNumberInput(value: string): number | null {
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) {
-    return null
-  }
-  return parsed
-}
-
-function normalizeInputValue(value: number): string {
-  return String(value)
-}
-
-function calculateSampleSize(state: CalculatorState): number {
-  const baseline = clamp(
-    state.baselinePercent / 100,
-    MIN_PROBABILITY,
-    MAX_PROBABILITY
-  )
-  const alpha = clamp(state.alphaPercent / 100, MIN_PROBABILITY, 0.5)
-  const power = clamp(state.powerPercent / 100, 0.5, MAX_PROBABILITY)
-  const zAlpha = inverseNormalCdf(1 - alpha / 2)
-  const zPower = inverseNormalCdf(power)
-
-  const bounds = calculateBounds(state)
-  const alternatives = [
-    clamp(bounds.lower / 100, MIN_PROBABILITY, MAX_PROBABILITY),
-    clamp(bounds.upper / 100, MIN_PROBABILITY, MAX_PROBABILITY),
-  ]
-
-  let required = 1
-  for (const alt of alternatives) {
-    const delta = Math.abs(alt - baseline)
-    if (delta < MIN_PROBABILITY) {
-      continue
-    }
-
-    const nullStd = Math.sqrt(2 * baseline * (1 - baseline))
-    const altStd = Math.sqrt(baseline * (1 - baseline) + alt * (1 - alt))
-    const n = (zAlpha * nullStd + zPower * altStd) ** 2 / delta ** 2
-    required = Math.max(required, Math.max(1, Math.round(n)))
-  }
-
-  return required
-}
-
-function calculateBounds(state: CalculatorState): {
-  lower: number
-  upper: number
-} {
-  const baseline = clamp(
-    state.baselinePercent / 100,
-    MIN_PROBABILITY,
-    MAX_PROBABILITY
-  )
-  if (state.mdeMode === "absolute") {
-    const delta = state.mdePercent / 100
-    return {
-      lower: clamp((baseline - delta) * 100, 0, 100),
-      upper: clamp((baseline + delta) * 100, 0, 100),
-    }
-  }
-
-  const multiplier = state.mdePercent / 100
-  return {
-    lower: clamp(baseline * (1 - multiplier) * 100, 0, 100),
-    upper: clamp(baseline * (1 + multiplier) * 100, 0, 100),
-  }
-}
+const railLabel =
+  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
 
 function PercentField({
   id,
   label,
+  suffix,
   value,
   onValueChange,
   onCommit,
 }: {
   id: string
   label: string
+  suffix: string
   value: string
   onValueChange: (value: string) => void
   onCommit: () => void
 }) {
   return (
-    <div className="grid gap-2">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="flex items-center gap-2">
-        <Input
+    <label
+      htmlFor={id}
+      className="grid grid-cols-[1fr_auto] items-baseline gap-3 border-b border-current/20 py-1.5 transition-colors has-[:focus]:border-current/70"
+    >
+      <span className={railLabel}>{label}</span>
+      <span className="flex items-baseline gap-1">
+        <input
           id={id}
           type="text"
           inputMode="decimal"
+          className="plate-data w-[4.5rem] bg-transparent text-right text-[0.95rem] outline-none"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
           onBlur={onCommit}
@@ -227,32 +66,52 @@ function PercentField({
             }
           }}
         />
-        <span className="text-sm text-muted-foreground">%</span>
-      </div>
-    </div>
+        <span className="w-4 text-[0.8rem] opacity-50">{suffix}</span>
+      </span>
+    </label>
   )
 }
 
-function PercentSliderRow({
+function RangeField({
+  id,
   label,
   min,
   max,
   step,
   value,
+  display,
   onValueChange,
-  formatValue,
-}: PercentSliderConfig) {
+}: {
+  id: string
+  label: string
+  min: number
+  max: number
+  step: number
+  value: number
+  display: string
+  onValueChange: (value: number) => void
+}) {
   return (
-    <div className="grid gap-3 md:grid-cols-[260px_1fr_76px] md:items-center">
-      <Label>{label}</Label>
-      <Slider
+    <div className="border-b border-current/20 py-1.5 transition-colors has-[:focus]:border-current/70">
+      <label
+        htmlFor={id}
+        className="grid grid-cols-[1fr_auto] items-baseline gap-3"
+      >
+        <span className={railLabel}>{label}</span>
+        <span className="plate-data pr-5 text-[0.95rem]">{display}</span>
+      </label>
+      <input
+        id={id}
+        type="range"
+        className="plate-range mt-1"
         min={min}
         max={max}
         step={step}
         value={value}
-        onValueChange={(next) => onValueChange(clamp(next, min, max))}
+        onChange={(event) =>
+          onValueChange(clamp(Number(event.target.value), min, max))
+        }
       />
-      <p className="text-right">{formatValue(value)}</p>
     </div>
   )
 }
@@ -260,169 +119,226 @@ function PercentSliderRow({
 export default function SampleSizeCalculatorPage() {
   const [state, setState] = React.useState<CalculatorState>(DEFAULT_STATE)
   const [baselineInput, setBaselineInput] = React.useState(
-    normalizeInputValue(DEFAULT_STATE.baselinePercent)
+    String(DEFAULT_STATE.baselinePercent)
   )
   const [mdeInput, setMdeInput] = React.useState(
-    normalizeInputValue(DEFAULT_STATE.mdePercent)
+    String(DEFAULT_STATE.mdePercent)
   )
 
   const sampleSize = React.useMemo(() => calculateSampleSize(state), [state])
   const bounds = React.useMemo(() => calculateBounds(state), [state])
+  const curve = React.useMemo(() => calculateSampleSizeCurve(state), [state])
 
-  const commitPercentInput = React.useCallback(
-    ({
-      input,
-      fallback,
-      setInput,
-      onCommit,
-    }: {
-      input: string
-      fallback: number
-      setInput: (value: string) => void
-      onCommit: (value: number) => void
-    }) => {
-      const parsed = parseNumberInput(input)
-      if (parsed === null) {
-        setInput(normalizeInputValue(fallback))
-        return
-      }
+  const commitPercentInput = (
+    input: string,
+    fallback: number,
+    setInput: (value: string) => void,
+    onCommit: (value: number) => void
+  ) => {
+    const parsed = parseNumberInput(input)
+    if (parsed === null) {
+      setInput(String(fallback))
+      return
+    }
 
-      const next = clamp(parsed, PERCENT_INPUT_MIN, PERCENT_INPUT_MAX)
-      onCommit(next)
-      setInput(normalizeInputValue(next))
-    },
-    []
-  )
+    const next = clamp(parsed, PERCENT_INPUT_MIN, PERCENT_INPUT_MAX)
+    onCommit(next)
+    setInput(String(next))
+  }
 
-  const commitBaseline = React.useCallback(() => {
-    commitPercentInput({
-      input: baselineInput,
-      fallback: state.baselinePercent,
-      setInput: setBaselineInput,
-      onCommit: (value) =>
-        setState((prev) => ({ ...prev, baselinePercent: value })),
-    })
-  }, [baselineInput, commitPercentInput, state.baselinePercent])
+  const commitBaseline = () =>
+    commitPercentInput(
+      baselineInput,
+      state.baselinePercent,
+      setBaselineInput,
+      (value) => setState((prev) => ({ ...prev, baselinePercent: value }))
+    )
 
-  const commitMde = React.useCallback(() => {
-    commitPercentInput({
-      input: mdeInput,
-      fallback: state.mdePercent,
-      setInput: setMdeInput,
-      onCommit: (value) => setState((prev) => ({ ...prev, mdePercent: value })),
-    })
-  }, [commitPercentInput, mdeInput, state.mdePercent])
+  const commitMde = () =>
+    commitPercentInput(mdeInput, state.mdePercent, setMdeInput, (value) =>
+      setState((prev) => ({ ...prev, mdePercent: value }))
+    )
 
-  const percentSliders: PercentSliderConfig[] = [
-    {
-      key: "power",
-      label: "Statistical power 1-β",
-      min: POWER_MIN,
-      max: POWER_MAX,
-      step: 1,
-      value: state.powerPercent,
-      onValueChange: (value) =>
-        setState((prev) => ({ ...prev, powerPercent: value })),
-      formatValue: (value) => `${Math.round(value)}%`,
-    },
-    {
-      key: "alpha",
-      label: "Significance level α",
-      min: ALPHA_MIN,
-      max: ALPHA_MAX,
-      step: 0.1,
-      value: state.alphaPercent,
-      onValueChange: (value) =>
-        setState((prev) => ({ ...prev, alphaPercent: value })),
-      formatValue: (value) => `${(Math.round(value * 10) / 10).toFixed(1)}%`,
-    },
-  ]
+  const curveStart = curve[0]
+  const curveEnd = curve[curve.length - 1]
 
   return (
-    <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-5xl px-6 py-8">
-        <div className="space-y-8">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold">Sample Size Calculator</h1>
-            <p className="text-muted-foreground">
-              How many subjects are needed for an A/B test?
+    <div className="plate min-h-screen bg-background pt-16">
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[14rem_minmax(0,1fr)]">
+          <div className="lg:sticky lg:top-24">
+            <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+              The test
             </p>
-          </div>
-
-          <div className="rounded-md border border-border p-6">
-            <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-5">
-                <PercentField
-                  id="baseline-rate"
-                  label="Baseline conversion rate"
-                  value={baselineInput}
-                  onValueChange={setBaselineInput}
-                  onCommit={commitBaseline}
-                />
-                <PercentField
-                  id="mde"
-                  label="Minimum Detectable Effect (MDE)"
-                  value={mdeInput}
-                  onValueChange={setMdeInput}
-                  onCommit={commitMde}
-                />
-                <div className="flex flex-wrap items-center gap-6 text-sm">
+            <div className="mt-3 grid">
+              <PercentField
+                id="baseline-rate"
+                label="Baseline rate"
+                suffix="%"
+                value={baselineInput}
+                onValueChange={setBaselineInput}
+                onCommit={commitBaseline}
+              />
+              <PercentField
+                id="mde"
+                label="Min. effect"
+                suffix={state.mdeMode === "relative" ? "%" : "pp"}
+                value={mdeInput}
+                onValueChange={setMdeInput}
+                onCommit={commitMde}
+              />
+              <fieldset className="grid grid-cols-[1fr_auto] items-baseline gap-3 border-b border-current/20 py-1.5">
+                <legend className="sr-only">Effect is measured as</legend>
+                <span className={railLabel} aria-hidden>
+                  Effect is
+                </span>
+                <span className="flex gap-3 pr-5">
                   {MDE_MODES.map((mode) => (
-                    <label key={mode.value} className="inline-flex items-center gap-2">
+                    <label
+                      key={mode.value}
+                      className={cn(
+                        "cursor-pointer text-[0.9rem] transition-opacity has-[:focus-visible]:underline",
+                        state.mdeMode === mode.value
+                          ? "underline decoration-current/60 underline-offset-4"
+                          : "opacity-45 hover:opacity-80"
+                      )}
+                    >
                       <input
                         type="radio"
                         name="mde-mode"
+                        className="sr-only"
                         checked={state.mdeMode === mode.value}
                         onChange={() =>
                           setState((prev) => ({ ...prev, mdeMode: mode.value }))
                         }
                       />
-                      <span>{mode.label}</span>
+                      {mode.label.toLowerCase()}
                     </label>
                   ))}
-                </div>
-              </div>
+                </span>
+              </fieldset>
 
-              <div className="space-y-3">
-                <div className="rounded-md border border-border p-3">
-                  <p className="text-sm text-muted-foreground">Baseline conversion rate</p>
-                  <p className="text-base font-medium">
-                    {formatPercent(state.baselinePercent)}
-                  </p>
-                </div>
-                <div className="rounded-md border border-border p-3">
-                  <p className="text-sm text-muted-foreground">Detectable conversion range</p>
-                  <p className="text-base font-medium">
-                    {formatPercent(bounds.lower)} - {formatPercent(bounds.upper)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-4xl font-semibold tracking-tight">
-              {sampleSize.toLocaleString()}
-            </p>
-            <p className="mt-1 text-lg text-muted-foreground">per variation</p>
-          </div>
-
-          <div className="space-y-5 rounded-md border border-border p-6">
-            {percentSliders.map((slider) => (
-              <PercentSliderRow
-                key={slider.key}
-                label={slider.label}
-                min={slider.min}
-                max={slider.max}
-                step={slider.step}
-                value={slider.value}
-                onValueChange={slider.onValueChange}
-                formatValue={slider.formatValue}
+              <p className="mt-6 plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+                Error rates
+              </p>
+              <RangeField
+                id="power"
+                label="Power"
+                min={POWER_MIN}
+                max={POWER_MAX}
+                step={1}
+                value={state.powerPercent}
+                display={`${Math.round(state.powerPercent)}%`}
+                onValueChange={(value) =>
+                  setState((prev) => ({ ...prev, powerPercent: value }))
+                }
               />
-            ))}
+              <RangeField
+                id="alpha"
+                label="Significance"
+                min={ALPHA_MIN}
+                max={ALPHA_MAX}
+                step={0.1}
+                value={state.alphaPercent}
+                display={`${state.alphaPercent.toFixed(1)}%`}
+                onValueChange={(value) =>
+                  setState((prev) => ({ ...prev, alphaPercent: value }))
+                }
+              />
+            </div>
+
+            <p className="mt-6 text-[0.8rem] leading-relaxed opacity-50">
+              A relative effect scales the baseline; an absolute one adds
+              percentage points to it.
+            </p>
+          </div>
+
+          <div className="min-w-0">
+            <Row
+              note={
+                <>
+                  Power is the chance the test flags a real effect of this
+                  size. Significance is the chance it flags one when there is
+                  none.
+                </>
+              }
+            >
+              <h1 className="text-[2.4rem] leading-tight">
+                Sample Size Calculator
+              </h1>
+              <p className="mt-4 max-w-[38rem]">
+                How many visitors does an A/B test need before it can tell a
+                real change in conversion rate from noise? It depends on where
+                you start, how small a change you care about, and how often you
+                are willing to be wrong in each direction.
+              </p>
+            </Row>
+
+            <Section>The answer</Section>
+            <Row>
+              <p className="mt-4 max-w-[38rem] text-[1.5rem] leading-[1.45]">
+                Run{" "}
+                <span className="plate-figures">{formatCount(sampleSize)}</span>{" "}
+                visitors through each variant,{" "}
+                <span className="plate-figures">
+                  {formatCount(sampleSize * 2)}
+                </span>{" "}
+                in all. That is enough to detect the conversion rate rising to{" "}
+                <span className="plate-figures">
+                  {formatPercent(bounds.upper)}
+                </span>{" "}
+                or falling to{" "}
+                <span className="plate-figures">
+                  {formatPercent(bounds.lower)}
+                </span>
+                .
+              </p>
+            </Row>
+
+            <Section>
+              Figure 1 &nbsp;&middot;&nbsp; What a smaller effect costs
+            </Section>
+            <Row
+              note={
+                <>
+                  The effect enters the formula squared, so halving it roughly
+                  quadruples the traffic. Deciding what change is worth
+                  detecting is the most expensive choice on this page.
+                </>
+              }
+            >
+              <div className="mt-6">
+                <SampleSizeCurveFigure
+                  points={curve}
+                  currentMde={state.mdePercent}
+                  currentSampleSize={sampleSize}
+                  mode={state.mdeMode}
+                />
+              </div>
+              <Caption>
+                Visitors needed per variant as the smallest effect worth
+                detecting runs from {formatMde(curveStart.mdePercent, state.mdeMode)}{" "}
+                to {formatMde(curveEnd.mdePercent, state.mdeMode)}, with power
+                and significance held where you set them. Detecting{" "}
+                {formatMde(curveStart.mdePercent, state.mdeMode)} takes{" "}
+                {formatCount(curveStart.sampleSize)} per variant;{" "}
+                {formatMde(curveEnd.mdePercent, state.mdeMode)} takes{" "}
+                {formatCount(curveEnd.sampleSize)}. The dot is your setting.
+              </Caption>
+            </Row>
+
+            <Section>Method</Section>
+            <Row>
+              <p className="mt-4 max-w-[38rem] text-[0.9rem] leading-relaxed opacity-70">
+                A two-sided test of two proportions under the normal
+                approximation. The page sizes the test for a move up and a move
+                down by the same effect and reports the larger of the two, since
+                near 0% or 100% the variance is not symmetric.
+              </p>
+            </Row>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   )
 }

@@ -5,10 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LoaderCircleIcon } from "lucide-react"
 
-import { useAppTheme } from "@/shared/lib/theme"
-import { cn } from "@/shared/lib/utils"
 import { TOOLS, type ToolDefinition } from "@/shared/config"
-import { buttonVariants } from "@/shared/ui/button"
 import {
   Combobox,
   ComboboxContent,
@@ -22,22 +19,15 @@ import { ThemeToggle } from "./theme-toggle"
 export function ToolsHeader() {
   const router = useRouter()
   const pathname = usePathname()
-  const { resolvedAppTheme } = useAppTheme()
   const inputRef = React.useRef<HTMLInputElement | null>(null)
   const openFromShortcutRef = React.useRef(false)
   const suppressReopenRef = React.useRef(false)
-  const [mounted, setMounted] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [value, setValue] = React.useState<ToolDefinition | null>(null)
   const [open, setOpen] = React.useState(false)
   const [pendingTool, setPendingTool] = React.useState<ToolDefinition | null>(
     null
   )
-  const isTerminalTheme = mounted && resolvedAppTheme === "terminal"
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -117,25 +107,12 @@ export function ToolsHeader() {
   }
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b border-border bg-background",
-        !isTerminalTheme && "bg-background/92 backdrop-blur supports-[backdrop-filter]:bg-background/82"
-      )}
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-current/15 bg-background">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="flex h-16 items-center gap-3">
+        <div className="flex h-16 items-center gap-6">
           <Link
             href="/"
-            className={cn(
-              buttonVariants({
-                variant: isTerminalTheme ? "outline" : "ghost",
-                size: "sm",
-              }),
-              isTerminalTheme
-                ? "rounded-none font-mono uppercase tracking-wide"
-                : "rounded-full px-4"
-              )}
+            className="plate-label shrink-0 text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55 transition-opacity hover:opacity-100"
           >
             Home
           </Link>
@@ -166,60 +143,31 @@ export function ToolsHeader() {
               autoHighlight
             >
               <ComboboxInput
-                className={cn(
-                  "w-full border-input bg-input/30 text-foreground focus-within:border-ring focus-within:ring-0 [&_input]:placeholder:text-muted-foreground [&_input]:text-base md:[&_input]:text-sm",
-                  isTerminalTheme
-                    ? "rounded-none [&_input]:font-mono [&_input]:tracking-wide"
-                    : "rounded-full border bg-background/80 px-2 shadow-sm"
-                )}
+                className="w-full [&_input]:text-base [&_input]:placeholder:text-muted-foreground md:[&_input]:text-[0.95rem]"
                 placeholder="Search tools by code or title (Cmd+K)"
                 showTrigger={false}
               />
-              <ComboboxContent
-                className={cn(
-                  "w-[min(88vw,900px)] border border-border bg-popover text-popover-foreground shadow-2xl",
-                  isTerminalTheme ? "rounded-none" : "rounded-3xl"
-                )}
-              >
-                <div
-                  className={cn(
-                    "border-b border-border px-4 py-2 text-xs font-semibold text-muted-foreground",
-                    isTerminalTheme
-                      ? "tracking-[0.08em]"
-                      : "tracking-[0.12em] uppercase"
-                  )}
-                >
-                  FUNCTIONS
+              <ComboboxContent className="w-[min(88vw,900px)] bg-popover text-popover-foreground">
+                <div className="plate-label border-b border-current/15 px-4 py-2 text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+                  Functions
                 </div>
                 <ComboboxList>
                   {(item: ToolDefinition) => (
                     <ComboboxItem
                       key={item.code}
                       value={item}
-                      className={cn(
-                        "py-2.5 pl-4 pr-3 data-highlighted:bg-chart-1 data-highlighted:text-primary-foreground",
-                        isTerminalTheme
-                          ? "rounded-none"
-                          : "w-auto rounded-2xl mx-1 my-0.5"
-                      )}
+                      className="py-2 pl-4 pr-3"
                     >
-                      <div
-                        className={cn(
-                          "grid w-full grid-cols-[88px_1fr] items-center gap-2",
-                          isTerminalTheme && "font-mono"
-                        )}
-                      >
-                        <span className="text-sm leading-none font-semibold text-foreground">
+                      <div className="grid w-full grid-cols-[88px_1fr] items-baseline gap-2">
+                        <span className="plate-data text-[0.8rem] font-medium tracking-[0.04em]">
                           {item.code}
                         </span>
-                        <span className="truncate text-sm text-primary">
-                          {item.title}
-                        </span>
+                        <span className="truncate">{item.title}</span>
                       </div>
                     </ComboboxItem>
                   )}
                 </ComboboxList>
-                <ComboboxEmpty className="justify-start px-4 py-3 text-muted-foreground">
+                <ComboboxEmpty className="justify-start px-4 py-3 opacity-60">
                   No matching tools.
                 </ComboboxEmpty>
               </ComboboxContent>
@@ -231,16 +179,11 @@ export function ToolsHeader() {
         </div>
         {pendingTool ? (
           <div
-            className={cn(
-              "flex h-8 items-center justify-between border-t border-border bg-card text-xs text-muted-foreground",
-              isTerminalTheme
-                ? "px-1 font-mono uppercase tracking-[0.12em]"
-                : "px-3"
-            )}
+            className="plate-label flex h-8 items-center justify-between border-t border-current/15 px-1 text-[0.66rem] uppercase tracking-[0.12em] opacity-60"
             aria-live="polite"
           >
             <div className="flex items-center gap-2">
-              <LoaderCircleIcon className="size-3.5 animate-spin text-primary" />
+              <LoaderCircleIcon className="size-3.5 animate-spin" />
               <span>
                 Loading {pendingTool.code} {pendingTool.title}
               </span>

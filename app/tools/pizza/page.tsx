@@ -5,6 +5,7 @@ import * as React from "react"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
+import { Section } from "@/shared/ui/plate"
 
 type Result = {
   people: number
@@ -31,7 +32,7 @@ function pizzasNeeded(people: number): number {
 
 function MathBlock({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex justify-center rounded-lg border border-border/70 bg-muted/25 px-4 py-6 text-[1.15rem] leading-normal text-foreground md:text-[1.3rem]">
+    <div className="flex justify-center py-6 text-[1.15rem] leading-normal md:text-[1.3rem]">
       {children}
     </div>
   )
@@ -62,15 +63,16 @@ export default function PizzaToolPage() {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-4xl px-6 py-8">
-        <div className="max-w-xl">
-          <h2 className="text-2xl font-semibold">Pizza Calculator</h2>
-          <p className="text-muted-foreground leading-relaxed mt-2">
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="max-w-[44rem]">
+          <h1 className="text-[2.4rem] leading-tight">Pizza Calculator</h1>
+          <p className="mt-4 max-w-[38rem]">
             How many pizzas do you need to get? Enter the number of people and
             find out.
           </p>
 
-          <div className="mt-6">
+          <Section>The formula</Section>
+          <div className="mt-2">
             <MathBlock>
               <math display="block">
                 <mrow>
@@ -90,21 +92,29 @@ export default function PizzaToolPage() {
                 </mrow>
               </math>
             </MathBlock>
-            <dl className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
+            <dl className="flex flex-col gap-1 text-[0.95rem]">
               <div className="flex gap-2">
-                <dt className="w-5 font-serif italic text-foreground">&Pi;</dt>
-                <dd>= pizzas to order (they&apos;re circular, so naturally a &pi;)</dd>
+                <dt className="w-5 italic">&Pi;</dt>
+                <dd className="opacity-70">
+                  = pizzas to order (they&apos;re circular, so naturally a &pi;)
+                </dd>
               </div>
               <div className="flex gap-2">
-                <dt className="w-5 font-serif italic text-foreground">&Delta;</dt>
-                <dd>= diners (hungry humans)</dd>
+                <dt className="w-5 italic">&Delta;</dt>
+                <dd className="opacity-70">= diners (hungry humans)</dd>
               </div>
             </dl>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="people-input">Number of people</Label>
+          <Section>Inputs</Section>
+          <form onSubmit={handleSubmit} className="mt-4 grid gap-5">
+            <div className="grid gap-1">
+              <Label
+                htmlFor="people-input"
+                className="plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+              >
+                Number of people
+              </Label>
               <Input
                 id="people-input"
                 inputMode="numeric"
@@ -115,36 +125,34 @@ export default function PizzaToolPage() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div>
               <Button type="submit">Calculate</Button>
             </div>
           </form>
 
           {error ? (
-            <p className="mt-4 text-sm text-destructive">{error}</p>
+            <p className="mt-4 text-[0.9rem] text-destructive">{error}</p>
           ) : null}
 
           {result ? (
-            <div className="mt-6 flex flex-col gap-3 text-sm border-t border-border pt-4">
-              <p>
-                For{" "}
-                <span className="font-medium">
-                  {result.people.toLocaleString()}
-                </span>{" "}
+            <>
+              <Section>Result</Section>
+              <p className="plate-figures mt-4 text-[1.5rem] leading-[1.45]">
+                For {result.people.toLocaleString()}{" "}
                 {result.people === 1 ? "person" : "people"}, you need{" "}
-                <span className="text-base font-bold text-foreground">
+                <strong className="font-semibold">
                   {result.pizzas.toLocaleString()}
-                </span>{" "}
+                </strong>{" "}
                 {result.pizzas === 1 ? "pizza" : "pizzas"}.
               </p>
-            </div>
+            </>
           ) : null}
 
-          <p className="mt-8 text-xs text-muted-foreground border-t border-border pt-4">
+          <p className="mt-14 border-t border-current/20 pt-3 text-[0.84rem] opacity-60">
             Formula discovered by Chris Pratt.
           </p>
         </div>
-      </section>
+      </div>
     </div>
   )
 }
