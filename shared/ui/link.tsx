@@ -12,7 +12,10 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
       <a
         ref={ref}
         href={href}
-        className={cn("text-primary hover:underline", className)}
+        className={cn(
+          "underline decoration-current/35 underline-offset-4 transition-colors hover:decoration-current",
+          className
+        )}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
         {...props}

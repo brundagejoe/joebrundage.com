@@ -3,11 +3,10 @@
 import * as React from "react"
 import { useMutation } from "@tanstack/react-query"
 
-import { Badge } from "@/shared/ui/badge"
 import { Button } from "@/shared/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
+import { Section } from "@/shared/ui/plate"
 import { Textarea } from "@/shared/ui/textarea"
 
 type Tag = Record<string, string>
@@ -44,10 +43,37 @@ type AnalyzeOutput = {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  "Only in URL 1": "bg-blue-500/10 text-blue-700 border-blue-300",
-  "Only in URL 2": "bg-orange-500/10 text-orange-700 border-orange-300",
-  Different: "bg-amber-500/10 text-amber-700 border-amber-300",
-  Identical: "bg-emerald-500/10 text-emerald-700 border-emerald-300",
+  "Only in URL 1": "opacity-80",
+  "Only in URL 2": "opacity-80",
+  Different: "opacity-100",
+  Identical: "opacity-40",
+}
+
+const LABEL_CLASS =
+  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+
+function SubsectionHeading({
+  title,
+  counts,
+}: {
+  title: string
+  counts: Array<{ label: string; value: number }>
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-current/20 pb-1">
+      <h4 className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-55">
+        {title}
+      </h4>
+      <dl className="plate-data flex gap-4 text-[0.8rem]">
+        {counts.map((count) => (
+          <div key={count.label} className="flex gap-1">
+            <dt className="opacity-50">{count.label}</dt>
+            <dd>{count.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
 }
 
 function normalizeBaseUrl(value: string): string | null {
@@ -198,54 +224,57 @@ function DiffSection({ diff }: { diff: DiffBuckets }) {
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-border p-3">
-      <div className="flex items-center justify-between">
-        <h4 className="font-medium">Meta Tags</h4>
-        <div className="flex gap-2 text-xs">
-          <Badge variant="outline">L: {diff.onlyLeft.length}</Badge>
-          <Badge variant="outline">R: {diff.onlyRight.length}</Badge>
-          <Badge variant="outline">D: {diff.different.length}</Badge>
-          <Badge variant="outline">I: {diff.identical.length}</Badge>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No tags found.</p>
-        ) : (
-          entries.map((entry, index) => (
-            <div key={`${entry.status}-${index}`} className="rounded-md border border-border p-2">
-              <Badge variant="outline" className={STATUS_STYLES[entry.status]}>
+    <div>
+      <SubsectionHeading
+        title="Meta tags"
+        counts={[
+          { label: "L", value: diff.onlyLeft.length },
+          { label: "R", value: diff.onlyRight.length },
+          { label: "D", value: diff.different.length },
+          { label: "I", value: diff.identical.length },
+        ]}
+      />
+      {entries.length === 0 ? (
+        <p className="mt-3 text-[0.9rem] opacity-60">No tags found.</p>
+      ) : (
+        <ul>
+          {entries.map((entry, index) => (
+            <li
+              key={`${entry.status}-${index}`}
+              className={`grid gap-1 border-b border-current/10 py-2 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-4 ${STATUS_STYLES[entry.status]}`}
+            >
+              <span className="plate-label pt-0.5 text-[0.62rem] font-medium uppercase tracking-[0.1em]">
                 {entry.status}
-              </Badge>
-              <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs">
+              </span>
+              <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
                 {entry.content}
               </pre>
-            </div>
-          ))
-        )}
-      </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
 
 function InventorySection({ tags }: { tags: Tag[] }) {
   return (
-    <div className="space-y-3 rounded-md border border-border p-3">
-      <div className="flex items-center justify-between">
-        <h4 className="font-medium">Meta Tags</h4>
-        <Badge variant="outline">Total: {tags.length}</Badge>
-      </div>
-      <div className="space-y-2">
-        {tags.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No tags found.</p>
-        ) : (
-          tags.map((tag, index) => (
-            <pre key={`meta-${index}`} className="overflow-x-auto rounded-md border p-2 text-xs">
-              {tagToDisplay(tag)}
-            </pre>
-          ))
-        )}
-      </div>
+    <div>
+      <SubsectionHeading
+        title="Meta tags"
+        counts={[{ label: "Total", value: tags.length }]}
+      />
+      {tags.length === 0 ? (
+        <p className="mt-3 text-[0.9rem] opacity-60">No tags found.</p>
+      ) : (
+        <ul>
+          {tags.map((tag, index) => (
+            <li key={`meta-${index}`} className="border-b border-current/10 py-2">
+              <pre className="overflow-x-auto text-xs">{tagToDisplay(tag)}</pre>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -388,103 +417,106 @@ export default function MetaAnalyzerPage() {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-5xl px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Meta Analyzer</CardTitle>
-            <CardDescription>
-              Compare meta tags across two base URLs and many paths.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="left-base">Base URL 1</Label>
-                <Input
-                  id="left-base"
-                  placeholder="https://example.com"
-                  value={leftBaseInput}
-                  onChange={(event) => setLeftBaseInput(event.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="right-base">Base URL 2</Label>
-                <Input
-                  id="right-base"
-                  placeholder="https://staging.example.com"
-                  value={rightBaseInput}
-                  onChange={(event) => setRightBaseInput(event.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="paths">Paths (one per line)</Label>
-                <Textarea
-                  id="paths"
-                  placeholder={"/\n/about\n/blog/post"}
-                  value={pathsInput}
-                  onChange={(event) => setPathsInput(event.target.value)}
-                  rows={8}
-                  required
-                />
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button type="submit" disabled={running}>
-                  {running ? "Analyzing..." : "Analyze"}
-                </Button>
-              </div>
-              {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            </form>
-          </CardContent>
-        </Card>
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="max-w-[44rem]">
+          <h1 className="text-[2.4rem] leading-tight">Meta Analyzer</h1>
+          <p className="mt-4 max-w-[38rem]">
+            Compare meta tags across two base URLs and many paths.
+          </p>
 
-        <div className="mt-6 space-y-4">
-          {results.map((result) => (
-            <Card key={result.path}>
-              <CardHeader>
-                <CardTitle className="text-lg">{result.path}</CardTitle>
-                <CardDescription>
-                  <div className="flex flex-col gap-2">
-                    {result.leftUrl ? (
-                      <a
-                        href={result.leftUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary underline"
-                      >
-                        URL 1: {result.leftUrl}
-                      </a>
-                    ) : null}
-                    {result.rightUrl ? (
-                      <a
-                        href={result.rightUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary underline"
-                      >
-                        URL 2: {result.rightUrl}
-                      </a>
-                    ) : null}
-                    {result.leftError ? <Badge variant="destructive">{result.leftError}</Badge> : null}
-                    {result.rightError ? (
-                      <Badge variant="destructive">{result.rightError}</Badge>
-                    ) : null}
-                  </div>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mode === "both" && !result.metaDiff ? (
-                  <p className="text-sm text-muted-foreground">
-                    Both URL requests failed for this path. Diff not rendered.
-                  </p>
-                ) : null}
-                {mode === "both" && result.metaDiff ? <DiffSection diff={result.metaDiff} /> : null}
-                {mode === "left" && result.leftTags ? <InventorySection tags={result.leftTags} /> : null}
-                {mode === "right" && result.rightTags ? <InventorySection tags={result.rightTags} /> : null}
-              </CardContent>
-            </Card>
-          ))}
+          <Section>Inputs</Section>
+          <form onSubmit={handleSubmit} className="mt-4 grid gap-5">
+            <div className="grid gap-1">
+              <Label htmlFor="left-base" className={LABEL_CLASS}>
+                Base URL 1
+              </Label>
+              <Input
+                id="left-base"
+                placeholder="https://example.com"
+                value={leftBaseInput}
+                onChange={(event) => setLeftBaseInput(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-1">
+              <Label htmlFor="right-base" className={LABEL_CLASS}>
+                Base URL 2
+              </Label>
+              <Input
+                id="right-base"
+                placeholder="https://staging.example.com"
+                value={rightBaseInput}
+                onChange={(event) => setRightBaseInput(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="paths" className={LABEL_CLASS}>
+                Paths (one per line)
+              </Label>
+              <Textarea
+                id="paths"
+                placeholder={"/\n/about\n/blog/post"}
+                value={pathsInput}
+                onChange={(event) => setPathsInput(event.target.value)}
+                rows={8}
+                required
+              />
+            </div>
+            <div>
+              <Button type="submit" disabled={running}>
+                {running ? "Analyzing..." : "Analyze"}
+              </Button>
+            </div>
+            {error ? (
+              <p className="text-[0.9rem] text-destructive">{error}</p>
+            ) : null}
+          </form>
         </div>
-      </section>
+
+        {results.length > 0 ? <Section>Results</Section> : null}
+        {results.map((result) => (
+          <article key={result.path} className="mt-8">
+            <h3 className="plate-data text-[1.1rem] font-medium">{result.path}</h3>
+            <div className="mt-2 flex flex-col gap-1 text-[0.9rem]">
+              {result.leftUrl ? (
+                <a
+                  href={result.leftUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="break-all underline decoration-current/35 underline-offset-4 hover:decoration-current"
+                >
+                  <span className="opacity-60">URL 1:</span> {result.leftUrl}
+                </a>
+              ) : null}
+              {result.rightUrl ? (
+                <a
+                  href={result.rightUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="break-all underline decoration-current/35 underline-offset-4 hover:decoration-current"
+                >
+                  <span className="opacity-60">URL 2:</span> {result.rightUrl}
+                </a>
+              ) : null}
+              {result.leftError ? (
+                <p className="text-destructive">{result.leftError}</p>
+              ) : null}
+              {result.rightError ? (
+                <p className="text-destructive">{result.rightError}</p>
+              ) : null}
+            </div>
+            <div className="mt-4">
+              {mode === "both" && !result.metaDiff ? (
+                <p className="text-[0.9rem] opacity-60">
+                  Both URL requests failed for this path. Diff not rendered.
+                </p>
+              ) : null}
+              {mode === "both" && result.metaDiff ? <DiffSection diff={result.metaDiff} /> : null}
+              {mode === "left" && result.leftTags ? <InventorySection tags={result.leftTags} /> : null}
+              {mode === "right" && result.rightTags ? <InventorySection tags={result.rightTags} /> : null}
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   )
 }

@@ -4,7 +4,6 @@ import { Suspense, useMemo, useState, type FormEvent } from "react"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/shared/lib/supabase-browser"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card"
 import { Button } from "@/shared/ui/button"
 import { Link } from "@/shared/ui/link"
 import {
@@ -37,7 +36,7 @@ function getSafeRedirectPath(next: string | null) {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen pt-24 px-6" />}>
+    <Suspense fallback={<main className="min-h-screen px-6 pt-24 pb-24" />}>
       <LoginPageContent />
     </Suspense>
   )
@@ -77,79 +76,71 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen pt-24 px-6">
-      <div className="mx-auto max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle>Log in</CardTitle>
-            <CardDescription>Use your email and password.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <FieldSet className="gap-4">
-                <FieldGroup className="gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      className="rounded-md"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      autoComplete="email"
-                      required
-                    />
-                  </Field>
+    <main className="min-h-screen px-6 pt-24 pb-24">
+      <div className="mx-auto max-w-[24rem]">
+        <h1 className="text-[2.4rem] leading-tight font-normal">Log in</h1>
+        <p className="mt-3 opacity-70">Use your email and password.</p>
+        <form className="mt-10 space-y-8" onSubmit={handleSubmit}>
+          <FieldSet>
+            <FieldGroup className="gap-6">
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </Field>
 
-                  <Field data-invalid={!!errorMessage} className="gap-2">
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <InputGroup className="rounded-md">
-                      <InputGroupInput
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        autoComplete="current-password"
-                        aria-invalid={!!errorMessage}
-                        required
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupButton
-                          aria-label={showPassword ? "Hide password" : "Show password"}
-                          onClick={() => setShowPassword((current) => !current)}
-                          className="rounded-md"
-                          size="icon-xs"
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                        </InputGroupButton>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FormFieldDescription className="mt-1">
-                      Enter the password for your existing account.
-                    </FormFieldDescription>
-                    <FieldError>{errorMessage}</FieldError>
-                  </Field>
-                </FieldGroup>
-              </FieldSet>
+              <Field data-invalid={!!errorMessage} className="gap-2">
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="current-password"
+                    aria-invalid={!!errorMessage}
+                    required
+                  />
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupButton
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      onClick={() => setShowPassword((current) => !current)}
+                      size="icon-xs"
+                    >
+                      {showPassword ? <EyeOff /> : <Eye />}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
+                <FormFieldDescription className="mt-1">
+                  Enter the password for your existing account.
+                </FormFieldDescription>
+                <FieldError>{errorMessage}</FieldError>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
 
-              <Button disabled={isSubmitting} type="submit" className="w-full rounded-md">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Logging in...
-                  </>
-                ) : (
-                  "Log in"
-                )}
-              </Button>
-            </form>
+          <Button disabled={isSubmitting} type="submit" className="w-full">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Log in"
+            )}
+          </Button>
+        </form>
 
-            <p className="text-sm text-muted-foreground mt-4">
-              Need an account? <Link href={`/signup?next=${encodeURIComponent(next)}`}>Create one</Link>
-            </p>
-          </CardContent>
-        </Card>
+        <p className="mt-8 text-[0.95rem] opacity-70">
+          Need an account? <Link href={`/signup?next=${encodeURIComponent(next)}`}>Create one</Link>
+        </p>
       </div>
-    </div>
+    </main>
   )
 }

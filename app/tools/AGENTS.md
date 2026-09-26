@@ -31,12 +31,12 @@ The tools header combobox reads from this file. Do not hardcode tool lists in th
 
 ## Presenting Results
 
-For tools whose job is to show a quantitative result and explain it
-(calculators, model readouts, analyses), there is a second, opt-in visual style
-documented in `app/tools/DATA-DISPLAY.md`. Read it before building one, and use
-`app/tools/bayesian-ab-test/` as the reference implementation. Form-heavy
-utilities and single-value converters should stay on the default shadcn look
-described here.
+Every tool follows the house style in `app/tools/DATA-DISPLAY.md`. Read it
+before building one. Tools that show a quantitative result and explain it
+(calculators, model readouts, analyses) take the full treatment, with
+`app/tools/bayesian-ab-test/` as the reference calculator and
+`app/tools/bayesian-ab-testing-primer/` as the reference explainer. Form-heavy
+utilities and single-value converters take the light pass described there.
 
 ## Conventions
 

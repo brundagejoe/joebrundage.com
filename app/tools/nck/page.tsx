@@ -5,6 +5,7 @@ import * as React from "react"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
+import { Section } from "@/shared/ui/plate"
 
 type Result = {
   n: bigint
@@ -12,6 +13,9 @@ type Result = {
   combinations: bigint
   permutations: bigint
 }
+
+const LABEL_CLASS =
+  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
 
 function parseNonNegativeInteger(value: string): bigint | null {
   if (!/^\d+$/.test(value.trim())) {
@@ -79,17 +83,20 @@ export default function NckToolPage() {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-4xl px-6 py-8">
-        <div className="max-w-xl">
-          <h2 className="text-2xl font-semibold">N Choose K Tool</h2>
-          <p className="text-muted-foreground leading-relaxed mt-2">
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="max-w-[44rem]">
+          <h1 className="text-[2.4rem] leading-tight">N Choose K</h1>
+          <p className="mt-4 max-w-[38rem]">
             Enter N and K to calculate combinations (nCk) and permutations
             (nPk).
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="n-input">N</Label>
+          <Section>Inputs</Section>
+          <form onSubmit={handleSubmit} className="mt-4 grid gap-5">
+            <div className="grid gap-1">
+              <Label htmlFor="n-input" className={LABEL_CLASS}>
+                N
+              </Label>
               <Input
                 id="n-input"
                 inputMode="numeric"
@@ -100,8 +107,10 @@ export default function NckToolPage() {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="k-input">K</Label>
+            <div className="grid gap-1">
+              <Label htmlFor="k-input" className={LABEL_CLASS}>
+                K
+              </Label>
               <Input
                 id="k-input"
                 inputMode="numeric"
@@ -112,33 +121,48 @@ export default function NckToolPage() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div>
               <Button type="submit">Calculate</Button>
             </div>
           </form>
 
           {error ? (
-            <p className="mt-4 text-sm text-destructive">{error}</p>
+            <p className="mt-4 text-[0.9rem] text-destructive">{error}</p>
           ) : null}
 
           {result ? (
-            <div className="mt-6 flex flex-col gap-3 text-sm border-t border-border pt-4">
-              <p>
-                <span className="font-medium">
-                  {result.n.toString()}C{result.k.toString()}
-                </span>{" "}
-                = {result.combinations.toLocaleString()}
-              </p>
-              <p>
-                <span className="font-medium">
-                  {result.n.toString()}P{result.k.toString()}
-                </span>{" "}
-                = {result.permutations.toLocaleString()}
-              </p>
-            </div>
+            <>
+              <Section>Result</Section>
+              <table className="plate-data mt-3 w-full text-[0.95rem]">
+                <tbody>
+                  <tr className="border-b border-current/20">
+                    <th
+                      scope="row"
+                      className="py-2 pr-5 text-left align-top font-normal opacity-70"
+                    >
+                      {result.n.toString()}C{result.k.toString()}
+                    </th>
+                    <td className="py-2 text-right break-all">
+                      {result.combinations.toLocaleString()}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-current/20">
+                    <th
+                      scope="row"
+                      className="py-2 pr-5 text-left align-top font-normal opacity-70"
+                    >
+                      {result.n.toString()}P{result.k.toString()}
+                    </th>
+                    <td className="py-2 text-right break-all">
+                      {result.permutations.toLocaleString()}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
           ) : null}
         </div>
-      </section>
+      </div>
     </div>
   )
 }

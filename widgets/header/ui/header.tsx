@@ -36,13 +36,13 @@ export function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-current/15 bg-background">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo/Name */}
             <Link
               href="/"
-              className="text-lg font-semibold text-foreground hover:text-foreground/80 transition-colors"
+              className="text-[1.2rem] transition-opacity hover:opacity-70"
             >
               Joe Brundage
             </Link>
@@ -54,8 +54,8 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "text-sm font-medium text-foreground/70 hover:text-foreground transition-colors",
-                    isActive(item.href) && "text-foreground"
+                    "plate-label text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55 transition-opacity hover:opacity-100",
+                    isActive(item.href) && "opacity-100"
                   )}
                 >
                   {item.label}
@@ -92,8 +92,10 @@ export function Header() {
       >
         <div className="flex flex-col h-full">
           {/* Menu Header */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-border">
-            <span className="text-lg font-semibold">Menu</span>
+          <div className="flex h-16 items-center justify-between border-b border-current/15 px-6">
+            <span className="plate-label text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55">
+              Menu
+            </span>
             <Button
               variant="ghost"
               size="icon"
@@ -112,8 +114,8 @@ export function Header() {
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
-                  "text-2xl font-medium text-foreground hover:text-foreground transition-colors text-left",
-                  isActive(item.href) && "text-foreground"
+                  "text-left text-[1.75rem] opacity-70 transition-opacity hover:opacity-100",
+                  isActive(item.href) && "opacity-100"
                 )}
               >
                 {item.label}

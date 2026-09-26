@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { Button } from "@/shared/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Section } from "@/shared/ui/plate"
 import { Textarea } from "@/shared/ui/textarea"
 
 type FromAnchor = "bottom" | "left" | "right"
@@ -769,83 +769,73 @@ export default function OrgChartComposerToolPage() {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Org Chart Composer (ORGC)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>Use a mermaid-like text format to define boxes and connectors.</p>
-              <pre className="overflow-auto rounded-md border border-border bg-muted/40 p-3 text-xs text-foreground">
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="max-w-[44rem]">
+          <h1 className="text-[2.4rem] leading-tight">Org Chart Composer</h1>
+          <p className="mt-4 max-w-[38rem]">
+            Use a mermaid-like text format to define boxes and connectors.
+          </p>
+
+          <Section>Syntax</Section>
+          <pre className="mt-3 overflow-auto text-xs leading-relaxed">
 {`id["name1; name2 | Title"]
 id@r2["name1; name2 | Title"]
 id@r2c3["name1; name2 | Title"]
 from --> to
 from:right --> to:left`}
-              </pre>
-              <p>Tip: Use semicolons or \\n for multiple names in one box.</p>
-              <p>Use `@rN` to force a row and `@rNcM` to control row + position order.</p>
-            </CardContent>
-          </Card>
+          </pre>
+          <div className="mt-3 space-y-1 text-[0.9rem] opacity-70">
+            <p>Tip: Use semicolons or \\n for multiple names in one box.</p>
+            <p>Use `@rN` to force a row and `@rNcM` to control row + position order.</p>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Diagram Input</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault()
-                }}
-                className="space-y-3"
+          <Section>Diagram input</Section>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+            }}
+            className="mt-3 space-y-4"
+          >
+            <Textarea
+              value={diagramInput}
+              onChange={(event) => setDiagramInput(event.target.value)}
+              rows={18}
+              className="font-mono text-xs"
+              placeholder='a@r0c1["Joe | President"]\na --> b'
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setDiagramInput(DEFAULT_INPUT)}
               >
-                <Textarea
-                  value={diagramInput}
-                  onChange={(event) => setDiagramInput(event.target.value)}
-                  rows={18}
-                  className="font-mono text-xs"
-                  placeholder='a@r0c1["Joe | President"]\na --> b'
-                />
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setDiagramInput(DEFAULT_INPUT)}
-                  >
-                    Load Sample
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleCopyPng}
-                    disabled={analysis.hasHardErrors || analysis.layouts.length === 0}
-                  >
-                    Copy PNG
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                Load Sample
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCopyPng}
+                disabled={analysis.hasHardErrors || analysis.layouts.length === 0}
+              >
+                Copy PNG
+              </Button>
+            </div>
+          </form>
 
-          <Card>
-            <CardHeader>
-            <CardTitle>Validation</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <Section>Validation</Section>
+          <div className="mt-3 space-y-2 text-[0.9rem]">
             {analysis.issues.length === 0 ? (
-              <p
-                className="text-emerald-600"
-              >
-                No issues found.
-              </p>
+              <p className="opacity-60">No issues found.</p>
             ) : (
               <ul className="space-y-1">
                 {analysis.issues.map((issue, index) => (
                   <li
                     key={`${issue.kind}-${index}`}
-                    className={issue.kind === "error" ? "text-destructive" : "text-amber-700"}
+                    className={issue.kind === "error" ? "text-destructive" : "opacity-80"}
                   >
-                    [{issue.kind.toUpperCase()}] {issue.message}
+                    <span className="plate-label mr-2 text-[0.62rem] font-medium uppercase tracking-[0.1em]">
+                      {issue.kind}
+                    </span>
+                    {issue.message}
                   </li>
                 ))}
               </ul>
@@ -855,106 +845,99 @@ from:right --> to:left`}
                 className={
                   copyStatus.kind === "error"
                     ? "text-destructive"
-                    : "text-emerald-600"
+                    : "opacity-60"
                 }
               >
                 {copyStatus.message}
               </p>
             ) : null}
-          </CardContent>
-        </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-auto rounded-md border border-border p-3">
-                <svg
-                  ref={svgRef}
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={analysis.svgWidth}
-                  height={analysis.svgHeight}
-                  viewBox={`0 0 ${analysis.svgWidth} ${analysis.svgHeight}`}
-                  role="img"
-                  aria-label="Org chart preview"
-                  fontFamily="Arial, Helvetica, sans-serif"
-                >
-                  <g stroke={BLUE} fill="none" strokeWidth={3} strokeLinecap="square">
-                    {analysis.connectorRenders.map((connectorRender) => (
-                      <path key={connectorRender.connectorId} d={connectorRender.path} />
-                    ))}
-                  </g>
-
-                  <g>
-                    {analysis.layouts.map((layout) => {
-                      const textBlockHeight =
-                        (layout.names.length - 1) * LAYOUT.nameLineHeight
-                      const firstNameY = layout.y + layout.bodyHeight / 2 - textBlockHeight / 2
-
-                      return (
-                        <g key={layout.id}>
-                          <rect
-                            x={layout.x}
-                            y={layout.y}
-                            width={layout.width}
-                            height={layout.bodyHeight}
-                            rx={3}
-                            ry={3}
-                            fill={BLUE}
-                          />
-
-                          <text
-                            x={layout.x + layout.width / 2}
-                            y={firstNameY}
-                            fill="#ffffff"
-                            fontSize={LAYOUT.nameFontSize}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                          >
-                            {layout.names.map((name, index) => (
-                              <tspan
-                                key={`${layout.id}-name-${index}`}
-                                x={layout.x + layout.width / 2}
-                                y={index === 0 ? firstNameY : undefined}
-                                dy={index === 0 ? 0 : LAYOUT.nameLineHeight}
-                              >
-                                {name}
-                              </tspan>
-                            ))}
-                          </text>
-
-                          <rect
-                            x={layout.ribbonX}
-                            y={layout.ribbonY}
-                            width={layout.ribbonWidth}
-                            height={layout.ribbonHeight}
-                            rx={2}
-                            ry={2}
-                            fill={LIGHT_RIBBON}
-                            stroke={BLUE}
-                            strokeWidth={2}
-                          />
-
-                          <text
-                            x={layout.ribbonX + layout.ribbonWidth / 2}
-                            y={layout.ribbonY + layout.ribbonHeight / 2 + 4}
-                            fill="#111111"
-                            fontSize={13}
-                            textAnchor="middle"
-                          >
-                            {layout.title}
-                          </text>
-                        </g>
-                      )
-                    })}
-                  </g>
-                </svg>
-              </div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
-      </section>
+
+        <Section>Preview</Section>
+        <div className="mt-4 overflow-auto">
+          <svg
+            ref={svgRef}
+            xmlns="http://www.w3.org/2000/svg"
+            width={analysis.svgWidth}
+            height={analysis.svgHeight}
+            viewBox={`0 0 ${analysis.svgWidth} ${analysis.svgHeight}`}
+            role="img"
+            aria-label="Org chart preview"
+            fontFamily="Arial, Helvetica, sans-serif"
+          >
+            <g stroke={BLUE} fill="none" strokeWidth={3} strokeLinecap="square">
+              {analysis.connectorRenders.map((connectorRender) => (
+                <path key={connectorRender.connectorId} d={connectorRender.path} />
+              ))}
+            </g>
+
+            <g>
+              {analysis.layouts.map((layout) => {
+                const textBlockHeight =
+                  (layout.names.length - 1) * LAYOUT.nameLineHeight
+                const firstNameY = layout.y + layout.bodyHeight / 2 - textBlockHeight / 2
+
+                return (
+                  <g key={layout.id}>
+                    <rect
+                      x={layout.x}
+                      y={layout.y}
+                      width={layout.width}
+                      height={layout.bodyHeight}
+                      rx={3}
+                      ry={3}
+                      fill={BLUE}
+                    />
+
+                    <text
+                      x={layout.x + layout.width / 2}
+                      y={firstNameY}
+                      fill="#ffffff"
+                      fontSize={LAYOUT.nameFontSize}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {layout.names.map((name, index) => (
+                        <tspan
+                          key={`${layout.id}-name-${index}`}
+                          x={layout.x + layout.width / 2}
+                          y={index === 0 ? firstNameY : undefined}
+                          dy={index === 0 ? 0 : LAYOUT.nameLineHeight}
+                        >
+                          {name}
+                        </tspan>
+                      ))}
+                    </text>
+
+                    <rect
+                      x={layout.ribbonX}
+                      y={layout.ribbonY}
+                      width={layout.ribbonWidth}
+                      height={layout.ribbonHeight}
+                      rx={2}
+                      ry={2}
+                      fill={LIGHT_RIBBON}
+                      stroke={BLUE}
+                      strokeWidth={2}
+                    />
+
+                    <text
+                      x={layout.ribbonX + layout.ribbonWidth / 2}
+                      y={layout.ribbonY + layout.ribbonHeight / 2 + 4}
+                      fill="#111111"
+                      fontSize={13}
+                      textAnchor="middle"
+                    >
+                      {layout.title}
+                    </text>
+                  </g>
+                )
+              })}
+            </g>
+          </svg>
+        </div>
+      </div>
     </div>
   )
 }

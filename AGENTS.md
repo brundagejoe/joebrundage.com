@@ -131,13 +131,14 @@ import { User } from "@/shared/user" // Business logic in shared
 
 This repository uses **shadcn/ui** as its component library. All UI components are built using shadcn/ui components, which are themselves built on **Base UI** primitives.
 
+The primitives are restyled to the site's house style (serif body, monochrome, square corners, hairline inputs, no boxes). Read `app/tools/DATA-DISPLAY.md` before building or restyling any page; it applies site-wide, not only to tools. There is no Card component; structure comes from whitespace, hairline rules, and the `Section` label in `shared/ui/plate.tsx`.
+
 ### UI Components (`shared/ui/`)
 
 All shadcn/ui components are located in `shared/ui/`:
 
 - `button.tsx` - Button component with variants
 - `input.tsx` - Input field
-- `card.tsx` - Card container
 - `alert-dialog.tsx` - Modal dialogs
 - `select.tsx` - Dropdown select
 - `combobox.tsx` - Autocomplete/combobox
@@ -154,16 +155,14 @@ All shadcn/ui components are located in `shared/ui/`:
 
 ```typescript
 import { Button } from "@/shared/ui/button"
-import { Card, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Section } from "@/shared/ui/plate"
 
 export function MyComponent() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Hello</CardTitle>
-      </CardHeader>
+    <>
+      <Section>Hello</Section>
       <Button variant="default">Click me</Button>
-    </Card>
+    </>
   )
 }
 ```
@@ -187,7 +186,7 @@ import { cn } from "@/shared/lib/utils"
 - **Styling**: Tailwind CSS 4.x
 - **UI Library**: shadcn/ui (Base UI primitives)
 - **Icons**: Lucide React
-- **Fonts**: Geist Sans, Geist Mono, Inter
+- **Fonts**: EB Garamond (body serif), Inter (labels, data, chart text), Geist Mono
 
 ## Working with the Codebase
 

@@ -1,5 +1,5 @@
 import { Link } from "@/shared/ui/link"
-import { Card, CardContent } from "@/shared/ui/card"
+import { Section } from "@/shared/ui/plate"
 
 export default function ProjectsPage() {
   const projects = [
@@ -34,39 +34,36 @@ export default function ProjectsPage() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col bg-background pt-16">
-      <section className="flex-1">
-        <div className="mx-auto max-w-4xl px-6 py-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-semibold">Projects</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              A collection of projects I&apos;ve worked on, ranging from web
-              applications to graphics and animation work.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4">
-            {projects.map((project) => (
-              <Link
-                key={project.name}
-                href={project.href}
-                className="block text-foreground no-underline hover:no-underline"
-                external={project.external}
-              >
-                <Card>
-                  <CardContent className="flex flex-col gap-2">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      {project.name}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed text-sm">
-                      {project.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen pt-16">
+      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
+        <h1 className="text-[2.4rem] leading-tight">Projects</h1>
+        <p className="mt-4 max-w-[38rem]">
+          A collection of projects I&apos;ve worked on, ranging from web
+          applications to graphics and animation work.
+        </p>
+
+        <Section>Selected work</Section>
+        <ul className="max-w-[44rem]">
+          {projects.map((project) => (
+            <li
+              key={project.name}
+              className="border-b border-current/15 py-6 last:border-b-0"
+            >
+              <h2 className="text-[1.35rem] leading-snug">
+                <Link href={project.href} external={project.external}>
+                  {project.name}
+                </Link>
+                {project.external ? (
+                  <span className="plate-label ml-2 align-middle text-[0.62rem] font-medium uppercase tracking-[0.12em] opacity-45">
+                    External
+                  </span>
+                ) : null}
+              </h2>
+              <p className="mt-2 max-w-[38rem]">{project.description}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

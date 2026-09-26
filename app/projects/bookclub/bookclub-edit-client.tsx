@@ -4,6 +4,7 @@ import * as React from "react"
 import NextLink from "next/link"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
+import { Section } from "@/shared/ui/plate"
 import { Textarea } from "@/shared/ui/textarea"
 
 type ClubResponse = {
@@ -344,15 +345,14 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
   if (!isAuthed) {
     return (
       <div className="min-h-screen bg-background pt-16">
-        <section className="mx-auto max-w-3xl px-6 py-8">
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Log in to access this bookclub.
-            </p>
-            <NextLink href={`/login?next=/projects/bookclub/${clubId}/edit`}>
-              <Button>Log in</Button>
-            </NextLink>
-          </div>
+        <section className="mx-auto max-w-3xl px-6 py-10">
+          <p className="opacity-65">Log in to access this bookclub.</p>
+          <NextLink
+            className="mt-4 inline-block"
+            href={`/login?next=/projects/bookclub/${clubId}/edit`}
+          >
+            <Button>Log in</Button>
+          </NextLink>
         </section>
       </div>
     )
@@ -396,24 +396,18 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-5xl px-6 py-8 space-y-6">
-        {loading && !data ? (
-          <>
-            <div className="h-12 rounded-md bg-muted/40" />
-            <div className="h-44 rounded-md bg-muted/40" />
-            <div className="h-56 rounded-md bg-muted/40" />
-          </>
-        ) : null}
+      <section className="mx-auto max-w-4xl px-6 py-10">
+        {loading && !data ? <p className="opacity-50">Loading...</p> : null}
 
         {data && club ? (
           <>
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex flex-col gap-2">
-                <h2 className="text-2xl font-semibold">{club.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  Bookclub session #{club.currentRound} • {club.phase}
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h1 className="text-[2.4rem] leading-tight">{club.name}</h1>
+                <p className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55 mt-2">
+                  Session <span className="plate-data">{club.currentRound}</span> · {club.phase}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="mt-3 opacity-65">
                   This edit page only shows and edits your own content.
                 </p>
               </div>
@@ -422,13 +416,13 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
               </NextLink>
             </div>
 
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            {error ? <p className="mt-6 text-[0.84rem] text-destructive">{error}</p> : null}
 
-            <section className="space-y-2">
-              <h3 className="text-lg font-semibold">Invite</h3>
-              <p className="text-sm text-muted-foreground">Share this link for others to join.</p>
-              <div className="space-y-2">
-                <p className="text-sm break-all">
+            <section>
+              <Section>Invite</Section>
+              <p className="mt-3 opacity-65">Share this link for others to join.</p>
+              <div className="mt-4 space-y-3">
+                <p className="plate-data break-all text-[0.9rem]">
                   {typeof window === "undefined"
                     ? `/projects/bookclub/join/${club.inviteCode}`
                     : `${window.location.origin}/projects/bookclub/join/${club.inviteCode}`}
@@ -446,53 +440,57 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
               </div>
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold">Your Submissions & Pitches</h3>
-              <p className="text-sm text-muted-foreground">
-                Your entries for session {club.submissionRound}, including pitches you added to books submitted by others.
+            <section>
+              <Section>Your submissions &amp; pitches</Section>
+              <p className="mt-3 opacity-65">
+                Your entries for session <span className="plate-figures">{club.submissionRound}</span>, including pitches you added to books submitted by others.
               </p>
-              <div className="space-y-3">
+              <div className="mt-4">
                 {myPitchedBooksThisSubmissionRound.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="opacity-50">
                     You have not submitted a pitch for this session yet.
                   </p>
                 ) : null}
-                {myPitchedBooksThisSubmissionRound.map((book) => {
-                  const myPitchesOnBook = (pitchesByBook[book.id] ?? []).filter(
-                    (entry) => entry.userId === currentUserId
-                  )
-                  const submittedBy = memberMap.get(book.createdByUserId)?.displayName ?? "Member"
+                {myPitchedBooksThisSubmissionRound.length > 0 ? (
+                  <ul className="divide-y divide-current/15 border-y border-current/20">
+                    {myPitchedBooksThisSubmissionRound.map((book) => {
+                      const myPitchesOnBook = (pitchesByBook[book.id] ?? []).filter(
+                        (entry) => entry.userId === currentUserId
+                      )
+                      const submittedBy = memberMap.get(book.createdByUserId)?.displayName ?? "Member"
 
-                  return (
-                    <div key={book.id} className="space-y-2">
-                      <p className="font-medium">
-                        {book.title} <span className="text-muted-foreground">by {book.author}</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {book.lengthHours} audiobook hours • Submitted by {submittedBy}
-                      </p>
-                      {myPitchesOnBook.map((pitchEntry) => (
-                        <div key={pitchEntry.id} className="space-y-1">
-                          <p className="text-xs text-muted-foreground">Your pitch</p>
-                          <p className="text-sm">{pitchEntry.pitch}</p>
-                        </div>
-                      ))}
-                    </div>
-                    )
-                })}
+                      return (
+                        <li key={book.id} className="py-4">
+                          <p>
+                            <em>{book.title}</em> <span className="opacity-65">by {book.author}</span>
+                          </p>
+                          <p className="mt-0.5 text-[0.9rem] opacity-55">
+                            <span className="plate-data text-[0.8rem]">{book.lengthHours}</span> audiobook hours · Submitted by {submittedBy}
+                          </p>
+                          {myPitchesOnBook.map((pitchEntry) => (
+                            <div key={pitchEntry.id} className="mt-3">
+                              <p className="plate-label text-[0.66rem] uppercase tracking-[0.08em] opacity-55">Your pitch</p>
+                              <p className="mt-1 max-w-[38rem]">{pitchEntry.pitch}</p>
+                            </div>
+                          ))}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                ) : null}
               </div>
             </section>
 
             {club.phase !== "voting" ? (
-              <section className="space-y-3">
-                <h3 className="text-lg font-semibold">Submit Book + Pitch</h3>
-                <p className="text-sm text-muted-foreground">
-                  Submit for session {club.submissionRound}. During reading, this becomes next session intake.
+              <section>
+                <Section>Submit book + pitch</Section>
+                <p className="mt-3 opacity-65">
+                  Submit for session <span className="plate-figures">{club.submissionRound}</span>. During reading, this becomes next session intake.
                 </p>
-                <div>
+                <div className="mt-4">
                   {mySubmissionForRound ? (
-                    <div className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
+                    <div className="space-y-4">
+                      <p className="opacity-65">
                         You already submitted for this session. Remove your submission before submitting again.
                       </p>
                       {(() => {
@@ -502,15 +500,15 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                         }
 
                         return (
-                          <div className="space-y-1">
-                            <p className="font-medium">
-                              {submittedBook.title}{" "}
-                              <span className="text-muted-foreground">by {submittedBook.author}</span>
+                          <div className="border-y border-current/20 py-4">
+                            <p>
+                              <em>{submittedBook.title}</em>{" "}
+                              <span className="opacity-65">by {submittedBook.author}</span>
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="plate-data mt-0.5 text-[0.8rem] opacity-55">
                               {submittedBook.lengthHours} audiobook hours
                             </p>
-                            <p className="text-sm">{mySubmissionForRound.pitch}</p>
+                            <p className="mt-3 max-w-[38rem]">{mySubmissionForRound.pitch}</p>
                           </div>
                         )
                       })()}
@@ -527,8 +525,8 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                     </div>
                   ) : (
                     <>
-                      <form className="space-y-3" onSubmit={handleSubmitPitch}>
-                        <div className="grid gap-3 md:grid-cols-3">
+                      <form className="space-y-5" onSubmit={handleSubmitPitch}>
+                        <div className="grid gap-x-6 gap-y-4 md:grid-cols-3">
                           <Input
                             placeholder="Title"
                             value={title}
@@ -585,9 +583,9 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                       </form>
 
                       {duplicateBook ? (
-                        <div className="mt-3 space-y-2">
-                          <p className="text-sm">
-                            This book already exists as <strong>{duplicateBook.title}</strong> by{" "}
+                        <div className="mt-6 space-y-3 border-t border-current/20 pt-3">
+                          <p>
+                            This book already exists as <em>{duplicateBook.title}</em> by{" "}
                             {duplicateBook.author}.
                           </p>
                           <div className="flex gap-2 flex-wrap">
@@ -611,8 +609,8 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                       ) : null}
 
                       {club.phase === "reading" && currentUserPitches.length > 0 ? (
-                        <div className="mt-4 space-y-2">
-                          <p className="text-sm font-medium">Resubmit a previous pitch</p>
+                        <div className="mt-8 space-y-3">
+                          <p className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55">Resubmit a previous pitch</p>
                           <div className="flex flex-wrap gap-2">
                             {currentUserPitches.map((previousPitch) => {
                               const book = booksById.get(previousPitch.bookId)
@@ -646,51 +644,60 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
             ) : null}
 
             {club.phase === "voting" ? (
-              <section className="space-y-3">
-                <h3 className="text-lg font-semibold">Ranked-Choice Voting</h3>
-                <p className="text-sm text-muted-foreground">
+              <section>
+                <Section>Ranked-choice voting</Section>
+                <p className="mt-3 opacity-65">
                   Rank all books from most to least preferred. Votes are anonymous.
                 </p>
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    {data.votesSubmittedCount} of {data.memberCount} members have voted.
+                <div className="mt-4">
+                  <p className="opacity-65">
+                    <span className="plate-figures">{data.votesSubmittedCount}</span> of{" "}
+                    <span className="plate-figures">{data.memberCount}</span> members have voted.
                   </p>
-                  {rankedBookIds.map((bookId, index) => {
-                    const book = booksById.get(bookId)
-                    if (!book) {
-                      return null
-                    }
+                  <ol className="mt-4 divide-y divide-current/15 border-y border-current/20">
+                    {rankedBookIds.map((bookId, index) => {
+                      const book = booksById.get(bookId)
+                      if (!book) {
+                        return null
+                      }
 
-                    return (
-                      <div
-                        key={bookId}
-                        className="py-1 flex items-center justify-between gap-3"
-                      >
-                        <p className="text-sm">
-                          #{index + 1} {book.title} by {book.author}
-                        </p>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={index === 0}
-                            onClick={() => moveRank(index, -1)}
-                          >
-                            Up
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={index === rankedBookIds.length - 1}
-                            onClick={() => moveRank(index, 1)}
-                          >
-                            Down
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                  })}
+                      return (
+                        <li
+                          key={bookId}
+                          className="flex items-center justify-between gap-3 py-2"
+                        >
+                          <p className="flex items-baseline gap-4">
+                            <span className="plate-data w-6 text-right text-[0.85rem] opacity-55">
+                              {index + 1}
+                            </span>
+                            <span>
+                              <em>{book.title}</em> <span className="opacity-65">by {book.author}</span>
+                            </span>
+                          </p>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={index === 0}
+                              onClick={() => moveRank(index, -1)}
+                            >
+                              Up
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={index === rankedBookIds.length - 1}
+                              onClick={() => moveRank(index, 1)}
+                            >
+                              Down
+                            </Button>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ol>
                   <Button
+                    className="mt-5"
                     disabled={busy || rankedBookIds.length !== currentRoundBooks.length}
                     onClick={() => {
                       void handleVoteSubmit()
@@ -703,22 +710,28 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
             ) : null}
 
             {club.phase === "reading" ? (
-              <section className="space-y-3">
-                <h3 className="text-lg font-semibold">Reading Phase</h3>
-                <p className="text-sm text-muted-foreground">Current winning book and meeting schedule.</p>
-                <div className="space-y-3">
+              <section>
+                <Section>Reading phase</Section>
+                <p className="mt-3 opacity-65">Current winning book and meeting schedule.</p>
+                <div className="mt-4 space-y-3">
                   {winningBook ? (
-                    <p className="text-sm">
-                      Current book: <strong>{winningBook.title}</strong> by {winningBook.author}
+                    <p className="flex items-baseline gap-3">
+                      <span className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55">Current book</span>
+                      <span>
+                        <em>{winningBook.title}</em> <span className="opacity-65">by {winningBook.author}</span>
+                      </span>
                     </p>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Winner not set yet.</p>
+                    <p className="opacity-50">Winner not set yet.</p>
                   )}
 
-                  <p className="text-sm">Meeting date: {formatDateTime(club.meetingAt)}</p>
+                  <p className="flex items-baseline gap-3">
+                    <span className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55">Meeting</span>
+                    <span className="plate-data text-[0.9rem]">{formatDateTime(club.meetingAt)}</span>
+                  </p>
 
                   {club.meetingAt ? (
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex flex-wrap gap-2 pt-1">
                       <a
                         href={buildGoogleCalendarLink(club.name, club.meetingAt)}
                         target="_blank"
@@ -740,9 +753,9 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
             ) : null}
 
             {club.isOwner ? (
-              <section className="space-y-3">
-                <h3 className="text-lg font-semibold">Owner Controls</h3>
-                <div className="space-y-3">
+              <section>
+                <Section>Owner controls</Section>
+                <div className="mt-4 space-y-6">
                   <div className="flex flex-wrap gap-2">
                     {(club.phase === "submission" || club.phase === "reading") ? (
                       <Button
@@ -780,10 +793,11 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                   </div>
 
                   {club.phase === "reading" ? (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Set meeting date</p>
-                      <div className="flex gap-2 flex-wrap">
+                    <div className="space-y-3">
+                      <p className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55">Set meeting date</p>
+                      <div className="flex flex-wrap items-end gap-4">
                         <Input
+                          className="plate-data w-auto"
                           type="datetime-local"
                           value={meetingAtInput}
                           onChange={(event) => setMeetingAtInput(event.target.value)}

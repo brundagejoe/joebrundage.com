@@ -3,6 +3,7 @@
 import * as React from "react"
 import NextLink from "next/link"
 import { Button } from "@/shared/ui/button"
+import { Section } from "@/shared/ui/plate"
 
 type ClubResponse = {
   currentUserId: string
@@ -107,13 +108,14 @@ export function BookclubClubClient({ clubId, isAuthed }: BookclubClubClientProps
   if (!isAuthed) {
     return (
       <div className="min-h-screen bg-background pt-16">
-        <section className="mx-auto max-w-3xl px-6 py-8">
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Log in to access this bookclub.</p>
-            <NextLink href={`/login?next=/projects/bookclub/${clubId}`}>
-              <Button>Log in</Button>
-            </NextLink>
-          </div>
+        <section className="mx-auto max-w-3xl px-6 py-10">
+          <p className="opacity-65">Log in to access this bookclub.</p>
+          <NextLink
+            className="mt-4 inline-block"
+            href={`/login?next=/projects/bookclub/${clubId}`}
+          >
+            <Button>Log in</Button>
+          </NextLink>
         </section>
       </div>
     )
@@ -138,88 +140,94 @@ export function BookclubClubClient({ clubId, isAuthed }: BookclubClubClientProps
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-5xl px-6 py-8 space-y-6">
-        {loading && !data ? (
-          <>
-            <div className="h-12 rounded-md bg-muted/40" />
-            <div className="h-44 rounded-md bg-muted/40" />
-            <div className="h-56 rounded-md bg-muted/40" />
-          </>
-        ) : null}
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      <section className="mx-auto max-w-4xl px-6 py-10">
+        {loading && !data ? <p className="opacity-50">Loading...</p> : null}
+        {error ? <p className="text-[0.84rem] text-destructive">{error}</p> : null}
 
         {club ? (
           <>
-            <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-semibold">{club.name}</h2>
-                <p className="text-sm text-muted-foreground">Bookclub session #{club.currentRound}</p>
+                <h1 className="text-[2.4rem] leading-tight">{club.name}</h1>
+                <p className="plate-label mt-2 text-[0.66rem] uppercase tracking-[0.12em] opacity-55">
+                  Session <span className="plate-data">{club.currentRound}</span>
+                </p>
               </div>
               <NextLink href={`/projects/bookclub/${clubId}/edit`}>
                 <Button>Edit My Content</Button>
               </NextLink>
             </div>
 
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold">Current Book</h3>
-              <p className="text-sm text-muted-foreground">Winner from the current session, if selected.</p>
-              <div>
+            <section>
+              <Section>Current book</Section>
+              <p className="mt-3 opacity-65">Winner from the current session, if selected.</p>
+              <div className="mt-4">
                 {winningBook ? (
-                  <div className="space-y-1">
-                    <p className="font-medium">{winningBook.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      by {winningBook.author} • {winningBook.lengthHours} audiobook hours
+                  <>
+                    <p className="text-[1.5rem] leading-snug">{winningBook.title}</p>
+                    <p className="mt-1 opacity-70">
+                      by {winningBook.author} · <span className="plate-figures">{winningBook.lengthHours}</span> audiobook hours
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      Meeting: {formatDateTime(club.meetingAt)}
+                    <p className="mt-3 flex items-baseline gap-3">
+                      <span className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55">
+                        Meeting
+                      </span>
+                      <span className="plate-data text-[0.9rem]">{formatDateTime(club.meetingAt)}</span>
                     </p>
-                  </div>
+                  </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No winning book yet.</p>
+                  <p className="opacity-50">No winning book yet.</p>
                 )}
               </div>
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold">Next Session Submissions</h3>
-              <p className="text-sm text-muted-foreground">
-                Submissions so far for session #{club.submissionRound}.
+            <section>
+              <Section>Next session submissions</Section>
+              <p className="mt-3 opacity-65">
+                Submissions so far for session <span className="plate-figures">{club.submissionRound}</span>.
               </p>
-              <div className="space-y-3">
+              <div className="mt-4">
                 {upcomingSubmissions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No submissions yet.</p>
-                ) : null}
-                {upcomingSubmissions.map((book) => (
-                  <div key={book.id} className="space-y-2">
-                    <p className="font-medium">
-                      {book.title} <span className="text-muted-foreground">by {book.author}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">{book.lengthHours} audiobook hours</p>
-                    {(pitchesByBook[book.id] ?? []).map((pitchEntry) => (
-                      <div key={pitchEntry.id} className="space-y-1">
-                        <p className="text-xs text-muted-foreground">
-                          {memberMap.get(pitchEntry.userId)?.displayName ?? "Member"}
+                  <p className="opacity-50">No submissions yet.</p>
+                ) : (
+                  <ul className="divide-y divide-current/15 border-y border-current/20">
+                    {upcomingSubmissions.map((book) => (
+                      <li key={book.id} className="py-4">
+                        <p>
+                          <em>{book.title}</em> <span className="opacity-65">by {book.author}</span>
                         </p>
-                        <p className="text-sm">{pitchEntry.pitch}</p>
-                      </div>
+                        <p className="plate-data mt-0.5 text-[0.8rem] opacity-55">
+                          {book.lengthHours} audiobook hours
+                        </p>
+                        {(pitchesByBook[book.id] ?? []).map((pitchEntry) => (
+                          <div key={pitchEntry.id} className="mt-3">
+                            <p className="plate-label text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                              {memberMap.get(pitchEntry.userId)?.displayName ?? "Member"}
+                            </p>
+                            <p className="mt-1 max-w-[38rem]">{pitchEntry.pitch}</p>
+                          </div>
+                        ))}
+                      </li>
                     ))}
-                  </div>
-                ))}
+                  </ul>
+                )}
               </div>
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold">Members</h3>
-              <div className="space-y-2">
+            <section>
+              <Section>Members</Section>
+              <ul className="mt-4 divide-y divide-current/15 border-y border-current/20">
                 {data.members.map((member) => (
-                  <p key={member.userId} className="text-sm">
-                    {member.displayName}
-                    <span className="text-xs text-muted-foreground">
-                      {member.role === "owner" ? " (owner)" : ""}
-                    </span>
-                  </p>
+                  <li key={member.userId} className="flex items-baseline justify-between gap-3 py-2">
+                    <span>{member.displayName}</span>
+                    {member.role === "owner" ? (
+                      <span className="plate-label text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                        owner
+                      </span>
+                    ) : null}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </section>
           </>
         ) : null}

@@ -98,36 +98,36 @@ export default async function MoneyStuffToolPage() {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-4xl px-6 py-8">
-        <div className="max-w-4xl">
-          <h2 className="text-xl font-bold tracking-wide">MONEY STUFF</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Bloomberg RSS via archive.ph
-          </p>
+      <div className="mx-auto max-w-[78rem] px-6 py-10">
+        <div className="max-w-[44rem]">
+          <h1 className="text-[2.4rem] leading-tight">Money Stuff</h1>
+          <p className="mt-4 max-w-[38rem]">Bloomberg RSS via archive.ph</p>
 
           {error ? (
-            <p className="mt-6 text-sm text-destructive">Failed to load feed: {error}</p>
+            <p className="mt-6 text-[0.9rem] text-destructive">
+              Failed to load feed: {error}
+            </p>
           ) : null}
 
           {!error && items.length === 0 ? (
-            <p className="mt-6 text-sm text-muted-foreground">No feed items found.</p>
+            <p className="mt-6 text-[0.9rem] opacity-60">No feed items found.</p>
           ) : null}
 
-          <ol className="mt-5 space-y-1 border border-border bg-card px-3 py-3 text-sm leading-tight">
+          <ol className="mt-10 border-t border-current/20">
             {items.map((item, index) => (
-              <li key={item.link}>
+              <li key={item.link} className="border-b border-current/10">
                 <a
                   href={toArchiveUrl(item.link)}
                   target="_blank"
                   rel="noreferrer"
                   style={{ color: "var(--foreground)" }}
-                  className="grid grid-cols-[auto_1fr_auto] items-start gap-3 text-foreground hover:underline"
+                  className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-3 py-1.5 hover:underline"
                 >
-                  <span className="tabular-nums text-card-foreground">
-                    {index + 1})
+                  <span className="plate-data text-[0.8rem] opacity-50">
+                    {index + 1}
                   </span>
                   <span className="truncate">{item.title}</span>
-                  <span className="w-10 text-right tabular-nums text-foreground">
+                  <span className="plate-data w-12 text-right text-[0.8rem] opacity-60">
                     {formatPubDate(item.pubDate) ?? "--/--"}
                   </span>
                 </a>
@@ -135,7 +135,7 @@ export default async function MoneyStuffToolPage() {
             ))}
           </ol>
         </div>
-      </section>
+      </div>
     </div>
   )
 }

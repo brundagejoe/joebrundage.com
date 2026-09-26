@@ -5,6 +5,7 @@ import NextLink from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
+import { Section } from "@/shared/ui/plate"
 
 type BookclubListItem = {
   id: string
@@ -114,20 +115,16 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-4xl px-6 py-8 space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Bookclub</h2>
-          <p className="text-muted-foreground">
-            Create a club, share a join link, submit pitches, and run ranked-choice voting.
-          </p>
-        </div>
+      <section className="mx-auto max-w-4xl px-6 py-10">
+        <h1 className="text-[2.4rem] leading-tight">Bookclub</h1>
+        <p className="mt-4 max-w-[38rem] opacity-80">
+          Create a club, share a join link, submit pitches, and run ranked-choice voting.
+        </p>
 
         {!isAuthed ? (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              You need an account to create or join a bookclub.
-            </p>
-            <div className="flex gap-3">
+          <div className="mt-8">
+            <p className="opacity-65">You need an account to create or join a bookclub.</p>
+            <div className="mt-4 flex gap-3">
               <NextLink href="/login?next=/projects/bookclub">
                 <Button>Log in</Button>
               </NextLink>
@@ -139,82 +136,80 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
         ) : null}
 
         {isAuthed ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold">Create a Club</h3>
-              <p className="text-sm text-muted-foreground">Start a new bookclub and invite others.</p>
-              <div>
-                <form className="space-y-3" onSubmit={handleCreate}>
-                  <Input
-                    value={createName}
-                    onChange={(event) => setCreateName(event.target.value)}
-                    placeholder="Downtown Sci-Fi Club"
-                    maxLength={80}
-                  />
-                  <Button
-                    type="submit"
-                    disabled={submitting || createName.trim().length < 2}
-                  >
-                    Create bookclub
-                  </Button>
-                </form>
-              </div>
+          <div className="grid gap-x-12 md:grid-cols-2">
+            <section>
+              <Section>Create a club</Section>
+              <p className="mt-3 opacity-65">Start a new bookclub and invite others.</p>
+              <form className="mt-4 space-y-4" onSubmit={handleCreate}>
+                <Input
+                  value={createName}
+                  onChange={(event) => setCreateName(event.target.value)}
+                  placeholder="Downtown Sci-Fi Club"
+                  maxLength={80}
+                />
+                <Button
+                  type="submit"
+                  disabled={submitting || createName.trim().length < 2}
+                >
+                  Create bookclub
+                </Button>
+              </form>
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold">Join by Invite</h3>
-              <p className="text-sm text-muted-foreground">Paste an invite code from a share link.</p>
-              <div>
-                <form className="space-y-3" onSubmit={handleJoin}>
-                  <Input
-                    value={joinCode}
-                    onChange={(event) => setJoinCode(event.target.value)}
-                    placeholder="Invite code"
-                  />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    disabled={submitting || !joinCode.trim()}
-                  >
-                    Join bookclub
-                  </Button>
-                </form>
-              </div>
+            <section>
+              <Section>Join by invite</Section>
+              <p className="mt-3 opacity-65">Paste an invite code from a share link.</p>
+              <form className="mt-4 space-y-4" onSubmit={handleJoin}>
+                <Input
+                  value={joinCode}
+                  onChange={(event) => setJoinCode(event.target.value)}
+                  placeholder="Invite code"
+                />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={submitting || !joinCode.trim()}
+                >
+                  Join bookclub
+                </Button>
+              </form>
             </section>
           </div>
         ) : null}
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="mt-6 text-[0.84rem] text-destructive">{error}</p> : null}
 
-        <section className="space-y-3">
-          <h3 className="text-lg font-semibold">Your Bookclubs</h3>
-          <p className="text-sm text-muted-foreground">
-            Open any club to submit, vote, or manage sessions.
-          </p>
-          <div className="space-y-3">
-            {loading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
+        <section>
+          <Section>Your bookclubs</Section>
+          <p className="mt-3 opacity-65">Open any club to submit, vote, or manage sessions.</p>
+          <div className="mt-4">
+            {loading ? <p className="opacity-50">Loading...</p> : null}
             {!loading && clubs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No bookclubs yet.</p>
+              <p className="opacity-50">No bookclubs yet.</p>
             ) : null}
-            {clubs.map((club) => (
-              <div
-                key={club.id}
-                className="flex items-center justify-between gap-3"
-              >
-                <div>
-                  <p className="font-medium">{club.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Session {club.currentRound} • {club.phase}
-                    {club.isOwner ? " • owner" : ""}
-                  </p>
-                </div>
-                <NextLink href={`/projects/bookclub/${club.id}`}>
-                  <Button variant="outline" size="sm">
-                    Open
-                  </Button>
-                </NextLink>
-              </div>
-            ))}
+            {clubs.length > 0 ? (
+              <ul className="divide-y divide-current/15 border-y border-current/20">
+                {clubs.map((club) => (
+                  <li
+                    key={club.id}
+                    className="flex items-center justify-between gap-3 py-3"
+                  >
+                    <div>
+                      <p>{club.name}</p>
+                      <p className="plate-label mt-0.5 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                        Session <span className="plate-data">{club.currentRound}</span> · {club.phase}
+                        {club.isOwner ? " · owner" : ""}
+                      </p>
+                    </div>
+                    <NextLink href={`/projects/bookclub/${club.id}`}>
+                      <Button variant="outline" size="sm">
+                        Open
+                      </Button>
+                    </NextLink>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
         </section>
       </section>

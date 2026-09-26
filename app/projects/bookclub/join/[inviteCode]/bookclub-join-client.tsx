@@ -49,24 +49,25 @@ export function BookclubJoinClient({ inviteCode, isAuthed }: BookclubJoinClientP
 
   return (
     <div className="min-h-screen bg-background pt-16">
-      <section className="mx-auto max-w-xl px-6 py-8">
-        <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Join Bookclub</h2>
-          {!isAuthed ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Log in first to accept this invite.
-              </p>
-              <NextLink href={`/login?next=/projects/bookclub/join/${inviteCode}`}>
-                <Button>Log in</Button>
-              </NextLink>
-            </>
-          ) : null}
-          {isAuthed && status === "joining" ? (
-            <p className="text-sm text-muted-foreground">Joining bookclub...</p>
-          ) : null}
-          {status === "error" ? <p className="text-sm text-destructive">{error}</p> : null}
-        </div>
+      <section className="mx-auto max-w-xl px-6 py-10">
+        <h1 className="text-[2.4rem] leading-tight">Join Bookclub</h1>
+        {!isAuthed ? (
+          <>
+            <p className="mt-4 opacity-65">Log in first to accept this invite.</p>
+            <NextLink
+              className="mt-4 inline-block"
+              href={`/login?next=/projects/bookclub/join/${inviteCode}`}
+            >
+              <Button>Log in</Button>
+            </NextLink>
+          </>
+        ) : null}
+        {isAuthed && status === "joining" ? (
+          <p className="mt-4 opacity-65">Joining bookclub...</p>
+        ) : null}
+        {status === "error" ? (
+          <p className="mt-4 text-[0.84rem] text-destructive">{error}</p>
+        ) : null}
       </section>
     </div>
   )

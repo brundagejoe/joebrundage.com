@@ -4,7 +4,6 @@ import { Suspense, useMemo, useState, type FormEvent } from "react"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/shared/lib/supabase-browser"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card"
 import { Button } from "@/shared/ui/button"
 import { Link } from "@/shared/ui/link"
 import {
@@ -37,7 +36,7 @@ function getSafeRedirectPath(next: string | null) {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen pt-24 px-6" />}>
+    <Suspense fallback={<main className="min-h-screen px-6 pt-24 pb-24" />}>
       <SignupPageContent />
     </Suspense>
   )
@@ -126,130 +125,120 @@ function SignupPageContent() {
   }
 
   return (
-    <div className="min-h-screen pt-24 px-6">
-      <div className="mx-auto max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle>Create account</CardTitle>
-            <CardDescription>Use your email and password.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <FieldSet className="gap-4">
-                <FieldGroup className="gap-4">
-                  <Field data-invalid={!!displayNameError}>
-                    <FieldLabel htmlFor="display-name">Display name</FieldLabel>
-                    <Input
-                      id="display-name"
-                      type="text"
-                      className="rounded-md"
-                      value={displayName}
-                      onChange={(event) => setDisplayName(event.target.value)}
-                      autoComplete="name"
-                      maxLength={80}
-                      aria-invalid={!!displayNameError}
+    <main className="min-h-screen px-6 pt-24 pb-24">
+      <div className="mx-auto max-w-[24rem]">
+        <h1 className="text-[2.4rem] leading-tight font-normal">Create account</h1>
+        <p className="mt-3 opacity-70">Pick a display name, then an email and password.</p>
+        <form className="mt-10 space-y-8" onSubmit={handleSubmit}>
+          <FieldSet>
+            <FieldGroup className="gap-6">
+              <Field data-invalid={!!displayNameError}>
+                <FieldLabel htmlFor="display-name">Display name</FieldLabel>
+                <Input
+                  id="display-name"
+                  type="text"
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  autoComplete="name"
+                  maxLength={80}
+                  aria-invalid={!!displayNameError}
+                  required
+                />
+                <FieldError>{displayNameError}</FieldError>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </Field>
+
+              <div className="space-y-3">
+                <Field className="gap-2">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput
+                      id="password"
+                      type={showPasswords ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      autoComplete="new-password"
                       required
                     />
-                    <FieldError>{displayNameError}</FieldError>
-                  </Field>
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
+                        onClick={() => setShowPasswords((current) => !current)}
+                        size="icon-xs"
+                      >
+                        {showPasswords ? <EyeOff /> : <Eye />}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      className="rounded-md"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      autoComplete="email"
+                <Field data-invalid={!!confirmPasswordError} className="gap-2">
+                  <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput
+                      id="confirm-password"
+                      type={showPasswords ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      autoComplete="new-password"
+                      aria-invalid={!!confirmPasswordError}
                       required
                     />
-                  </Field>
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
+                        onClick={() => setShowPasswords((current) => !current)}
+                        size="icon-xs"
+                      >
+                        {showPasswords ? <EyeOff /> : <Eye />}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
+                  <FieldError>{confirmPasswordError}</FieldError>
+                </Field>
+              </div>
 
-                  <div className="space-y-3">
-                    <Field className="gap-2">
-                      <FieldLabel htmlFor="password">Password</FieldLabel>
-                      <InputGroup className="rounded-md">
-                        <InputGroupInput
-                          id="password"
-                          type={showPasswords ? "text" : "password"}
-                          value={password}
-                          onChange={(event) => setPassword(event.target.value)}
-                          autoComplete="new-password"
-                          required
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <InputGroupButton
-                            aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
-                            onClick={() => setShowPasswords((current) => !current)}
-                            className="rounded-md"
-                            size="icon-xs"
-                          >
-                            {showPasswords ? <EyeOff /> : <Eye />}
-                          </InputGroupButton>
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </Field>
+              {infoMessage ? (
+                <Field>
+                  <FormFieldDescription>{infoMessage}</FormFieldDescription>
+                </Field>
+              ) : null}
 
-                    <Field data-invalid={!!confirmPasswordError} className="gap-2">
-                      <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
-                      <InputGroup className="rounded-md">
-                        <InputGroupInput
-                          id="confirm-password"
-                          type={showPasswords ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(event) => setConfirmPassword(event.target.value)}
-                          autoComplete="new-password"
-                          aria-invalid={!!confirmPasswordError}
-                          required
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <InputGroupButton
-                            aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
-                            onClick={() => setShowPasswords((current) => !current)}
-                            className="rounded-md"
-                            size="icon-xs"
-                          >
-                            {showPasswords ? <EyeOff /> : <Eye />}
-                          </InputGroupButton>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      <FieldError>{confirmPasswordError}</FieldError>
-                    </Field>
-                  </div>
+              {errorMessage ? (
+                <Field data-invalid>
+                  <FieldError>{errorMessage}</FieldError>
+                </Field>
+              ) : null}
+            </FieldGroup>
+          </FieldSet>
 
-                  {infoMessage ? (
-                    <Field>
-                      <FormFieldDescription>{infoMessage}</FormFieldDescription>
-                    </Field>
-                  ) : null}
+          <Button disabled={isSubmitting} type="submit" className="w-full">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Creating account...
+              </>
+            ) : (
+              "Create account"
+            )}
+          </Button>
+        </form>
 
-                  {errorMessage ? (
-                    <Field data-invalid>
-                      <FieldError>{errorMessage}</FieldError>
-                    </Field>
-                  ) : null}
-                </FieldGroup>
-              </FieldSet>
-
-              <Button disabled={isSubmitting} type="submit" className="w-full rounded-md">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  "Create account"
-                )}
-              </Button>
-            </form>
-
-            <p className="text-sm text-muted-foreground mt-4">
-              Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`}>Log in</Link>
-            </p>
-          </CardContent>
-        </Card>
+        <p className="mt-8 text-[0.95rem] opacity-70">
+          Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`}>Log in</Link>
+        </p>
       </div>
-    </div>
+    </main>
   )
 }
