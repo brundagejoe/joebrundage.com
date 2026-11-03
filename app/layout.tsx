@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { EB_Garamond, Geist, Geist_Mono, Inter } from "next/font/google"
+import { EB_Garamond, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { AppQueryProvider } from "@/shared/lib/query"
 import {
@@ -16,11 +16,6 @@ const ebGaramond = EB_Garamond({
   subsets: ["latin"],
   variable: "--font-plate-serif",
   display: "swap",
-})
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
 })
 
 const geistMono = Geist_Mono({
@@ -41,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable}`}
+      className={`${inter.variable} ${geistMono.variable} ${ebGaramond.variable}`}
       suppressHydrationWarning
     >
       <head>
