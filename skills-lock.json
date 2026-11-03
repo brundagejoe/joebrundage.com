@@ -6,6 +6,12 @@
       "sourceType": "github",
       "computedHash": "32f63a1e56fc41f53497f7b19d6391b7c3e55bedd884c5a4d10bc4eacd2310e4"
     },
+    "improve-typography": {
+      "source": "brundagejoe/skills",
+      "sourceType": "github",
+      "skillPath": "improve-typography/SKILL.md",
+      "computedHash": "17729038268f756e45674a4db6a0406d19fb9bb3f543781a37d6869faf689132"
+    },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
