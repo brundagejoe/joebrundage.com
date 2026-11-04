@@ -186,7 +186,7 @@ import { cn } from "@/shared/lib/utils"
 - **Styling**: Tailwind CSS 4.x
 - **UI Library**: shadcn/ui (Base UI primitives)
 - **Icons**: Lucide React
-- **Fonts**: EB Garamond (body serif), Inter (labels, data, chart text), Geist Mono
+- **Fonts**: Source Serif 4 (body serif), Source Sans 3 (labels, data, chart text), Source Code Pro (terminal theme, code)
 
 ## Working with the Codebase
 

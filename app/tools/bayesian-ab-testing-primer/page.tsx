@@ -61,11 +61,11 @@ function Control({
       <div className="flex items-baseline justify-between gap-3">
         <label
           htmlFor={id}
-          className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
+          className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70"
         >
           {label}
         </label>
-        <span className="plate-data text-[0.85rem]">{display}</span>
+        <span className="plate-data text-[0.94rem]">{display}</span>
       </div>
       <input
         id={id}
@@ -90,7 +90,7 @@ function ControlStrip({ children }: { children: React.ReactNode }) {
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[32em] space-y-4">{children}</div>
+  return <div className="max-w-[35em] space-y-4">{children}</div>
 }
 
 function Aside({
@@ -103,7 +103,7 @@ function Aside({
   return (
     <>
       <h4 className="mt-10 text-[1.2rem] leading-snug">{title}</h4>
-      <div className="mt-3 max-w-[32em] space-y-4">{children}</div>
+      <div className="mt-3 max-w-[35em] space-y-4">{children}</div>
     </>
   )
 }
@@ -197,18 +197,18 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+          <p className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
             BABTP
           </p>
           <h1 className="mt-3 text-[1.9rem] leading-tight">
             Bayesian A/B Testing Primer
           </h1>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             Six sections, one idea. A conversion rate is a probability you do
             not know, so you represent it with a distribution rather than a
-            number. Everything that follows&nbsp;— posterior updating, the chance one
-            variant beats another, the cost of deciding early&nbsp;— is that one move
-            applied again and again.
+            number. Everything that follows&nbsp;— posterior updating, the
+            chance one variant beats another, the cost of deciding early&nbsp;—
+            is that one move applied again and again.
           </p>
         </Row>
 
@@ -249,8 +249,8 @@ export default function BayesianAbTestingPrimerPage() {
               <InlineMath>
                 <span>B(&alpha;, &beta;)</span>
               </InlineMath>{" "}
-              is the Beta function&nbsp;— the constant that makes the area under the
-              curve exactly 1, so the curve is a valid distribution.
+              is the Beta function&nbsp;— the constant that makes the area under
+              the curve exactly 1, so the curve is a valid distribution.
             </p>
           </Prose>
           <BetaFunctionFormula />
@@ -260,8 +260,8 @@ export default function BayesianAbTestingPrimerPage() {
               higher conversion probabilities, a larger{" "}
               <span className="italic">β</span> toward lower ones. When both are
               1 the distribution is flat, which is why{" "}
-              <InlineMath>Beta(1, 1)</InlineMath> is the usual neutral starting
-              point.
+              <InlineMath>Beta(1,&nbsp;1)</InlineMath> is the usual neutral
+              starting point.
             </p>
           </Prose>
         </Row>
@@ -301,7 +301,7 @@ export default function BayesianAbTestingPrimerPage() {
             />
           </ControlStrip>
           <Caption>
-            The current prior is Beta({formatProbability(alpha)},{" "}
+            The current prior is Beta({formatProbability(alpha)},&nbsp;
             {formatProbability(beta)}), with a mean of{" "}
             {((alpha / (alpha + beta)) * 100).toFixed(1)}%. The shaded region is
             the whole density, and its area is always 1 however you move the
@@ -323,9 +323,7 @@ export default function BayesianAbTestingPrimerPage() {
         </Row>
 
         {/* ─── Section 2 ─────────────────────────────────────────── */}
-        <Section>
-          Section 2&nbsp;&middot; From shape to conversion data
-        </Section>
+        <Section>Section 2&nbsp;&middot; From shape to conversion data</Section>
         <Row
           note={
             <>
@@ -334,13 +332,15 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h3 className="mt-4 text-[1.4rem] leading-snug">Counting into the shape</h3>
+          <h3 className="mt-4 text-[1.4rem] leading-snug">
+            Counting into the shape
+          </h3>
           <Prose>
             <p>
               In an A/B test, <span className="italic">α</span> and{" "}
               <span className="italic">β</span> stop feeling abstract as soon as
-              you connect them to outcomes. Start from a neutral Beta(1, 1),
-              then add successes to α and failures to β.
+              you connect them to outcomes. Start from a neutral
+              Beta(1,&nbsp;1), then add successes to α and failures to β.
             </p>
           </Prose>
           <PosteriorUpdateCountsFormula />
@@ -371,50 +371,55 @@ export default function BayesianAbTestingPrimerPage() {
               }))}
             />
           </div>
-          <div className="mt-6 max-w-[34rem] overflow-x-auto" role="region" aria-label="Posterior sample sizes" tabIndex={0}>
-          <table className="plate-data w-full min-w-[30rem] text-[0.85rem]">
-            <thead>
-              <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
-                <th className="py-1 text-left font-medium">Sample</th>
-                <th className="py-1 pl-5 text-right font-medium">Successes</th>
-                <th className="py-1 pl-5 text-right font-medium">Failures</th>
-                <th className="py-1 pl-5 text-right font-medium">Alpha</th>
-                <th className="py-1 pl-5 text-right font-medium">Beta</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sampleSizeSeries.map((row) => (
-                <tr key={row.key}>
-                  <td className="py-1.5">N = {formatCount(row.n)}</td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {formatCount(row.successes)}
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {formatCount(row.failures)}
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {formatCount(row.alpha)}
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {formatCount(row.beta)}
-                  </td>
+          <div
+            className="mt-6 max-w-[34rem] overflow-x-auto"
+            role="region"
+            aria-label="Posterior sample sizes"
+            tabIndex={0}
+          >
+            <table className="plate-data w-full min-w-[30rem] text-[0.94rem]">
+              <thead>
+                <tr className="plate-label border-b border-current/25 text-[0.8rem] uppercase tracking-[0.1em] opacity-70">
+                  <th className="py-1 text-left font-medium">Sample</th>
+                  <th className="py-1 pl-5 text-right font-medium">
+                    Successes
+                  </th>
+                  <th className="py-1 pl-5 text-right font-medium">Failures</th>
+                  <th className="py-1 pl-5 text-right font-medium">Alpha</th>
+                  <th className="py-1 pl-5 text-right font-medium">Beta</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sampleSizeSeries.map((row) => (
+                  <tr key={row.key}>
+                    <td className="py-1.5">N = {formatCount(row.n)}</td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {formatCount(row.successes)}
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {formatCount(row.failures)}
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {formatCount(row.alpha)}
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {formatCount(row.beta)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
           <Caption>
-            Three posteriors from the same 5% observed rate and a Beta(1, 1)
-            prior. At N = 100 the posterior is still broad; by N = 2,000 it has
-            squeezed tightly around 5%, which is what it means for data to be
-            informative about the underlying rate.
+            Three posteriors from the same 5% observed rate and a
+            Beta(1,&nbsp;1) prior. At N = 100 the posterior is still broad; by N
+            = 2,000 it has squeezed tightly around 5%, which is what it means
+            for data to be informative about the underlying rate.
           </Caption>
         </Row>
 
         {/* ─── Section 3 ─────────────────────────────────────────── */}
-        <Section>
-          Section 3&nbsp;&middot; Comparing two posteriors
-        </Section>
+        <Section>Section 3&nbsp;&middot; Comparing two posteriors</Section>
         <Row
           note={
             <>
@@ -423,7 +428,9 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h3 className="mt-4 text-[1.4rem] leading-snug">Which variant is better?</h3>
+          <h3 className="mt-4 text-[1.4rem] leading-snug">
+            Which variant is better?
+          </h3>
           <Prose>
             <p>
               Each variant gets its own stream of data, so each gets its own
@@ -506,7 +513,7 @@ export default function BayesianAbTestingPrimerPage() {
               onChange={setAbN}
             />
           </ControlStrip>
-          <p className="mt-5 flex max-w-[32em] items-baseline gap-2 text-[1.15rem]">
+          <p className="mt-5 flex max-w-[35em] items-baseline gap-2 text-[1.15rem]">
             <span>P(B &gt; A)</span>
             <ProbabilityStrip
               probability={sectionThree.probBBeatsA}
@@ -519,8 +526,8 @@ export default function BayesianAbTestingPrimerPage() {
           </p>
           <Caption>
             Control dashed, variant solid; the shaded region is where they
-            overlap. That overlap is the zone of uncertainty&nbsp;— both rates are
-            plausible there. When the curves are far apart P(B &gt; A)
+            overlap. That overlap is the zone of uncertainty&nbsp;— both rates
+            are plausible there. When the curves are far apart P(B &gt; A)
             approaches 0 or 1 and the decision is clear. When they nearly
             coincide it drifts toward 50%, which does not mean the test is
             broken: it means the data cannot yet tell the variants apart.
@@ -549,7 +556,9 @@ export default function BayesianAbTestingPrimerPage() {
             <>Direction is cheap. Stakes are what you actually decide on.</>
           }
         >
-          <h3 className="mt-4 text-[1.4rem] leading-snug">The cost of being wrong</h3>
+          <h3 className="mt-4 text-[1.4rem] leading-snug">
+            The cost of being wrong
+          </h3>
           <Prose>
             <p>
               P(B &gt; A) gives the direction but not whether acting on it is
@@ -576,8 +585,8 @@ export default function BayesianAbTestingPrimerPage() {
         <Row
           note={
             <>
-              The wider the overlap, the more both losses cost you&nbsp;— which is
-              why deciding early is expensive.
+              The wider the overlap, the more both losses cost you&nbsp;— which
+              is why deciding early is expensive.
             </>
           }
         >
@@ -621,7 +630,7 @@ export default function BayesianAbTestingPrimerPage() {
               onChange={setS4N}
             />
           </ControlStrip>
-          <table className="plate-data mt-5 w-full max-w-[26rem] text-[0.85rem]">
+          <table className="plate-data mt-5 w-full max-w-[26rem] text-[0.94rem]">
             <tbody>
               <tr className="border-b border-current/25">
                 <td className="py-1.5">Hold A&nbsp;— cost of withholding B</td>
@@ -650,9 +659,7 @@ export default function BayesianAbTestingPrimerPage() {
         </Row>
 
         {/* ─── Section 5 ─────────────────────────────────────────── */}
-        <Section>
-          Section 5&nbsp;&middot; Should you keep running?
-        </Section>
+        <Section>Section 5&nbsp;&middot; Should you keep running?</Section>
         <Row
           note={
             <>
@@ -661,7 +668,9 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h3 className="mt-4 text-[1.4rem] leading-snug">What another week buys</h3>
+          <h3 className="mt-4 text-[1.4rem] leading-snug">
+            What another week buys
+          </h3>
           <Prose>
             <p>
               Expected loss answers whether to act on the data you have. A
@@ -672,10 +681,10 @@ export default function BayesianAbTestingPrimerPage() {
             </p>
             <p>
               Holding the observed rates constant, you can compute what the
-              posterior&nbsp;— and therefore the expected loss&nbsp;— would look like at
-              any future N. Both losses shrink as N grows, but not at the same
-              rate: when one variant is genuinely better, its loss converges to
-              zero much faster than the other.
+              posterior&nbsp;— and therefore the expected loss&nbsp;— would look
+              like at any future N. Both losses shrink as N grows, but not at
+              the same rate: when one variant is genuinely better, its loss
+              converges to zero much faster than the other.
             </p>
           </Prose>
         </Row>
@@ -767,12 +776,12 @@ export default function BayesianAbTestingPrimerPage() {
             <p>The full stopping rule is two conditions at once:</p>
             <ol className="ml-5 list-decimal space-y-2">
               <li>
-                Loss<sub>B</sub> &lt; ε&nbsp;— the expected regret of shipping is
-                below your threshold.
+                Loss<sub>B</sub> &lt; ε&nbsp;— the expected regret of shipping
+                is below your threshold.
               </li>
               <li>
-                N &ge; N<sub>min</sub>&nbsp;— you have enough data for the projection
-                to be credible at the observed rates.
+                N &ge; N<sub>min</sub>&nbsp;— you have enough data for the
+                projection to be credible at the observed rates.
               </li>
             </ol>
             <p>
@@ -792,13 +801,15 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h3 className="mt-4 text-[1.4rem] leading-snug">The recommendation flips twice</h3>
+          <h3 className="mt-4 text-[1.4rem] leading-snug">
+            The recommendation flips twice
+          </h3>
           <Prose>
             <p>
               New users arrive each week and the posteriors update. Below is the
-              whole run at once&nbsp;— one small chart per week, control dashed and
-              variant solid, on a shared reading. Select a week to read what was
-              happening at the time.
+              whole run at once&nbsp;— one small chart per week, control dashed
+              and variant solid, on a shared reading. Select a week to read what
+              was happening at the time.
             </p>
           </Prose>
         </Row>
@@ -816,49 +827,54 @@ export default function BayesianAbTestingPrimerPage() {
             selected={s6Week}
             onSelect={setS6Week}
           />
-          <div className="mt-8 overflow-x-auto" role="region" aria-label="Weekly test results" tabIndex={0}>
-          <table className="plate-data w-full min-w-[38rem] text-[0.85rem]">
-            <thead>
-              <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
-                <th className="py-1 text-left font-medium">Week</th>
-                <th className="py-1 pl-5 text-right font-medium">N / arm</th>
-                <th className="py-1 pl-5 text-right font-medium">
-                  P(B &gt; A)
-                </th>
-                <th className="py-1 pl-5 text-right font-medium">Loss A</th>
-                <th className="py-1 pl-5 text-right font-medium">Loss B</th>
-                <th className="py-1 pl-5 text-right font-medium">Call</th>
-              </tr>
-            </thead>
-            <tbody>
-              {weeks.map((row) => (
-                <tr
-                  key={row.week}
-                  className={row.week === s6Week ? "" : "opacity-65"}
-                >
-                  <td className="py-1.5">{row.week}</td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {formatCount(row.nPerVariant)}
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {(row.probBBeatsA * 100).toFixed(1)}%
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {(row.lossChooseA * 100).toFixed(3)}
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">
-                    {(row.lossChooseB * 100).toFixed(3)}
-                  </td>
-                  <td className="py-1.5 pl-5 text-right">{row.call}</td>
+          <div
+            className="mt-8 overflow-x-auto"
+            role="region"
+            aria-label="Weekly test results"
+            tabIndex={0}
+          >
+            <table className="plate-data w-full min-w-[38rem] text-[0.94rem]">
+              <thead>
+                <tr className="plate-label border-b border-current/25 text-[0.8rem] uppercase tracking-[0.1em] opacity-70">
+                  <th className="py-1 text-left font-medium">Week</th>
+                  <th className="py-1 pl-5 text-right font-medium">N / arm</th>
+                  <th className="py-1 pl-5 text-right font-medium">
+                    P(B &gt; A)
+                  </th>
+                  <th className="py-1 pl-5 text-right font-medium">Loss A</th>
+                  <th className="py-1 pl-5 text-right font-medium">Loss B</th>
+                  <th className="py-1 pl-5 text-right font-medium">Call</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {weeks.map((row) => (
+                  <tr
+                    key={row.week}
+                    className={row.week === s6Week ? "" : "opacity-65"}
+                  >
+                    <td className="py-1.5">{row.week}</td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {formatCount(row.nPerVariant)}
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {(row.probBBeatsA * 100).toFixed(1)}%
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {(row.lossChooseA * 100).toFixed(3)}
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">
+                      {(row.lossChooseB * 100).toFixed(3)}
+                    </td>
+                    <td className="py-1.5 pl-5 text-right">{row.call}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
           <Caption>
             Losses are in percentage points. The call column is simply whichever
-            loss is smaller&nbsp;— and it flips at week 3 and again at week 5. In
-            weeks 1 and 2 both losses are high in absolute terms even though
+            loss is smaller&nbsp;— and it flips at week 3 and again at week 5.
+            In weeks 1 and 2 both losses are high in absolute terms even though
             Loss<sub>B</sub> is the smaller one: the signature of a wide
             posterior, where the comparison points in a direction but the
             magnitude says the data is thin.
@@ -883,7 +899,9 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h4 className="mt-10 text-[1.2rem] leading-snug">{week.narrative.heading}</h4>
+          <h4 className="mt-10 text-[1.2rem] leading-snug">
+            {week.narrative.heading}
+          </h4>
           <div className="mt-4 grid items-start gap-x-8 gap-y-5 lg:grid-cols-[1fr_1fr]">
             <div>
               <PosteriorPairFigure
@@ -899,7 +917,7 @@ export default function BayesianAbTestingPrimerPage() {
               <p className="text-[0.9em] leading-[1.4] opacity-85">
                 {week.narrative.body}
               </p>
-              <table className="plate-data mt-4 w-full text-[0.85rem]">
+              <table className="plate-data mt-4 w-full text-[0.94rem]">
                 <tbody>
                   <tr>
                     <td className="py-1">N per variant</td>
@@ -940,11 +958,12 @@ export default function BayesianAbTestingPrimerPage() {
           <Aside title="What this walkthrough shows">
             <p>
               B looked like the clear winner in weeks 1 and 2, then A pulled
-              ahead for weeks 3 and 4, then B reclaimed the lead. The true rates&nbsp;—{" "}
-              {(TRUE_CONTROL_RATE * 100).toFixed(1)}% for the control and{" "}
-              {(TRUE_VARIANT_RATE * 100).toFixed(1)}% for the variant&nbsp;— were
-              never visible during the test. The early lead for B was variance;
-              A had two strong weeks; then the true signal reasserted itself.
+              ahead for weeks 3 and 4, then B reclaimed the lead. The true
+              rates&nbsp;— {(TRUE_CONTROL_RATE * 100).toFixed(1)}% for the
+              control and {(TRUE_VARIANT_RATE * 100).toFixed(1)}% for the
+              variant&nbsp;— were never visible during the test. The early lead
+              for B was variance; A had two strong weeks; then the true signal
+              reasserted itself.
             </p>
             <p>
               A pre-set threshold ε would have held the test through those early

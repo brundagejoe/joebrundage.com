@@ -54,7 +54,7 @@ function Field({
       htmlFor={id}
       className="grid grid-cols-[1fr_auto] items-baseline gap-3 border-b border-current/20 py-1.5 transition-colors has-[:focus]:border-current/70"
     >
-      <span className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+      <span className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
         {label}
       </span>
       <span className="flex items-baseline gap-1">
@@ -62,7 +62,7 @@ function Field({
           id={id}
           type="text"
           inputMode="decimal"
-          className="plate-data w-[5.5rem] bg-transparent text-right text-[0.95rem] outline-none"
+          className="plate-data w-[5.5rem] bg-transparent text-right text-[1.05rem] outline-none"
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value)}
           required
@@ -207,11 +207,11 @@ export default function BayesianAbTestPage() {
           className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[15rem_minmax(0,1fr)]"
         >
           <div className="lg:sticky lg:top-24">
-            <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+            <p className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
               The experiment
             </p>
             <div className="mt-3 grid">
-              <p className="mt-2 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+              <p className="mt-2 plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Variant A
               </p>
               <Field
@@ -227,7 +227,7 @@ export default function BayesianAbTestPage() {
                 onChange={setInput("conversionsA")}
               />
 
-              <p className="mt-6 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+              <p className="mt-6 plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Variant B
               </p>
               <Field
@@ -243,7 +243,7 @@ export default function BayesianAbTestPage() {
                 onChange={setInput("conversionsB")}
               />
 
-              <p className="mt-6 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+              <p className="mt-6 plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Your rules
               </p>
               <Field
@@ -264,7 +264,7 @@ export default function BayesianAbTestPage() {
 
             <button
               type="submit"
-              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-75 transition-opacity hover:opacity-100"
+              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-75 transition-opacity hover:opacity-100"
             >
               Recompute
             </button>
@@ -285,14 +285,14 @@ export default function BayesianAbTestPage() {
             <Row
               note={
                 <>
-                  Priors are fixed at Beta({FIXED_PRIOR_ALPHA},{" "}
+                  Priors are fixed at Beta({FIXED_PRIOR_ALPHA},&nbsp;
                   {FIXED_PRIOR_BETA})&nbsp;&mdash; flat, opinionless. Everything
                   below comes from your counts alone.
                 </>
               }
             >
               <h1 className="text-[1.9rem] leading-tight">Bayesian A/B Test</h1>
-              <p className="mt-4 max-w-[32em]">
+              <p className="mt-4 max-w-[35em]">
                 Two variants, some visitors, some conversions. The useful
                 question is not whether the difference is significant but what
                 the difference plausibly <em>is</em>, and what acting on it
@@ -315,7 +315,7 @@ export default function BayesianAbTestPage() {
                     </>
                   }
                 >
-                  <p className="mt-4 max-w-[32em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
+                  <p className="mt-4 max-w-[35em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                     {VERDICT_HEADLINE[result.decisionStatus]} B converts better
                     than A with probability{" "}
                     <span className="whitespace-nowrap">
@@ -342,7 +342,7 @@ export default function BayesianAbTestPage() {
                     </span>
                     .
                   </p>
-                  <p className="mt-5 max-w-[32em] opacity-80">
+                  <p className="mt-5 max-w-[35em] opacity-80">
                     Acting today means choosing {result.chosenVariantNow}. If
                     that turns out to be the worse arm, the cost is{" "}
                     <span className="plate-figures">
@@ -442,9 +442,9 @@ export default function BayesianAbTestPage() {
                   }
                 >
                   <div className="mt-6 grid items-start gap-x-10 gap-y-6 lg:grid-cols-[1fr_1fr]">
-                    <table className="plate-data w-full text-[0.85rem]">
+                    <table className="plate-data w-full text-[0.94rem]">
                       <thead>
-                        <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
+                        <tr className="plate-label border-b border-current/25 text-[0.8rem] uppercase tracking-[0.1em] opacity-70">
                           <th className="py-1 text-left font-medium">
                             Variant
                           </th>
@@ -528,9 +528,9 @@ export default function BayesianAbTestPage() {
                       <RegretDecayFigure points={regretPoints} />
                     </div>
 
-                    <table className="plate-data w-full text-[0.85rem]">
+                    <table className="plate-data w-full text-[0.94rem]">
                       <thead>
-                        <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
+                        <tr className="plate-label border-b border-current/25 text-[0.8rem] uppercase tracking-[0.1em] opacity-70">
                           <th className="py-1 text-left font-medium">
                             Extra / arm
                           </th>
@@ -604,12 +604,12 @@ export default function BayesianAbTestPage() {
                     </>
                   }
                 >
-                  <div className="mt-4 max-w-[32em] space-y-3 text-[0.9em] leading-[1.4] opacity-70">
+                  <div className="mt-4 max-w-[35em] space-y-3 text-[0.9em] leading-[1.4] opacity-70">
                     <p>
                       Posteriors are Beta(
-                      {formatCount(result.posteriorAlphaA)},{" "}
+                      {formatCount(result.posteriorAlphaA)},&nbsp;
                       {formatCount(result.posteriorBetaA)}) for A and Beta(
-                      {formatCount(result.posteriorAlphaB)},{" "}
+                      {formatCount(result.posteriorAlphaB)},&nbsp;
                       {formatCount(result.posteriorBetaB)}) for B. Interval and
                       threshold probabilities come from sampling those two; the
                       win probability is closed form.

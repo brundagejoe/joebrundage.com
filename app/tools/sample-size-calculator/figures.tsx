@@ -91,7 +91,7 @@ export function SampleSizeCurveFigure({
         x={labelOnLeft ? markerX - 10 : markerX + 10}
         y={markerY - 10}
         textAnchor={labelOnLeft ? "end" : "start"}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.75}
       >
@@ -110,7 +110,7 @@ export function SampleSizeCurveFigure({
       <text
         x={frameX - 9}
         y={plotTop - 14}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.5}
       >
@@ -131,7 +131,7 @@ export function SampleSizeCurveFigure({
             x={frameX - 9}
             y={y(tick) + 4}
             textAnchor="end"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -164,7 +164,7 @@ export function SampleSizeCurveFigure({
             x={x(tick)}
             y={axisY + 20}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -176,7 +176,7 @@ export function SampleSizeCurveFigure({
         x={plotRight}
         y={axisY + 42}
         textAnchor="end"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.5}
       >

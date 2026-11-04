@@ -112,7 +112,7 @@ export function ToolsHeader() {
         <div className="flex h-16 items-center gap-6">
           <Link
             href="/"
-            className="plate-label shrink-0 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70 transition-opacity hover:opacity-100"
+            className="plate-label shrink-0 text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70 transition-opacity hover:opacity-100"
           >
             Home
           </Link>
@@ -148,7 +148,7 @@ export function ToolsHeader() {
                 showTrigger={false}
               />
               <ComboboxContent className="w-[min(88vw,900px)] bg-popover text-popover-foreground">
-                <div className="plate-label border-b border-current/15 px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+                <div className="plate-label border-b border-current/15 px-4 py-2 text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
                   Functions
                 </div>
                 <ComboboxList>
@@ -159,7 +159,7 @@ export function ToolsHeader() {
                       className="py-2 pl-4 pr-3"
                     >
                       <div className="grid w-full grid-cols-[88px_1fr] items-baseline gap-2">
-                        <span className="plate-data text-[0.8rem] font-medium tracking-[0.06em]">
+                        <span className="plate-data text-[0.88rem] font-medium tracking-[0.06em]">
                           {item.code}
                         </span>
                         <span className="truncate">{item.title}</span>
@@ -179,7 +179,7 @@ export function ToolsHeader() {
         </div>
         {pendingTool ? (
           <div
-            className="plate-label flex h-8 items-center justify-between border-t border-current/15 px-1 text-[0.72rem] uppercase tracking-[0.1em] opacity-70"
+            className="plate-label flex h-8 items-center justify-between border-t border-current/15 px-1 text-[0.8rem] uppercase tracking-[0.1em] opacity-70"
             aria-live="polite"
           >
             <div className="flex items-center gap-2">

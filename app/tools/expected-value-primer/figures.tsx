@@ -95,7 +95,7 @@ export function OutcomeBalanceFigure({
               x={stalkX + nudge(anchor, 4)}
               y={labelY}
               textAnchor={anchor}
-              fontSize={12}
+              fontSize={13}
               fill="currentColor"
               opacity={0.75}
             >
@@ -115,7 +115,7 @@ export function OutcomeBalanceFigure({
                 x={stalkX + nudge(tickAnchors[index], 2)}
                 y={axisY + 19}
                 textAnchor={tickAnchors[index]}
-                fontSize={12}
+                fontSize={13}
                 fill="currentColor"
                 opacity={0.7}
               >
@@ -150,7 +150,7 @@ export function OutcomeBalanceFigure({
             x={zeroX}
             y={axisY + 19}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.5}
           >
@@ -168,7 +168,7 @@ export function OutcomeBalanceFigure({
         x={evX + nudge(evAnchor, -6)}
         y={axisY + 42}
         textAnchor={evAnchor}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.85}
       >
@@ -294,7 +294,7 @@ export function LongRunFigure({ longRun }: { longRun: LongRun }) {
       <text
         x={right + 8}
         y={endExpected + 4}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.85}
       >
@@ -305,7 +305,7 @@ export function LongRunFigure({ longRun }: { longRun: LongRun }) {
           <text
             x={right + 8}
             y={endUpper + 4}
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.55}
           >
@@ -314,7 +314,7 @@ export function LongRunFigure({ longRun }: { longRun: LongRun }) {
           <text
             x={right + 8}
             y={endLower + 4}
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.55}
           >
@@ -347,7 +347,7 @@ export function LongRunFigure({ longRun }: { longRun: LongRun }) {
             x={x(tick)}
             y={axisY + 19}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -358,7 +358,7 @@ export function LongRunFigure({ longRun }: { longRun: LongRun }) {
       <text
         x={right + 24}
         y={axisY + 19}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.5}
       >
@@ -389,7 +389,7 @@ export function LongRunFigure({ longRun }: { longRun: LongRun }) {
             x={left - 22}
             y={y(tick) + 4}
             textAnchor="end"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >

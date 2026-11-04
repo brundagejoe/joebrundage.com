@@ -37,7 +37,7 @@ export default function ProjectsPage() {
     <div className="min-h-screen pt-16">
       <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
         <h1 className="text-[1.9rem] leading-tight">Projects</h1>
-        <p className="mt-4 max-w-[32em]">
+        <p className="mt-4 max-w-[35em]">
           A collection of projects I’ve worked on, ranging from web applications
           to graphics and animation work.
         </p>
@@ -54,12 +54,12 @@ export default function ProjectsPage() {
                   {project.name}
                 </Link>
                 {project.external ? (
-                  <span className="plate-label ml-2 align-middle text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+                  <span className="plate-label ml-2 align-middle text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
                     External
                   </span>
                 ) : null}
               </h2>
-              <p className="mt-2 max-w-[32em]">{project.description}</p>
+              <p className="mt-2 max-w-[35em]">{project.description}</p>
             </li>
           ))}
         </ul>

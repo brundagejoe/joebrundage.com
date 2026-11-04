@@ -31,7 +31,7 @@ const selectedProjects = [
 
 function List({ items }: { items: string[] }) {
   return (
-    <ul className="mt-4 max-w-[32em] list-disc space-y-2 pl-5 marker:opacity-35">
+    <ul className="mt-4 max-w-[35em] list-disc space-y-2 pl-5 marker:opacity-35">
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}
@@ -45,10 +45,10 @@ export default function Page() {
       <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
         <Row>
           <h1 className="text-[1.9rem] leading-tight">Joe Brundage</h1>
-          <p className="plate-label mt-1 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+          <p className="plate-label mt-1 text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
             Software Engineer
           </p>
-          <p className="mt-6 max-w-[32em] text-[1.35rem] leading-[1.4]">
+          <p className="mt-6 max-w-[35em] text-[1.35rem] leading-[1.4]">
             I work on complex, consumer-facing systems where performance, scale,
             and product impact all matter&nbsp;— often in fast-paced, ambiguous
             problem spaces. Currently building at{" "}
@@ -85,7 +85,7 @@ export default function Page() {
 
         <Section>Selected projects</Section>
         <Row>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             Examples of systems I’ve owned or led in production.
           </p>
         </Row>
@@ -94,13 +94,13 @@ export default function Page() {
             <h3 className="mt-8 text-[1.35rem] leading-snug">
               {project.title}
             </h3>
-            <p className="mt-2 max-w-[32em]">{project.description}</p>
+            <p className="mt-2 max-w-[35em]">{project.description}</p>
           </Row>
         ))}
 
         <Section>Technical depth</Section>
         <Row>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             I have a computer science background with an emphasis in computer
             graphics, which informs how I approach performance, algorithms, and
             system design. While my day-to-day work is product-focused, I’m
@@ -111,7 +111,7 @@ export default function Page() {
 
         <Section>About</Section>
         <Row>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             I’ve spent the last three years at{" "}
             <Link href="https://neighbor.com" external>
               Neighbor
@@ -126,7 +126,7 @@ export default function Page() {
         <div id="contact" className="scroll-mt-16">
           <Section>Get in touch</Section>
           <Row>
-            <p className="mt-4 max-w-[32em]">
+            <p className="mt-4 max-w-[35em]">
               If you’re looking for an engineer who can own complex systems,
               move quickly, and think deeply about tradeoffs, I’d love to
               connect. You can reach me at{" "}

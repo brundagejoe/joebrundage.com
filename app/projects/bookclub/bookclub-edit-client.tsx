@@ -404,7 +404,7 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h1 className="text-[1.9rem] leading-tight">{club.name}</h1>
-                <p className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70 mt-2">
+                <p className="plate-label text-[0.8rem] uppercase tracking-[0.1em] opacity-70 mt-2">
                   Session <span className="plate-data">{club.currentRound}</span> · {club.phase}
                 </p>
                 <p className="mt-3 opacity-65">
@@ -422,7 +422,7 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
               <Section>Invite</Section>
               <p className="mt-3 opacity-65">Share this link for others to join.</p>
               <div className="mt-4 space-y-3">
-                <p className="plate-data break-all text-[0.9rem]">
+                <p className="plate-data break-all text-[1rem]">
                   {typeof window === "undefined"
                     ? `/projects/bookclub/join/${club.inviteCode}`
                     : `${window.location.origin}/projects/bookclub/join/${club.inviteCode}`}
@@ -465,12 +465,12 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                             <em>{book.title}</em> <span className="opacity-65">by {book.author}</span>
                           </p>
                           <p className="mt-0.5 text-[0.9em] opacity-55">
-                            <span className="plate-data text-[0.8rem]">{book.lengthHours}</span> audiobook hours · Submitted by {submittedBy}
+                            <span className="plate-data text-[0.88rem]">{book.lengthHours}</span> audiobook hours · Submitted by {submittedBy}
                           </p>
                           {myPitchesOnBook.map((pitchEntry) => (
                             <div key={pitchEntry.id} className="mt-3">
-                              <p className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">Your pitch</p>
-                              <p className="mt-1 max-w-[32em]">{pitchEntry.pitch}</p>
+                              <p className="plate-label text-[0.8rem] uppercase tracking-[0.1em] opacity-70">Your pitch</p>
+                              <p className="mt-1 max-w-[35em]">{pitchEntry.pitch}</p>
                             </div>
                           ))}
                         </li>
@@ -505,10 +505,10 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                               <em>{submittedBook.title}</em>{" "}
                               <span className="opacity-65">by {submittedBook.author}</span>
                             </p>
-                            <p className="plate-data mt-0.5 text-[0.8rem] opacity-55">
+                            <p className="plate-data mt-0.5 text-[0.88rem] opacity-55">
                               {submittedBook.lengthHours} audiobook hours
                             </p>
-                            <p className="mt-3 max-w-[32em]">{mySubmissionForRound.pitch}</p>
+                            <p className="mt-3 max-w-[35em]">{mySubmissionForRound.pitch}</p>
                           </div>
                         )
                       })()}
@@ -610,7 +610,7 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
 
                       {club.phase === "reading" && currentUserPitches.length > 0 ? (
                         <div className="mt-8 space-y-3">
-                          <p className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">Resubmit a previous pitch</p>
+                          <p className="plate-label text-[0.8rem] uppercase tracking-[0.1em] opacity-70">Resubmit a previous pitch</p>
                           <div className="flex flex-wrap gap-2">
                             {currentUserPitches.map((previousPitch) => {
                               const book = booksById.get(previousPitch.bookId)
@@ -667,7 +667,7 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                           className="flex items-center justify-between gap-3 py-2"
                         >
                           <p className="flex items-baseline gap-4">
-                            <span className="plate-data w-6 text-right text-[0.85rem] opacity-55">
+                            <span className="plate-data w-6 text-right text-[0.94rem] opacity-55">
                               {index + 1}
                             </span>
                             <span>
@@ -716,7 +716,7 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                 <div className="mt-4 space-y-3">
                   {winningBook ? (
                     <p className="flex items-baseline gap-3">
-                      <span className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">Current book</span>
+                      <span className="plate-label text-[0.8rem] uppercase tracking-[0.1em] opacity-70">Current book</span>
                       <span>
                         <em>{winningBook.title}</em> <span className="opacity-65">by {winningBook.author}</span>
                       </span>
@@ -726,8 +726,8 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
                   )}
 
                   <p className="flex items-baseline gap-3">
-                    <span className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">Meeting</span>
-                    <span className="plate-data text-[0.9rem]">{formatDateTime(club.meetingAt)}</span>
+                    <span className="plate-label text-[0.8rem] uppercase tracking-[0.1em] opacity-70">Meeting</span>
+                    <span className="plate-data text-[1rem]">{formatDateTime(club.meetingAt)}</span>
                   </p>
 
                   {club.meetingAt ? (
@@ -794,7 +794,7 @@ export function BookclubEditClient({ clubId, isAuthed }: BookclubEditClientProps
 
                   {club.phase === "reading" ? (
                     <div className="space-y-3">
-                      <p className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">Set meeting date</p>
+                      <p className="plate-label text-[0.8rem] uppercase tracking-[0.1em] opacity-70">Set meeting date</p>
                       <div className="flex flex-wrap items-end gap-4">
                         <Input
                           className="plate-data w-auto"

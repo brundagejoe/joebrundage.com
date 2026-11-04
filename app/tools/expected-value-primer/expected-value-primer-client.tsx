@@ -72,7 +72,7 @@ function ControlLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
+      className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70"
     >
       {children}
     </label>
@@ -108,7 +108,7 @@ function RangeControl({
     <div className="grid content-start gap-1">
       <div className="flex items-baseline justify-between gap-3">
         <ControlLabel htmlFor={id}>{label}</ControlLabel>
-        <span className="plate-data text-[0.85rem]">{display}</span>
+        <span className="plate-data text-[0.94rem]">{display}</span>
       </div>
       <input
         id={id}
@@ -165,7 +165,7 @@ function ControlStrip({ children }: { children: React.ReactNode }) {
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[32em] space-y-4">{children}</div>
+  return <div className="max-w-[35em] space-y-4">{children}</div>
 }
 
 function Aside({
@@ -178,7 +178,7 @@ function Aside({
   return (
     <>
       <h3 className="mt-10 text-[1.2rem] leading-snug">{title}</h3>
-      <div className="mt-3 max-w-[32em] space-y-4">{children}</div>
+      <div className="mt-3 max-w-[35em] space-y-4">{children}</div>
     </>
   )
 }
@@ -314,13 +314,13 @@ export function ExpectedValuePrimerClient({
             </>
           }
         >
-          <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+          <p className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
             EVP
           </p>
           <h1 className="mt-3 text-[1.9rem] leading-tight">
             Expected Value Primer
           </h1>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             Estimate the average long-run value of a decision by weighting each
             outcome by its probability. One number summarizes the bet; a second
             figure shows what that number does and does not promise.
@@ -366,7 +366,7 @@ export function ExpectedValuePrimerClient({
               {customExample?.title || "Custom"}
             </AiFeatureGateButton>
           </div>
-          <p className="mt-4 max-w-[32em]">{selectedExample.description}</p>
+          <p className="mt-4 max-w-[35em]">{selectedExample.description}</p>
         </Row>
 
         <Section>Section 2&nbsp;&middot; Weighing the outcomes</Section>

@@ -14,7 +14,7 @@ export default async function TestPage() {
 
   return (
     <main className="min-h-screen px-6 pt-24 pb-24">
-      <div className="mx-auto max-w-[32em]">
+      <div className="mx-auto max-w-[35em]">
         <h1 className="text-[1.9rem] leading-tight font-normal">Success</h1>
         <p className="mt-3 opacity-70">
           You are logged in and allowed to view this protected test page. You

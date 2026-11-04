@@ -50,7 +50,7 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 const LABEL_CLASS =
-  "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
+  "plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70"
 
 function SubsectionHeading({
   title,
@@ -61,10 +61,10 @@ function SubsectionHeading({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-current/20 pb-1">
-      <h4 className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+      <h4 className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
         {title}
       </h4>
-      <dl className="plate-data flex gap-4 text-[0.8rem]">
+      <dl className="plate-data flex gap-4 text-[0.88rem]">
         {counts.map((count) => (
           <div key={count.label} className="flex gap-1">
             <dt className="opacity-50">{count.label}</dt>
@@ -243,7 +243,7 @@ function DiffSection({ diff }: { diff: DiffBuckets }) {
               key={`${entry.status}-${index}`}
               className={`grid gap-1 border-b border-current/10 py-2 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-4 ${STATUS_STYLES[entry.status]}`}
             >
-              <span className="plate-label pt-0.5 text-[0.72rem] font-medium uppercase tracking-[0.1em]">
+              <span className="plate-label pt-0.5 text-[0.8rem] font-medium uppercase tracking-[0.1em]">
                 {entry.status}
               </span>
               <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
@@ -420,7 +420,7 @@ export default function MetaAnalyzerPage() {
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
           <h1 className="text-[1.9rem] leading-tight">Meta Analyzer</h1>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             Compare meta tags across two base URLs and many paths.
           </p>
 
@@ -475,7 +475,7 @@ export default function MetaAnalyzerPage() {
         {results.length > 0 ? <Section>Results</Section> : null}
         {results.map((result) => (
           <article key={result.path} className="mt-8">
-            <h3 className="plate-data text-[1.1rem] font-medium">{result.path}</h3>
+            <h3 className="plate-data text-[1.2rem] font-medium">{result.path}</h3>
             <div className="mt-2 flex flex-col gap-1 text-[0.9em]">
               {result.leftUrl ? (
                 <a

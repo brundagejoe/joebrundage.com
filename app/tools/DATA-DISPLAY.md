@@ -10,7 +10,7 @@ Shared pieces live in `shared/ui/plate.tsx` (`Section`, `Row`, `Caption`,
 `ProbabilityStrip`) and `shared/lib/plot.ts` (scales, ticks, path builders).
 Use them rather than copying — a third copy is how a style rots.
 
-This style applies site-wide. The root layout loads EB Garamond and puts
+This style applies site-wide. The root layout loads Source Serif 4 and puts
 `.plate` on `<body>`, and the primitives in `shared/ui` are already restyled to
 match (monochrome, square, hairline inputs), so a page gets the typography and
 controls without doing anything. What varies is how far a page goes:
@@ -140,11 +140,11 @@ column you scan for differences is data.
 
 | Class | Face | Use for |
 |---|---|---|
-| `.plate` | EB Garamond | On `<body>` in the root layout. Sets the serif, lining figures, base size |
+| `.plate` | Source Serif 4 | On `<body>` in the root layout. Sets the serif, lining figures, base size |
 | `.plate-figures` | serif | Numerals **inside running prose** |
-| `.plate-label` | Inter | Tracked uppercase labels: section heads, table heads, rail |
-| `.plate-data` | Inter | Numerals in tables, input values, scanned columns |
-| `.plate-chart` | Inter | Put on every `<svg>`; all chart text inherits it |
+| `.plate-label` | Source Sans 3 | Tracked uppercase labels: section heads, table heads, rail |
+| `.plate-data` | Source Sans 3 | Numerals in tables, input values, scanned columns |
+| `.plate-chart` | Source Sans 3 | Put on every `<svg>`; all chart text inherits it |
 
 Defined at the bottom of `app/globals.css`.
 
@@ -155,12 +155,13 @@ a `.plate-*` rule — they are unlayered and would silently beat Tailwind's
 
 Two things to remember when mixing:
 
-- **Inter's x-height runs larger than Garamond's.** A label that was
-  `text-[0.72rem]` in serif wants `text-[0.66rem]` in sans to look the same
-  size. Chart text went from `fontSize={13}` to `{12}` for the same reason.
-- **Garamond ships old-style figures** — 3, 4, 7, 9 drop below the baseline.
-  Lovely in a sentence, wrong in a table. `.plate` forces `lining-nums`
-  globally; the data classes add `tabular-nums` so digits sit in fixed columns.
+- **Source Serif and Source Sans are one family.** They share proportions, so
+  a sans label needs no size correction to sit beside the serif. Uppercase
+  labels are `text-[0.8rem]` with `tracking-[0.1em]`; chart text is
+  `fontSize={13}`.
+- **Figures are forced to lining.** `.plate` sets `lining-nums` globally so a
+  digit never drops below the baseline in a table; the data classes add
+  `tabular-nums` so digits sit in fixed columns.
 
 The `terminal` theme overrides all of these back to its mono face. Any new
 `.plate-*` class must be added to that override or it will break the theme.
@@ -270,8 +271,8 @@ Split the file. `model.ts` for math and types, `figures.tsx` for the SVG,
 a single formula runs to forty lines of markup and will otherwise bury the
 prose. `page.tsx` should be readable as prose.
 
-Set display math with space, not a box: no border, no tint. MathML's default
-italic serif sits well next to Garamond.
+Set display math with space, not a box: no border, no tint. MathML’s default
+italic serif sits well next to the text face.
 
 ---
 

@@ -60,11 +60,11 @@ function PercentControl({
       <div className="flex items-baseline justify-between gap-3">
         <label
           htmlFor={id}
-          className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
+          className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70"
         >
           {label}
         </label>
-        <span className="plate-data flex items-baseline text-[0.85rem]">
+        <span className="plate-data flex items-baseline text-[0.94rem]">
           <input
             id={id}
             inputMode="decimal"
@@ -103,7 +103,7 @@ function ControlStrip({ children }: { children: React.ReactNode }) {
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[32em] space-y-4">{children}</div>
+  return <div className="max-w-[35em] space-y-4">{children}</div>
 }
 
 function countNoun(value: number, noun: string): string {
@@ -205,11 +205,11 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
             </>
           }
         >
-          <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+          <p className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
             Tools
           </p>
           <h1 className="mt-3 text-[1.9rem] leading-tight">Bayes Primer</h1>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             Start with a prior belief, observe evidence, and let Bayes’ rule
             update the belief. In the {selectedExample.title.toLowerCase()}{" "}
             scenario, seeing the evidence moves the chance of <Term>H</Term>{" "}
@@ -268,7 +268,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
               {customExample?.title || "Custom"}
             </AiFeatureGateButton>
           </div>
-          <p className="mt-4 max-w-[32em]">{selectedExample.description}</p>
+          <p className="mt-4 max-w-[35em]">{selectedExample.description}</p>
         </Row>
 
         <Section>Ten thousand cases</Section>

@@ -772,7 +772,7 @@ export default function OrgChartComposerToolPage() {
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
           <h1 className="text-[1.9rem] leading-tight">Org Chart Composer</h1>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             Use a mermaid-like text format to define boxes and connectors.
           </p>
 
@@ -832,7 +832,7 @@ from:right --> to:left`}
                     key={`${issue.kind}-${index}`}
                     className={issue.kind === "error" ? "text-destructive" : "opacity-80"}
                   >
-                    <span className="plate-label mr-2 text-[0.72rem] font-medium uppercase tracking-[0.1em]">
+                    <span className="plate-label mr-2 text-[0.8rem] font-medium uppercase tracking-[0.1em]">
                       {issue.kind}
                     </span>
                     {issue.message}
@@ -926,7 +926,7 @@ from:right --> to:left`}
                       x={layout.ribbonX + layout.ribbonWidth / 2}
                       y={layout.ribbonY + layout.ribbonHeight / 2 + 4}
                       fill="#111111"
-                      fontSize={13}
+                      fontSize={14}
                       textAnchor="middle"
                     >
                       {layout.title}

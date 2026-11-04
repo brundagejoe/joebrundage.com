@@ -19,7 +19,7 @@ export function Section({
   return (
     <h2
       className={cn(
-        "plate-label mt-14 border-t border-current/20 pt-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70",
+        "plate-label mt-14 border-t border-current/20 pt-2 text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70",
         className
       )}
     >
@@ -53,7 +53,7 @@ export function Row({
 /** A figure caption: a complete sentence that carries content. */
 export function Caption({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-3 max-w-[34em] text-[0.9em] leading-[1.4] opacity-75">
+    <p className="mt-3 max-w-[37em] text-[0.9em] leading-[1.4] opacity-75">
       {children}
     </p>
   )
