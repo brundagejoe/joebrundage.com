@@ -50,7 +50,7 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 const LABEL_CLASS =
-  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+  "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
 
 function SubsectionHeading({
   title,
@@ -61,7 +61,7 @@ function SubsectionHeading({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-current/20 pb-1">
-      <h4 className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-55">
+      <h4 className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
         {title}
       </h4>
       <dl className="plate-data flex gap-4 text-[0.8rem]">
@@ -235,7 +235,7 @@ function DiffSection({ diff }: { diff: DiffBuckets }) {
         ]}
       />
       {entries.length === 0 ? (
-        <p className="mt-3 text-[0.9rem] opacity-60">No tags found.</p>
+        <p className="mt-3 text-[0.9em] opacity-60">No tags found.</p>
       ) : (
         <ul>
           {entries.map((entry, index) => (
@@ -243,7 +243,7 @@ function DiffSection({ diff }: { diff: DiffBuckets }) {
               key={`${entry.status}-${index}`}
               className={`grid gap-1 border-b border-current/10 py-2 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-4 ${STATUS_STYLES[entry.status]}`}
             >
-              <span className="plate-label pt-0.5 text-[0.62rem] font-medium uppercase tracking-[0.1em]">
+              <span className="plate-label pt-0.5 text-[0.72rem] font-medium uppercase tracking-[0.1em]">
                 {entry.status}
               </span>
               <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
@@ -265,7 +265,7 @@ function InventorySection({ tags }: { tags: Tag[] }) {
         counts={[{ label: "Total", value: tags.length }]}
       />
       {tags.length === 0 ? (
-        <p className="mt-3 text-[0.9rem] opacity-60">No tags found.</p>
+        <p className="mt-3 text-[0.9em] opacity-60">No tags found.</p>
       ) : (
         <ul>
           {tags.map((tag, index) => (
@@ -419,8 +419,8 @@ export default function MetaAnalyzerPage() {
     <div className="min-h-screen bg-background pt-16">
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
-          <h1 className="text-[2.4rem] leading-tight">Meta Analyzer</h1>
-          <p className="mt-4 max-w-[38rem]">
+          <h1 className="text-[1.9rem] leading-tight">Meta Analyzer</h1>
+          <p className="mt-4 max-w-[32em]">
             Compare meta tags across two base URLs and many paths.
           </p>
 
@@ -463,11 +463,11 @@ export default function MetaAnalyzerPage() {
             </div>
             <div>
               <Button type="submit" disabled={running}>
-                {running ? "Analyzing..." : "Analyze"}
+                {running ? "Analyzing…" : "Analyze"}
               </Button>
             </div>
             {error ? (
-              <p className="text-[0.9rem] text-destructive">{error}</p>
+              <p className="text-[0.9em] text-destructive">{error}</p>
             ) : null}
           </form>
         </div>
@@ -476,7 +476,7 @@ export default function MetaAnalyzerPage() {
         {results.map((result) => (
           <article key={result.path} className="mt-8">
             <h3 className="plate-data text-[1.1rem] font-medium">{result.path}</h3>
-            <div className="mt-2 flex flex-col gap-1 text-[0.9rem]">
+            <div className="mt-2 flex flex-col gap-1 text-[0.9em]">
               {result.leftUrl ? (
                 <a
                   href={result.leftUrl}
@@ -506,7 +506,7 @@ export default function MetaAnalyzerPage() {
             </div>
             <div className="mt-4">
               {mode === "both" && !result.metaDiff ? (
-                <p className="text-[0.9rem] opacity-60">
+                <p className="text-[0.9em] opacity-60">
                   Both URL requests failed for this path. Diff not rendered.
                 </p>
               ) : null}

@@ -191,12 +191,16 @@
   font-family: var(--font-plate-serif), Palatino, "Palatino Linotype",
     "Iowan Old Style", Georgia, serif;
   font-variant-numeric: lining-nums;
-  font-size: 1.0625rem;
-  line-height: 1.55;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  font-size: 1.1875rem;
+  line-height: 1.4;
 }
 
-.plate :is(h1, h2, h3) {
+.plate :is(h1, h2, h3, h4) {
   font-weight: 400;
+  hyphens: none;
+  text-wrap: balance;
 }
 
 /* Numerals inside running prose: serif, so they read as part of the sentence. */

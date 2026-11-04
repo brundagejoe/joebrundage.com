@@ -54,7 +54,7 @@ function Field({
       htmlFor={id}
       className="grid grid-cols-[1fr_auto] items-baseline gap-3 border-b border-current/20 py-1.5 transition-colors has-[:focus]:border-current/70"
     >
-      <span className="plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60">
+      <span className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
         {label}
       </span>
       <span className="flex items-baseline gap-1">
@@ -68,7 +68,7 @@ function Field({
           required
         />
         {suffix ? (
-          <span className="w-2 text-[0.8rem] opacity-50">{suffix}</span>
+          <span className="w-2 text-[0.8em] opacity-50">{suffix}</span>
         ) : (
           <span className="w-2" aria-hidden />
         )}
@@ -125,8 +125,7 @@ export default function BayesianAbTestPage() {
 
   const { meaningfulLift, decisionThreshold } = result
   const meaningfulLabel = formatPercent(meaningfulLift, 0)
-  const lift = (value: number | null) =>
-    formatRelativeLift(value, 1).replace("-", "\u2212")
+  const lift = (value: number | null) => formatRelativeLift(value, 1)
 
   const isThreshold = (cut: number) => Math.abs(cut - meaningfulLift) < 1e-9
 
@@ -208,11 +207,11 @@ export default function BayesianAbTestPage() {
           className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[15rem_minmax(0,1fr)]"
         >
           <div className="lg:sticky lg:top-24">
-            <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+            <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
               The experiment
             </p>
             <div className="mt-3 grid">
-              <p className="mt-2 plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="mt-2 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Variant A
               </p>
               <Field
@@ -228,7 +227,7 @@ export default function BayesianAbTestPage() {
                 onChange={setInput("conversionsA")}
               />
 
-              <p className="mt-6 plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="mt-6 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Variant B
               </p>
               <Field
@@ -244,7 +243,7 @@ export default function BayesianAbTestPage() {
                 onChange={setInput("conversionsB")}
               />
 
-              <p className="mt-6 plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="mt-6 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Your rules
               </p>
               <Field
@@ -265,16 +264,16 @@ export default function BayesianAbTestPage() {
 
             <button
               type="submit"
-              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] opacity-75 transition-opacity hover:opacity-100"
+              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-75 transition-opacity hover:opacity-100"
             >
               Recompute
             </button>
 
             {error ? (
-              <p className="mt-3 text-[0.84rem] text-destructive">{error}</p>
+              <p className="mt-3 text-[0.85em] text-destructive">{error}</p>
             ) : null}
 
-            <p className="mt-6 text-[0.8rem] leading-relaxed opacity-50">
+            <p className="mt-6 text-[0.8em] leading-[1.4] opacity-70">
               &ldquo;Worth having&rdquo; is relative, not percentage points: at
               a {formatPercent(result.posteriorMeanA, 2)} baseline,{" "}
               {meaningfulLabel} means about{" "}
@@ -287,13 +286,13 @@ export default function BayesianAbTestPage() {
               note={
                 <>
                   Priors are fixed at Beta({FIXED_PRIOR_ALPHA},{" "}
-                  {FIXED_PRIOR_BETA}) &mdash; flat, opinionless. Everything
+                  {FIXED_PRIOR_BETA})&nbsp;&mdash; flat, opinionless. Everything
                   below comes from your counts alone.
                 </>
               }
             >
-              <h1 className="text-[2.4rem] leading-tight">Bayesian A/B Test</h1>
-              <p className="mt-4 max-w-[38rem]">
+              <h1 className="text-[1.9rem] leading-tight">Bayesian A/B Test</h1>
+              <p className="mt-4 max-w-[32em]">
                 Two variants, some visitors, some conversions. The useful
                 question is not whether the difference is significant but what
                 the difference plausibly <em>is</em>, and what acting on it
@@ -316,17 +315,20 @@ export default function BayesianAbTestPage() {
                     </>
                   }
                 >
-                  <p className="mt-4 max-w-[38rem] text-[1.5rem] leading-[1.45]">
+                  <p className="mt-4 max-w-[32em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                     {VERDICT_HEADLINE[result.decisionStatus]} B converts better
                     than A with probability{" "}
-                    <span className="plate-figures">
-                      {formatPercent(result.probabilityBBeatsA, 1)}
-                    </span>
-                    <ProbabilityStrip
-                      probability={result.probabilityBBeatsA}
-                      threshold={decisionThreshold}
-                    />
-                    . The lift is most likely{" "}
+                    <span className="whitespace-nowrap">
+                      <span className="plate-figures">
+                        {formatPercent(result.probabilityBBeatsA, 1)}
+                      </span>
+                      <ProbabilityStrip
+                        probability={result.probabilityBBeatsA}
+                        threshold={decisionThreshold}
+                      />
+                      .
+                    </span>{" "}
+                    The lift is most likely{" "}
                     <span className="plate-figures">
                       {lift(result.liftMedian)}
                     </span>
@@ -340,7 +342,7 @@ export default function BayesianAbTestPage() {
                     </span>
                     .
                   </p>
-                  <p className="mt-5 max-w-[38rem] opacity-80">
+                  <p className="mt-5 max-w-[32em] opacity-80">
                     Acting today means choosing {result.chosenVariantNow}. If
                     that turns out to be the worse arm, the cost is{" "}
                     <span className="plate-figures">
@@ -349,7 +351,7 @@ export default function BayesianAbTestPage() {
                         3
                       )}
                     </span>{" "}
-                    of conversion rate in expectation &mdash; about{" "}
+                    of conversion rate in expectation&nbsp;&mdash; about{" "}
                     <span className="plate-figures">
                       {formatExpectedMissedConversions(
                         result.expectedRegretIfShipNow,
@@ -370,9 +372,7 @@ export default function BayesianAbTestPage() {
                   </p>
                 </Row>
 
-                <Section>
-                  Figure 1 &nbsp;&middot;&nbsp; The difference itself
-                </Section>
+                <Section>Figure 1&nbsp;&middot; The difference itself</Section>
                 <Row
                   note={
                     <>
@@ -409,8 +409,7 @@ export default function BayesianAbTestPage() {
                 </Row>
 
                 <Section>
-                  Figure 2 &nbsp;&middot;&nbsp; The same curve, cut at
-                  thresholds
+                  Figure 2&nbsp;&middot; The same curve, cut at thresholds
                 </Section>
                 <Row
                   note={
@@ -432,9 +431,7 @@ export default function BayesianAbTestPage() {
                   </Caption>
                 </Row>
 
-                <Section>
-                  Figure 3 &nbsp;&middot;&nbsp; The two variants
-                </Section>
+                <Section>Figure 3&nbsp;&middot; The two variants</Section>
                 <Row
                   note={
                     <>
@@ -447,7 +444,7 @@ export default function BayesianAbTestPage() {
                   <div className="mt-6 grid items-start gap-x-10 gap-y-6 lg:grid-cols-[1fr_1fr]">
                     <table className="plate-data w-full text-[0.85rem]">
                       <thead>
-                        <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                        <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                           <th className="py-1 text-left font-medium">
                             Variant
                           </th>
@@ -516,9 +513,7 @@ export default function BayesianAbTestPage() {
                   </Caption>
                 </Row>
 
-                <Section>
-                  Figure 4 &nbsp;&middot;&nbsp; What waiting buys
-                </Section>
+                <Section>Figure 4&nbsp;&middot; What waiting buys</Section>
                 <Row
                   note={
                     <>
@@ -535,7 +530,7 @@ export default function BayesianAbTestPage() {
 
                     <table className="plate-data w-full text-[0.85rem]">
                       <thead>
-                        <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                        <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                           <th className="py-1 text-left font-medium">
                             Extra / arm
                           </th>
@@ -587,7 +582,7 @@ export default function BayesianAbTestPage() {
                   <Caption>
                     Expected regret, in percentage points, if you decide now
                     versus after more traffic. The last column turns the saving
-                    into conversions per 10,000 future visitors &mdash; the
+                    into conversions per 10,000 future visitors&nbsp;&mdash; the
                     number worth weighing against however long the extra traffic
                     takes to collect.
                   </Caption>
@@ -609,7 +604,7 @@ export default function BayesianAbTestPage() {
                     </>
                   }
                 >
-                  <div className="mt-4 max-w-[38rem] space-y-3 text-[0.9rem] leading-relaxed opacity-70">
+                  <div className="mt-4 max-w-[32em] space-y-3 text-[0.9em] leading-[1.4] opacity-70">
                     <p>
                       Posteriors are Beta(
                       {formatCount(result.posteriorAlphaA)},{" "}

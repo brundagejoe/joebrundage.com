@@ -127,7 +127,7 @@ function SignupPageContent() {
   return (
     <main className="min-h-screen px-6 pt-24 pb-24">
       <div className="mx-auto max-w-[24rem]">
-        <h1 className="text-[2.4rem] leading-tight font-normal">Create account</h1>
+        <h1 className="text-[1.9rem] leading-tight font-normal">Create account</h1>
         <p className="mt-3 opacity-70">Pick a display name, then an email and password.</p>
         <form className="mt-10 space-y-8" onSubmit={handleSubmit}>
           <FieldSet>
@@ -227,7 +227,7 @@ function SignupPageContent() {
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin" />
-                Creating account...
+                Creating account…
               </>
             ) : (
               "Create account"
@@ -235,7 +235,7 @@ function SignupPageContent() {
           </Button>
         </form>
 
-        <p className="mt-8 text-[0.95rem] opacity-70">
+        <p className="mt-8 text-[0.9em] opacity-70">
           Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`}>Log in</Link>
         </p>
       </div>

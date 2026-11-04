@@ -494,7 +494,7 @@ export function WeekSmallMultiples({
                 : "border-current/20 opacity-55 hover:opacity-85")
             }
           >
-            <span className="plate-label block text-[0.62rem] font-medium uppercase tracking-[0.1em]">
+            <span className="plate-label block text-[0.72rem] font-medium uppercase tracking-[0.1em]">
               Wk {week.week}
             </span>
             <PosteriorPairFigure

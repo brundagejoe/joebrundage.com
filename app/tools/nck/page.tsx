@@ -15,7 +15,7 @@ type Result = {
 }
 
 const LABEL_CLASS =
-  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+  "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
 
 function parseNonNegativeInteger(value: string): bigint | null {
   if (!/^\d+$/.test(value.trim())) {
@@ -85,8 +85,8 @@ export default function NckToolPage() {
     <div className="min-h-screen bg-background pt-16">
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
-          <h1 className="text-[2.4rem] leading-tight">N Choose K</h1>
-          <p className="mt-4 max-w-[38rem]">
+          <h1 className="text-[1.9rem] leading-tight">N Choose K</h1>
+          <p className="mt-4 max-w-[32em]">
             Enter N and K to calculate combinations (nCk) and permutations
             (nPk).
           </p>
@@ -127,7 +127,7 @@ export default function NckToolPage() {
           </form>
 
           {error ? (
-            <p className="mt-4 text-[0.9rem] text-destructive">{error}</p>
+            <p className="mt-4 text-[0.9em] text-destructive">{error}</p>
           ) : null}
 
           {result ? (

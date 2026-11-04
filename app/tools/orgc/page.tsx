@@ -771,8 +771,8 @@ export default function OrgChartComposerToolPage() {
     <div className="min-h-screen bg-background pt-16">
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
-          <h1 className="text-[2.4rem] leading-tight">Org Chart Composer</h1>
-          <p className="mt-4 max-w-[38rem]">
+          <h1 className="text-[1.9rem] leading-tight">Org Chart Composer</h1>
+          <p className="mt-4 max-w-[32em]">
             Use a mermaid-like text format to define boxes and connectors.
           </p>
 
@@ -784,7 +784,7 @@ id@r2c3["name1; name2 | Title"]
 from --> to
 from:right --> to:left`}
           </pre>
-          <div className="mt-3 space-y-1 text-[0.9rem] opacity-70">
+          <div className="mt-3 space-y-1 text-[0.9em] opacity-70">
             <p>Tip: Use semicolons or \\n for multiple names in one box.</p>
             <p>Use `@rN` to force a row and `@rNcM` to control row + position order.</p>
           </div>
@@ -822,7 +822,7 @@ from:right --> to:left`}
           </form>
 
           <Section>Validation</Section>
-          <div className="mt-3 space-y-2 text-[0.9rem]">
+          <div className="mt-3 space-y-2 text-[0.9em]">
             {analysis.issues.length === 0 ? (
               <p className="opacity-60">No issues found.</p>
             ) : (
@@ -832,7 +832,7 @@ from:right --> to:left`}
                     key={`${issue.kind}-${index}`}
                     className={issue.kind === "error" ? "text-destructive" : "opacity-80"}
                   >
-                    <span className="plate-label mr-2 text-[0.62rem] font-medium uppercase tracking-[0.1em]">
+                    <span className="plate-label mr-2 text-[0.72rem] font-medium uppercase tracking-[0.1em]">
                       {issue.kind}
                     </span>
                     {issue.message}

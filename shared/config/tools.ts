@@ -15,12 +15,12 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     code: "BABTP",
-    title: "Bayesian AB Testing Primer",
+    title: "Bayesian A/B Testing Primer",
     href: "/tools/bayesian-ab-testing-primer",
   },
   {
     code: "BBI",
-    title: "Beta-Bernoulli Inference",
+    title: "Beta–Bernoulli Inference",
     href: "/tools/beta-bernoulli-inference",
   },
   {

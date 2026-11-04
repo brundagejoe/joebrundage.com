@@ -54,7 +54,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "plate-label text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55 transition-opacity hover:opacity-100",
+                    "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70 transition-opacity hover:opacity-100",
                     isActive(item.href) && "opacity-100"
                   )}
                 >
@@ -93,7 +93,7 @@ export function Header() {
         <div className="flex flex-col h-full">
           {/* Menu Header */}
           <div className="flex h-16 items-center justify-between border-b border-current/15 px-6">
-            <span className="plate-label text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55">
+            <span className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
               Menu
             </span>
             <Button

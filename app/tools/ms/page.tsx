@@ -100,17 +100,17 @@ export default async function MoneyStuffToolPage() {
     <div className="min-h-screen bg-background pt-16">
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
-          <h1 className="text-[2.4rem] leading-tight">Money Stuff</h1>
-          <p className="mt-4 max-w-[38rem]">Bloomberg RSS via archive.ph</p>
+          <h1 className="text-[1.9rem] leading-tight">Money Stuff</h1>
+          <p className="mt-4 max-w-[32em]">Bloomberg RSS via archive.ph</p>
 
           {error ? (
-            <p className="mt-6 text-[0.9rem] text-destructive">
+            <p className="mt-6 text-[0.9em] text-destructive">
               Failed to load feed: {error}
             </p>
           ) : null}
 
           {!error && items.length === 0 ? (
-            <p className="mt-6 text-[0.9rem] opacity-60">No feed items found.</p>
+            <p className="mt-6 text-[0.9em] opacity-60">No feed items found.</p>
           ) : null}
 
           <ol className="mt-10 border-t border-current/20">

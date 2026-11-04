@@ -36,7 +36,7 @@ export function BetaDensityFormula() {
                 <mi>p</mi>
                 <mrow>
                   <mi>&alpha;</mi>
-                  <mo>-</mo>
+                  <mo>&minus;</mo>
                   <mn>1</mn>
                 </mrow>
               </msup>
@@ -44,13 +44,13 @@ export function BetaDensityFormula() {
                 <mrow>
                   <mo>(</mo>
                   <mn>1</mn>
-                  <mo>-</mo>
+                  <mo>&minus;</mo>
                   <mi>p</mi>
                   <mo>)</mo>
                 </mrow>
                 <mrow>
                   <mi>&beta;</mi>
-                  <mo>-</mo>
+                  <mo>&minus;</mo>
                   <mn>1</mn>
                 </mrow>
               </msup>
@@ -91,7 +91,7 @@ export function BetaFunctionFormula() {
             <mi>t</mi>
             <mrow>
               <mi>&alpha;</mi>
-              <mo>-</mo>
+              <mo>&minus;</mo>
               <mn>1</mn>
             </mrow>
           </msup>
@@ -99,13 +99,13 @@ export function BetaFunctionFormula() {
             <mrow>
               <mo>(</mo>
               <mn>1</mn>
-              <mo>-</mo>
+              <mo>&minus;</mo>
               <mi>t</mi>
               <mo>)</mo>
             </mrow>
             <mrow>
               <mi>&beta;</mi>
-              <mo>-</mo>
+              <mo>&minus;</mo>
               <mn>1</mn>
             </mrow>
           </msup>

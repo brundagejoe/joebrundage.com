@@ -60,7 +60,7 @@ function PercentControl({
       <div className="flex items-baseline justify-between gap-3">
         <label
           htmlFor={id}
-          className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.06em] opacity-60"
+          className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
         >
           {label}
         </label>
@@ -87,7 +87,7 @@ function PercentControl({
         value={sliderValue}
         onChange={(event) => onChange(event.target.value)}
       />
-      <p id={`${id}-hint`} className="text-[0.84rem] leading-snug opacity-60">
+      <p id={`${id}-hint`} className="text-[0.85em] leading-snug opacity-60">
         {hint}
       </p>
     </div>
@@ -103,7 +103,7 @@ function ControlStrip({ children }: { children: React.ReactNode }) {
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[38rem] space-y-4">{children}</div>
+  return <div className="max-w-[32em] space-y-4">{children}</div>
 }
 
 function countNoun(value: number, noun: string): string {
@@ -205,13 +205,13 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
             </>
           }
         >
-          <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+          <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
             Tools
           </p>
-          <h1 className="mt-3 text-[2.4rem] leading-tight">Bayes Primer</h1>
-          <p className="mt-4 max-w-[38rem]">
-            Start with a prior belief, observe evidence, and let Bayes&apos;
-            rule update the belief. In the {selectedExample.title.toLowerCase()}{" "}
+          <h1 className="mt-3 text-[1.9rem] leading-tight">Bayes Primer</h1>
+          <p className="mt-4 max-w-[32em]">
+            Start with a prior belief, observe evidence, and let Bayes’ rule
+            update the belief. In the {selectedExample.title.toLowerCase()}{" "}
             scenario, seeing the evidence moves the chance of <Term>H</Term>{" "}
             from{" "}
             <span className="plate-figures">{formatPercent(result.prior)}</span>{" "}
@@ -268,7 +268,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
               {customExample?.title || "Custom"}
             </AiFeatureGateButton>
           </div>
-          <p className="mt-4 max-w-[38rem]">{selectedExample.description}</p>
+          <p className="mt-4 max-w-[32em]">{selectedExample.description}</p>
         </Row>
 
         <Section>Ten thousand cases</Section>
@@ -322,7 +322,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
             />
           </ControlStrip>
           {error ? (
-            <p role="alert" className="mt-3 text-[0.9rem] text-destructive">
+            <p role="alert" className="mt-3 text-[0.9em] text-destructive">
               {error}
             </p>
           ) : null}
@@ -343,16 +343,16 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
         <Row
           note={
             <>
-              <Term>P(E)</Term> is the middle bar&apos;s filled length as a
-              share of the whole bar: everyone who shows the evidence, with or
-              without <Term>H</Term>.
+              <Term>P(E)</Term> is the middle bar’s filled length as a share of
+              the whole bar: everyone who shows the evidence, with or without{" "}
+              <Term>H</Term>.
             </>
           }
         >
           <Prose>
             <p className="mt-4">
-              The bottom bar is Bayes&apos; rule drawn to scale. The posterior
-              is the true positives divided by everyone who shows the evidence:
+              The bottom bar is Bayes’ rule drawn to scale. The posterior is the
+              true positives divided by everyone who shows the evidence:
             </p>
           </Prose>
           <BayesRuleFormula />
@@ -441,7 +441,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
                     event.currentTarget.form?.requestSubmit()
                   }
                 }}
-                placeholder="A startup screens resumes with an AI filter; given a flagged candidate, what's the chance they're truly a strong fit?"
+                placeholder="A startup screens resumes with an AI filter; given a flagged candidate, what’s the chance they’re truly a strong fit?"
                 rows={5}
                 disabled={customGeneration.isGenerating}
                 required
@@ -457,7 +457,7 @@ export function BayesPrimerClient({ canUseAiCustom }: BayesPrimerClientProps) {
                 Cancel
               </AlertDialogCancel>
               <Button type="submit" disabled={customGeneration.isGenerating}>
-                {customGeneration.isGenerating ? "Generating..." : "Generate"}
+                {customGeneration.isGenerating ? "Generating…" : "Generate"}
               </Button>
             </AlertDialogFooter>
           </form>

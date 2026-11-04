@@ -19,7 +19,7 @@ export function Section({
   return (
     <h2
       className={cn(
-        "plate-label mt-14 border-t border-current/20 pt-2 text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70",
+        "plate-label mt-14 border-t border-current/20 pt-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70",
         className
       )}
     >
@@ -37,10 +37,10 @@ export function Row({
   note?: React.ReactNode
 }) {
   return (
-    <div className="grid gap-x-8 gap-y-3 xl:grid-cols-[minmax(0,44rem)_12rem]">
+    <div className="grid gap-x-8 gap-y-3 xl:grid-cols-[minmax(0,44rem)_13rem]">
       <div className="min-w-0">{children}</div>
       {note ? (
-        <aside className="text-[0.95rem] leading-relaxed opacity-75 xl:pt-1">
+        <aside className="text-[0.85em] leading-[1.4] opacity-75 xl:pt-1">
           {note}
         </aside>
       ) : (
@@ -53,7 +53,7 @@ export function Row({
 /** A figure caption: a complete sentence that carries content. */
 export function Caption({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-3 max-w-[40rem] text-[0.95rem] leading-relaxed opacity-75">
+    <p className="mt-3 max-w-[34em] text-[0.9em] leading-[1.4] opacity-75">
       {children}
     </p>
   )

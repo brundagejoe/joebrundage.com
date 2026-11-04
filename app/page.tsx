@@ -3,27 +3,27 @@ import { Row, Section } from "@/shared/ui/plate"
 
 const selectedProjects = [
   {
-    title: "Server-Side Rendering Migration",
+    title: "Server-side rendering migration",
     description:
       "Led the migration of our search page and other high-traffic pages to SSR. This required careful coordination and incremental rollout. The migration resulted in meaningful performance and conversion improvements and established a more scalable rendering foundation.",
   },
   {
-    title: "Experimentation on Cached Pages",
+    title: "Experimentation on cached pages",
     description:
       "Designed and implemented multivariate testing for aggressively cached pages without introducing content flash or performance regressions. Used CloudFront functions to balance experimentation needs with caching and latency constraints.",
   },
   {
-    title: "Diversity-Aware Ranking Algorithms",
+    title: "Diversity-aware ranking algorithms",
     description:
       "Designed ranking algorithms that make results context-aware of one another. This work involved reviewing academic research, evaluating tradeoffs, and delivering a performant, production-ready solution aligned with product goals.",
   },
   {
-    title: "Space Trace Engine (Web)",
+    title: "Space Trace engine (web)",
     description:
       "Built the core engine behind a feature that allows users to annotate uploaded photos with branded shapes. Implemented in Rust and compiled to low-level web targets, with a focus on performance, correctness, and long-term maintainability.",
   },
   {
-    title: "Technical SEO Systems",
+    title: "Technical SEO systems",
     description:
       "Currently leading technical SEO work as a large, data-driven system rather than a collection of optimizations. The work spans ranking strategy, infrastructure, data analysis, and long-term technical planning across multiple stakeholders.",
   },
@@ -31,7 +31,7 @@ const selectedProjects = [
 
 function List({ items }: { items: string[] }) {
   return (
-    <ul className="mt-4 max-w-[38rem] list-disc space-y-2 pl-5 marker:opacity-35">
+    <ul className="mt-4 max-w-[32em] list-disc space-y-2 pl-5 marker:opacity-35">
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}
@@ -42,16 +42,16 @@ function List({ items }: { items: string[] }) {
 export default function Page() {
   return (
     <div className="min-h-screen pt-16">
-      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32 text-[1.125rem] leading-[1.5]">
+      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
         <Row>
-          <h1 className="text-[2.4rem] leading-tight">Joe Brundage</h1>
-          <p className="plate-label mt-1 text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70">
+          <h1 className="text-[1.9rem] leading-tight">Joe Brundage</h1>
+          <p className="plate-label mt-1 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
             Software Engineer
           </p>
-          <p className="mt-6 max-w-[38rem] text-[1.35rem] leading-[1.45]">
+          <p className="mt-6 max-w-[32em] text-[1.35rem] leading-[1.4]">
             I work on complex, consumer-facing systems where performance, scale,
-            and product impact all matter—often in fast-paced, ambiguous problem
-            spaces. Currently building at{" "}
+            and product impact all matter&nbsp;— often in fast-paced, ambiguous
+            problem spaces. Currently building at{" "}
             <Link href="https://neighbor.com" external>
               Neighbor
             </Link>
@@ -85,8 +85,8 @@ export default function Page() {
 
         <Section>Selected projects</Section>
         <Row>
-          <p className="mt-4 max-w-[38rem]">
-            Examples of systems I&apos;ve owned or led in production.
+          <p className="mt-4 max-w-[32em]">
+            Examples of systems I’ve owned or led in production.
           </p>
         </Row>
         {selectedProjects.map((project) => (
@@ -94,16 +94,16 @@ export default function Page() {
             <h3 className="mt-8 text-[1.35rem] leading-snug">
               {project.title}
             </h3>
-            <p className="mt-2 max-w-[38rem]">{project.description}</p>
+            <p className="mt-2 max-w-[32em]">{project.description}</p>
           </Row>
         ))}
 
         <Section>Technical depth</Section>
         <Row>
-          <p className="mt-4 max-w-[38rem]">
+          <p className="mt-4 max-w-[32em]">
             I have a computer science background with an emphasis in computer
             graphics, which informs how I approach performance, algorithms, and
-            system design. While my day-to-day work is product-focused, I&apos;m
+            system design. While my day-to-day work is product-focused, I’m
             comfortable working close to the metal when performance or
             correctness demand it.
           </p>
@@ -111,26 +111,25 @@ export default function Page() {
 
         <Section>About</Section>
         <Row>
-          <p className="mt-4 max-w-[38rem]">
-            I&apos;ve spent the last three years at{" "}
+          <p className="mt-4 max-w-[32em]">
+            I’ve spent the last three years at{" "}
             <Link href="https://neighbor.com" external>
               Neighbor
             </Link>
             , a peer-to-peer storage marketplace that connects people who need
             storage space with those who have unused space in their homes or
-            properties. I&apos;ve grown by taking on increasingly complex
-            systems and higher-impact responsibilities in a fast-moving
-            environment.
+            properties. I’ve grown by taking on increasingly complex systems and
+            higher-impact responsibilities in a fast-moving environment.
           </p>
         </Row>
 
         <div id="contact" className="scroll-mt-16">
           <Section>Get in touch</Section>
           <Row>
-            <p className="mt-4 max-w-[38rem]">
-              If you&apos;re looking for an engineer who can own complex
-              systems, move quickly, and think deeply about tradeoffs, I&apos;d
-              love to connect. You can reach me at{" "}
+            <p className="mt-4 max-w-[32em]">
+              If you’re looking for an engineer who can own complex systems,
+              move quickly, and think deeply about tradeoffs, I’d love to
+              connect. You can reach me at{" "}
               <Link href="mailto:joebrundage@icloud.com">
                 joebrundage@icloud.com
               </Link>

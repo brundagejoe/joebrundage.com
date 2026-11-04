@@ -65,8 +65,8 @@ export default function PizzaToolPage() {
     <div className="min-h-screen bg-background pt-16">
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
-          <h1 className="text-[2.4rem] leading-tight">Pizza Calculator</h1>
-          <p className="mt-4 max-w-[38rem]">
+          <h1 className="text-[1.9rem] leading-tight">Pizza Calculator</h1>
+          <p className="mt-4 max-w-[32em]">
             How many pizzas do you need to get? Enter the number of people and
             find out.
           </p>
@@ -92,11 +92,11 @@ export default function PizzaToolPage() {
                 </mrow>
               </math>
             </MathBlock>
-            <dl className="flex flex-col gap-1 text-[0.95rem]">
+            <dl className="flex flex-col gap-1 text-[0.9em]">
               <div className="flex gap-2">
                 <dt className="w-5 italic">&Pi;</dt>
                 <dd className="opacity-70">
-                  = pizzas to order (they&apos;re circular, so naturally a &pi;)
+                  = pizzas to order (they’re circular, so naturally a &pi;)
                 </dd>
               </div>
               <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function PizzaToolPage() {
             <div className="grid gap-1">
               <Label
                 htmlFor="people-input"
-                className="plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+                className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
               >
                 Number of people
               </Label>
@@ -131,13 +131,13 @@ export default function PizzaToolPage() {
           </form>
 
           {error ? (
-            <p className="mt-4 text-[0.9rem] text-destructive">{error}</p>
+            <p className="mt-4 text-[0.9em] text-destructive">{error}</p>
           ) : null}
 
           {result ? (
             <>
               <Section>Result</Section>
-              <p className="plate-figures mt-4 text-[1.5rem] leading-[1.45]">
+              <p className="plate-figures mt-4 text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                 For {result.people.toLocaleString()}{" "}
                 {result.people === 1 ? "person" : "people"}, you need{" "}
                 <strong className="font-semibold">
@@ -148,7 +148,7 @@ export default function PizzaToolPage() {
             </>
           ) : null}
 
-          <p className="mt-14 border-t border-current/20 pt-3 text-[0.84rem] opacity-60">
+          <p className="mt-14 border-t border-current/20 pt-3 text-[0.85em] opacity-60">
             Formula discovered by Chris Pratt.
           </p>
         </div>

@@ -128,7 +128,7 @@ export function ChangePasswordForm() {
       </FieldSet>
 
       <Button disabled={isSubmitting} type="submit" className="w-full">
-        {isSubmitting ? "Updating..." : "Update password"}
+        {isSubmitting ? "Updating…" : "Update password"}
       </Button>
     </form>
   )

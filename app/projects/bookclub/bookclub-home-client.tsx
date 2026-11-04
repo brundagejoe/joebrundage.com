@@ -116,8 +116,8 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
   return (
     <div className="min-h-screen bg-background pt-16">
       <section className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="text-[2.4rem] leading-tight">Bookclub</h1>
-        <p className="mt-4 max-w-[38rem] opacity-80">
+        <h1 className="text-[1.9rem] leading-tight">Bookclub</h1>
+        <p className="mt-4 max-w-[32em] opacity-80">
           Create a club, share a join link, submit pitches, and run ranked-choice voting.
         </p>
 
@@ -177,13 +177,13 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
           </div>
         ) : null}
 
-        {error ? <p className="mt-6 text-[0.84rem] text-destructive">{error}</p> : null}
+        {error ? <p className="mt-6 text-[0.85em] text-destructive">{error}</p> : null}
 
         <section>
           <Section>Your bookclubs</Section>
           <p className="mt-3 opacity-65">Open any club to submit, vote, or manage sessions.</p>
           <div className="mt-4">
-            {loading ? <p className="opacity-50">Loading...</p> : null}
+            {loading ? <p className="opacity-50">Loading…</p> : null}
             {!loading && clubs.length === 0 ? (
               <p className="opacity-50">No bookclubs yet.</p>
             ) : null}
@@ -196,7 +196,7 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
                   >
                     <div>
                       <p>{club.name}</p>
-                      <p className="plate-label mt-0.5 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                      <p className="plate-label mt-0.5 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                         Session <span className="plate-data">{club.currentRound}</span> · {club.phase}
                         {club.isOwner ? " · owner" : ""}
                       </p>

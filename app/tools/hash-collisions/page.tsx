@@ -13,7 +13,7 @@ type Result = {
 }
 
 const LABEL_CLASS =
-  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+  "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
 
 function parseNonNegativeInteger(value: string): number | null {
   if (!/^\d+$/.test(value.trim())) {
@@ -118,12 +118,12 @@ export default function HashCollisionsToolPage() {
     <div className="min-h-screen bg-background pt-16">
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
-          <h1 className="text-[2.4rem] leading-tight">
+          <h1 className="text-[1.9rem] leading-tight">
             Hash Collision Probability
           </h1>
-          <p className="mt-4 max-w-[38rem]">
+          <p className="mt-4 max-w-[32em]">
             Enter N buckets and K items. This uses the birthday-problem formulas
-            from Kevin Galligan&apos;s article.
+            from Kevin Galligan’s article.
           </p>
 
           <Section>Inputs</Section>
@@ -162,7 +162,7 @@ export default function HashCollisionsToolPage() {
           </form>
 
           {error ? (
-            <p className="mt-4 text-[0.9rem] text-destructive">{error}</p>
+            <p className="mt-4 text-[0.9em] text-destructive">{error}</p>
           ) : null}
 
           {result ? (
