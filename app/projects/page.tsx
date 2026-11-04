@@ -35,7 +35,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen pt-16">
-      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
+      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32 text-[1.125rem] leading-[1.5]">
         <h1 className="text-[2.4rem] leading-tight">Projects</h1>
         <p className="mt-4 max-w-[38rem]">
           A collection of projects I&apos;ve worked on, ranging from web
@@ -54,7 +54,7 @@ export default function ProjectsPage() {
                   {project.name}
                 </Link>
                 {project.external ? (
-                  <span className="plate-label ml-2 align-middle text-[0.62rem] font-medium uppercase tracking-[0.12em] opacity-45">
+                  <span className="plate-label ml-2 align-middle text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70">
                     External
                   </span>
                 ) : null}

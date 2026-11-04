@@ -16,7 +16,7 @@ export default function ToolsPage() {
         <Section>Index</Section>
         <table className="mt-3 w-full max-w-[44rem]">
           <thead>
-            <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+            <tr className="plate-label border-b border-current/25 text-[0.75rem] uppercase tracking-[0.08em] opacity-70">
               <th className="w-[6.5rem] py-1 text-left font-medium">Code</th>
               <th className="py-1 text-left font-medium">Tool</th>
             </tr>
@@ -27,7 +27,7 @@ export default function ToolsPage() {
                 key={tool.code}
                 className="border-b border-current/10 last:border-b-0"
               >
-                <td className="plate-data py-2 align-baseline text-[0.8rem] font-medium tracking-[0.04em] opacity-70">
+                <td className="plate-data py-2 pr-4 align-baseline text-[0.875rem] font-medium tracking-[0.04em] opacity-80">
                   {tool.code}
                 </td>
                 <td className="py-2 align-baseline">

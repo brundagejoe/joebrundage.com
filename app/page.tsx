@@ -42,10 +42,10 @@ function List({ items }: { items: string[] }) {
 export default function Page() {
   return (
     <div className="min-h-screen pt-16">
-      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
+      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32 text-[1.125rem] leading-[1.5]">
         <Row>
           <h1 className="text-[2.4rem] leading-tight">Joe Brundage</h1>
-          <p className="plate-label mt-1 text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55">
+          <p className="plate-label mt-1 text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70">
             Software Engineer
           </p>
           <p className="mt-6 max-w-[38rem] text-[1.35rem] leading-[1.45]">

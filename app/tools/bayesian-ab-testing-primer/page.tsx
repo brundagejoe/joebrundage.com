@@ -61,7 +61,7 @@ function Control({
       <div className="flex items-baseline justify-between gap-3">
         <label
           htmlFor={id}
-          className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.1em] opacity-60"
+          className="plate-label text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70"
         >
           {label}
         </label>
@@ -102,7 +102,7 @@ function Aside({
 }) {
   return (
     <>
-      <h3 className="mt-10 text-[1.35rem]">{title}</h3>
+      <h4 className="mt-10 text-[1.35rem] leading-snug">{title}</h4>
       <div className="mt-3 max-w-[38rem] space-y-4">{children}</div>
     </>
   )
@@ -197,7 +197,7 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+          <p className="plate-label text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70">
             BABTP
           </p>
           <h1 className="mt-3 text-[2.4rem] leading-tight">
@@ -222,9 +222,9 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">
+          <h3 className="mt-4 text-[1.6rem] leading-snug">
             A distribution over a probability
-          </h2>
+          </h3>
           <Prose>
             <p>
               The Beta distribution is the standard prior and posterior for a
@@ -334,7 +334,7 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">Counting into the shape</h2>
+          <h3 className="mt-4 text-[1.6rem] leading-snug">Counting into the shape</h3>
           <Prose>
             <p>
               In an A/B test, <span className="italic">α</span> and{" "}
@@ -371,9 +371,10 @@ export default function BayesianAbTestingPrimerPage() {
               }))}
             />
           </div>
-          <table className="plate-data mt-6 w-full max-w-[34rem] text-[0.85rem]">
+          <div className="mt-6 max-w-[34rem] overflow-x-auto" role="region" aria-label="Posterior sample sizes" tabIndex={0}>
+          <table className="plate-data w-full min-w-[30rem] text-[0.85rem]">
             <thead>
-              <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+              <tr className="plate-label border-b border-current/25 text-[0.75rem] uppercase tracking-[0.08em] opacity-70">
                 <th className="py-1 text-left font-medium">Sample</th>
                 <th className="py-1 pl-5 text-right font-medium">Successes</th>
                 <th className="py-1 pl-5 text-right font-medium">Failures</th>
@@ -401,6 +402,7 @@ export default function BayesianAbTestingPrimerPage() {
               ))}
             </tbody>
           </table>
+          </div>
           <Caption>
             Three posteriors from the same 5% observed rate and a Beta(1, 1)
             prior. At N = 100 the posterior is still broad; by N = 2,000 it has
@@ -421,7 +423,7 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">Which variant is better?</h2>
+          <h3 className="mt-4 text-[1.6rem] leading-snug">Which variant is better?</h3>
           <Prose>
             <p>
               Each variant gets its own stream of data, so each gets its own
@@ -547,7 +549,7 @@ export default function BayesianAbTestingPrimerPage() {
             <>Direction is cheap. Stakes are what you actually decide on.</>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">The cost of being wrong</h2>
+          <h3 className="mt-4 text-[1.6rem] leading-snug">The cost of being wrong</h3>
           <Prose>
             <p>
               P(B &gt; A) gives the direction but not whether acting on it is
@@ -659,7 +661,7 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">What another week buys</h2>
+          <h3 className="mt-4 text-[1.6rem] leading-snug">What another week buys</h3>
           <Prose>
             <p>
               Expected loss answers whether to act on the data you have. A
@@ -790,7 +792,7 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">The recommendation flips twice</h2>
+          <h3 className="mt-4 text-[1.6rem] leading-snug">The recommendation flips twice</h3>
           <Prose>
             <p>
               New users arrive each week and the posteriors update. Below is the
@@ -814,9 +816,10 @@ export default function BayesianAbTestingPrimerPage() {
             selected={s6Week}
             onSelect={setS6Week}
           />
-          <table className="plate-data mt-8 w-full text-[0.85rem]">
+          <div className="mt-8 overflow-x-auto" role="region" aria-label="Weekly test results" tabIndex={0}>
+          <table className="plate-data w-full min-w-[38rem] text-[0.85rem]">
             <thead>
-              <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+              <tr className="plate-label border-b border-current/25 text-[0.75rem] uppercase tracking-[0.08em] opacity-70">
                 <th className="py-1 text-left font-medium">Week</th>
                 <th className="py-1 pl-5 text-right font-medium">N / arm</th>
                 <th className="py-1 pl-5 text-right font-medium">
@@ -851,6 +854,7 @@ export default function BayesianAbTestingPrimerPage() {
               ))}
             </tbody>
           </table>
+          </div>
           <Caption>
             Losses are in percentage points. The call column is simply whichever
             loss is smaller — and it flips at week 3 and again at week 5. In
@@ -879,7 +883,7 @@ export default function BayesianAbTestingPrimerPage() {
             </>
           }
         >
-          <h3 className="mt-10 text-[1.35rem]">{week.narrative.heading}</h3>
+          <h4 className="mt-10 text-[1.35rem] leading-snug">{week.narrative.heading}</h4>
           <div className="mt-4 grid items-start gap-x-8 gap-y-5 lg:grid-cols-[1fr_1fr]">
             <div>
               <PosteriorPairFigure
