@@ -47,7 +47,7 @@ function Field({
       htmlFor={id}
       className="grid grid-cols-[1fr_auto] items-baseline gap-3 border-b border-current/20 py-1.5 transition-colors has-[:focus]:border-current/70"
     >
-      <span className="plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60">
+      <span className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
         {label}
       </span>
       <span className="flex items-baseline gap-1">
@@ -60,7 +60,7 @@ function Field({
           onChange={(event) => onChange(event.target.value)}
         />
         {suffix ? (
-          <span className="w-2 text-[0.8rem] opacity-50">{suffix}</span>
+          <span className="w-2 text-[0.8em] opacity-50">{suffix}</span>
         ) : (
           <span className="w-2" aria-hidden />
         )}
@@ -178,12 +178,12 @@ export function BetaBernoulliInferenceClient() {
           className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[15rem_minmax(0,1fr)]"
         >
           <div className="lg:sticky lg:top-24">
-            <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+            <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
               The setup
             </p>
 
             <div className="mt-3 grid">
-              <p className="plate-label mt-2 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="plate-label mt-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 What you saw
               </p>
               <Field
@@ -199,7 +199,7 @@ export function BetaBernoulliInferenceClient() {
                 onChange={setInput("successes")}
               />
 
-              <p className="plate-label mt-6 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="plate-label mt-6 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 What you believed first
               </p>
               <Field
@@ -215,7 +215,7 @@ export function BetaBernoulliInferenceClient() {
                 onChange={setInput("priorBeta")}
               />
 
-              <p className="plate-label mt-6 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="plate-label mt-6 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 What you want to know
               </p>
               <div className="flex gap-4 border-b border-current/20 py-2">
@@ -231,7 +231,7 @@ export function BetaBernoulliInferenceClient() {
                       }))
                     }
                     className={
-                      "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] transition-opacity " +
+                      "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] transition-opacity " +
                       (inputs.queryMode === option.mode
                         ? "opacity-100 underline underline-offset-4"
                         : "opacity-45 hover:opacity-75")
@@ -260,18 +260,18 @@ export function BetaBernoulliInferenceClient() {
 
             <button
               type="submit"
-              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] opacity-75 transition-opacity hover:opacity-100"
+              className="plate-label mt-6 w-full border border-current/40 py-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-75 transition-opacity hover:opacity-100"
             >
               Recompute
             </button>
 
             {validation.error ? (
-              <p className="mt-3 text-[0.84rem] text-destructive">
+              <p className="mt-3 text-[0.85em] text-destructive">
                 {validation.error}
               </p>
             ) : null}
 
-            <p className="plate-label mt-8 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+            <p className="plate-label mt-8 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
               Or start from
             </p>
             <div className="mt-1">
@@ -280,7 +280,7 @@ export function BetaBernoulliInferenceClient() {
                   key={example.label}
                   type="button"
                   onClick={() => applyInputs(example.inputs)}
-                  className="block w-full border-b border-current/15 py-2 text-left text-[0.86rem] opacity-70 transition-opacity hover:opacity-100"
+                  className="block w-full border-b border-current/15 py-2 text-left text-[0.85em] opacity-70 transition-opacity hover:opacity-100"
                 >
                   {example.label}
                 </button>
@@ -297,14 +297,14 @@ export function BetaBernoulliInferenceClient() {
                 </>
               }
             >
-              <h1 className="text-[2.4rem] leading-tight">
-                Beta-Bernoulli Inference
+              <h1 className="text-[1.9rem] leading-tight">
+                Beta–Bernoulli Inference
               </h1>
-              <p className="mt-4 max-w-[38rem]">
+              <p className="mt-4 max-w-[32em]">
                 You have a run of yes-or-no outcomes and a belief about the rate
                 behind them. Combining the two gives a distribution over that
-                rate, not a single estimate — and from the distribution you can
-                read off the answer to any question you care to ask of it.
+                rate, not a single estimate&nbsp;— and from the distribution you
+                can read off the answer to any question you care to ask of it.
               </p>
             </Row>
 
@@ -312,7 +312,7 @@ export function BetaBernoulliInferenceClient() {
               <>
                 <Section>No reading yet</Section>
                 <Row>
-                  <p className="mt-4 max-w-[38rem] opacity-70">
+                  <p className="mt-4 max-w-[32em] opacity-70">
                     Fix the setup on the left and the posterior will appear
                     here.
                   </p>
@@ -328,7 +328,7 @@ export function BetaBernoulliInferenceClient() {
                     </>
                   }
                 >
-                  <p className="mt-4 flex max-w-[38rem] flex-wrap items-baseline gap-x-2 text-[1.5rem] leading-[1.45]">
+                  <p className="mt-4 flex max-w-[32em] flex-wrap items-baseline gap-x-2 text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                     <span>
                       The rate is {modeWord}{" "}
                       {formatPercent(report.query.targetRate, 1)} with
@@ -342,7 +342,7 @@ export function BetaBernoulliInferenceClient() {
                       threshold={0.5}
                     />
                   </p>
-                  <p className="mt-3 max-w-[38rem] text-[1.5rem] leading-[1.45]">
+                  <p className="mt-3 max-w-[32em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                     Its most likely value is{" "}
                     <span className="plate-figures">
                       {formatPercent(report.posteriorMean, 1)}
@@ -356,7 +356,7 @@ export function BetaBernoulliInferenceClient() {
                     </span>
                     .
                   </p>
-                  <p className="mt-5 max-w-[38rem] opacity-80">
+                  <p className="mt-5 max-w-[32em] opacity-80">
                     That comes from{" "}
                     <span className="plate-figures">
                       {formatCount(report.successes)}
@@ -365,13 +365,14 @@ export function BetaBernoulliInferenceClient() {
                     <span className="plate-figures">
                       {formatCount(report.trials)}
                     </span>{" "}
-                    trials — an observed{" "}
+                    trials&nbsp;— an observed{" "}
                     <span className="plate-figures">
                       {observedRate === null
                         ? "n/a"
                         : formatPercent(observedRate, 1)}
-                    </span>{" "}
-                    — pulled toward the prior, which carries the weight of about{" "}
+                    </span>
+                    &nbsp;— pulled toward the prior, which carries the weight of
+                    about{" "}
                     <span className="plate-figures">
                       {formatCount(report.priorWeight)}
                     </span>{" "}
@@ -380,7 +381,7 @@ export function BetaBernoulliInferenceClient() {
                 </Row>
 
                 <Section>
-                  Figure 1 &nbsp;&middot;&nbsp; Before and after the data
+                  Figure 1&nbsp;&middot; Before and after the data
                 </Section>
                 <Row
                   note={
@@ -412,8 +413,7 @@ export function BetaBernoulliInferenceClient() {
                 </Row>
 
                 <Section>
-                  Figure 2 &nbsp;&middot;&nbsp; How much the answer depends on
-                  the line
+                  Figure 2&nbsp;&middot; How much the answer depends on the line
                 </Section>
                 <Row
                   note={
@@ -441,9 +441,7 @@ export function BetaBernoulliInferenceClient() {
                   </Caption>
                 </Row>
 
-                <Section>
-                  Figure 3 &nbsp;&middot;&nbsp; What the data changed
-                </Section>
+                <Section>Figure 3&nbsp;&middot; What the data changed</Section>
                 <Row
                   note={
                     <>
@@ -454,7 +452,7 @@ export function BetaBernoulliInferenceClient() {
                 >
                   <table className="plate-data mt-6 w-full max-w-[34rem] text-[0.85rem]">
                     <thead>
-                      <tr className="plate-label border-b border-current/25 text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                      <tr className="plate-label border-b border-current/25 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                         <th className="py-1 text-left font-medium">Belief</th>
                         <th className="py-1 pl-5 text-right font-medium">
                           Alpha

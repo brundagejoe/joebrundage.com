@@ -78,7 +78,7 @@ function LoginPageContent() {
   return (
     <main className="min-h-screen px-6 pt-24 pb-24">
       <div className="mx-auto max-w-[24rem]">
-        <h1 className="text-[2.4rem] leading-tight font-normal">Log in</h1>
+        <h1 className="text-[1.9rem] leading-tight font-normal">Log in</h1>
         <p className="mt-3 opacity-70">Use your email and password.</p>
         <form className="mt-10 space-y-8" onSubmit={handleSubmit}>
           <FieldSet>
@@ -129,7 +129,7 @@ function LoginPageContent() {
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin" />
-                Logging in...
+                Logging in…
               </>
             ) : (
               "Log in"
@@ -137,7 +137,7 @@ function LoginPageContent() {
           </Button>
         </form>
 
-        <p className="mt-8 text-[0.95rem] opacity-70">
+        <p className="mt-8 text-[0.9em] opacity-70">
           Need an account? <Link href={`/signup?next=${encodeURIComponent(next)}`}>Create one</Link>
         </p>
       </div>

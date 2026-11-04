@@ -152,12 +152,12 @@ export function formatRelativeLift(value: number | null, digits = 2): string {
     return "n/a"
   }
 
-  return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`
+  return `${value < 0 ? "−" : "+"}${Math.abs(value * 100).toFixed(digits)}%`
 }
 
 export function formatPercentagePoints(value: number, digits = 2): string {
   const points = value * 100
-  return `${points >= 0 ? "+" : ""}${points.toFixed(digits)} pp`
+  return `${points < 0 ? "−" : "+"}${Math.abs(points).toFixed(digits)} pp`
 }
 
 export function formatUnsignedPercentagePoints(value: number, digits = 2): string {

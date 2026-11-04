@@ -112,7 +112,7 @@ export function ToolsHeader() {
         <div className="flex h-16 items-center gap-6">
           <Link
             href="/"
-            className="plate-label shrink-0 text-[0.68rem] font-medium uppercase tracking-[0.16em] opacity-55 transition-opacity hover:opacity-100"
+            className="plate-label shrink-0 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70 transition-opacity hover:opacity-100"
           >
             Home
           </Link>
@@ -144,11 +144,11 @@ export function ToolsHeader() {
             >
               <ComboboxInput
                 className="w-full [&_input]:text-base [&_input]:placeholder:text-muted-foreground md:[&_input]:text-[0.95rem]"
-                placeholder="Search tools by code or title (Cmd+K)"
+                placeholder="Search tools by code or title (⌘K)"
                 showTrigger={false}
               />
               <ComboboxContent className="w-[min(88vw,900px)] bg-popover text-popover-foreground">
-                <div className="plate-label border-b border-current/15 px-4 py-2 text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+                <div className="plate-label border-b border-current/15 px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                   Functions
                 </div>
                 <ComboboxList>
@@ -159,7 +159,7 @@ export function ToolsHeader() {
                       className="py-2 pl-4 pr-3"
                     >
                       <div className="grid w-full grid-cols-[88px_1fr] items-baseline gap-2">
-                        <span className="plate-data text-[0.8rem] font-medium tracking-[0.04em]">
+                        <span className="plate-data text-[0.8rem] font-medium tracking-[0.06em]">
                           {item.code}
                         </span>
                         <span className="truncate">{item.title}</span>
@@ -179,7 +179,7 @@ export function ToolsHeader() {
         </div>
         {pendingTool ? (
           <div
-            className="plate-label flex h-8 items-center justify-between border-t border-current/15 px-1 text-[0.66rem] uppercase tracking-[0.12em] opacity-60"
+            className="plate-label flex h-8 items-center justify-between border-t border-current/15 px-1 text-[0.72rem] uppercase tracking-[0.1em] opacity-70"
             aria-live="polite"
           >
             <div className="flex items-center gap-2">
@@ -188,7 +188,7 @@ export function ToolsHeader() {
                 Loading {pendingTool.code} {pendingTool.title}
               </span>
             </div>
-            <span>Switching tool...</span>
+            <span>Switching tool…</span>
           </div>
         ) : null}
       </div>

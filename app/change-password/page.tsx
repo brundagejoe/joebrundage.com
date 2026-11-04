@@ -15,7 +15,7 @@ export default async function ChangePasswordPage() {
   return (
     <main className="min-h-screen px-6 pt-24 pb-24">
       <div className="mx-auto max-w-[24rem]">
-        <h1 className="text-[2.4rem] leading-tight font-normal">Change password</h1>
+        <h1 className="text-[1.9rem] leading-tight font-normal">Change password</h1>
         <p className="mt-3 opacity-70">Update your password while logged in.</p>
         <ChangePasswordForm />
       </div>

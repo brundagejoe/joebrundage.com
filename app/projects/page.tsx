@@ -18,7 +18,7 @@ export default function ProjectsPage() {
       external: true,
     },
     {
-      name: "The Witch's Cat",
+      name: "The Witch’s Cat",
       description:
         "Animated capstone film produced at BYU (Class of 2023). Served as FX Technical Director, owning the fire effects used throughout the film, and led early research and development for the animation pipeline, balancing visual quality, performance constraints, and production timelines in a collaborative environment.",
       href: "https://animation.byu.edu/the-witchs-cat-2023",
@@ -35,11 +35,11 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen pt-16">
-      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32 text-[1.125rem] leading-[1.5]">
-        <h1 className="text-[2.4rem] leading-tight">Projects</h1>
-        <p className="mt-4 max-w-[38rem]">
-          A collection of projects I&apos;ve worked on, ranging from web
-          applications to graphics and animation work.
+      <div className="mx-auto max-w-[60rem] px-6 pt-14 pb-32">
+        <h1 className="text-[1.9rem] leading-tight">Projects</h1>
+        <p className="mt-4 max-w-[32em]">
+          A collection of projects I’ve worked on, ranging from web applications
+          to graphics and animation work.
         </p>
 
         <Section>Selected work</Section>
@@ -54,12 +54,12 @@ export default function ProjectsPage() {
                   {project.name}
                 </Link>
                 {project.external ? (
-                  <span className="plate-label ml-2 align-middle text-[0.75rem] font-medium uppercase tracking-[0.1em] opacity-70">
+                  <span className="plate-label ml-2 align-middle text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                     External
                   </span>
                 ) : null}
               </h2>
-              <p className="mt-2 max-w-[38rem]">{project.description}</p>
+              <p className="mt-2 max-w-[32em]">{project.description}</p>
             </li>
           ))}
         </ul>

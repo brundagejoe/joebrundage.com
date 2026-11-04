@@ -62,7 +62,7 @@ export function LiftDistributionFigure({
       viewBox={`0 0 ${width} ${height}`}
       className="plate-chart h-auto w-full overflow-visible"
       role="img"
-      aria-label="Posterior distribution of variant B's relative lift over variant A"
+      aria-label="Posterior distribution of variant B’s relative lift over variant A"
     >
       <path d={areaPath(curve, plotBottom)} fill="currentColor" opacity={0.1} />
       <path
@@ -483,7 +483,7 @@ export function ProbabilityStaircase({
   return (
     <div className="mt-6">
       <div
-        className={`plate-label grid grid-cols-[1fr_auto] items-end gap-x-4 pb-2 text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-55 ${columns}`}
+        className={`plate-label grid grid-cols-[1fr_auto] items-end gap-x-4 pb-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70 ${columns}`}
       >
         <span>Statement</span>
         <span className="relative hidden h-4 sm:block">

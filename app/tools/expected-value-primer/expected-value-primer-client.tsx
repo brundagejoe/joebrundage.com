@@ -72,7 +72,7 @@ function ControlLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.1em] opacity-60"
+      className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
     >
       {children}
     </label>
@@ -80,7 +80,7 @@ function ControlLabel({
 }
 
 function ControlHint({ children }: { children: React.ReactNode }) {
-  return <p className="text-[0.84rem] leading-snug opacity-55">{children}</p>
+  return <p className="text-[0.85em] leading-snug opacity-55">{children}</p>
 }
 
 function RangeControl({
@@ -165,7 +165,7 @@ function ControlStrip({ children }: { children: React.ReactNode }) {
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[38rem] space-y-4">{children}</div>
+  return <div className="max-w-[32em] space-y-4">{children}</div>
 }
 
 function Aside({
@@ -177,8 +177,8 @@ function Aside({
 }) {
   return (
     <>
-      <h3 className="mt-10 text-[1.35rem]">{title}</h3>
-      <div className="mt-3 max-w-[38rem] space-y-4">{children}</div>
+      <h3 className="mt-10 text-[1.2rem] leading-snug">{title}</h3>
+      <div className="mt-3 max-w-[32em] space-y-4">{children}</div>
     </>
   )
 }
@@ -314,20 +314,20 @@ export function ExpectedValuePrimerClient({
             </>
           }
         >
-          <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+          <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
             EVP
           </p>
-          <h1 className="mt-3 text-[2.4rem] leading-tight">
+          <h1 className="mt-3 text-[1.9rem] leading-tight">
             Expected Value Primer
           </h1>
-          <p className="mt-4 max-w-[38rem]">
+          <p className="mt-4 max-w-[32em]">
             Estimate the average long-run value of a decision by weighting each
             outcome by its probability. One number summarizes the bet; a second
             figure shows what that number does and does not promise.
           </p>
         </Row>
 
-        <Section>Section 1 &nbsp;&middot;&nbsp; The scenario</Section>
+        <Section>Section 1&nbsp;&middot; The scenario</Section>
         <Row
           note={
             canUseAiCustom ? (
@@ -343,7 +343,7 @@ export function ExpectedValuePrimerClient({
             )
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">A decision with two outcomes</h2>
+          <h2 className="mt-4 text-[1.4rem]">A decision with two outcomes</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {EXAMPLES.map((example) => (
               <Button
@@ -366,10 +366,10 @@ export function ExpectedValuePrimerClient({
               {customExample?.title || "Custom"}
             </AiFeatureGateButton>
           </div>
-          <p className="mt-4 max-w-[38rem]">{selectedExample.description}</p>
+          <p className="mt-4 max-w-[32em]">{selectedExample.description}</p>
         </Row>
 
-        <Section>Section 2 &nbsp;&middot;&nbsp; Weighing the outcomes</Section>
+        <Section>Section 2&nbsp;&middot; Weighing the outcomes</Section>
         <Row
           note={
             <>
@@ -378,7 +378,7 @@ export function ExpectedValuePrimerClient({
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">The balance point</h2>
+          <h2 className="mt-4 text-[1.4rem]">The balance point</h2>
           <Prose>
             <p>
               Expected value weights each outcome by its chance of happening
@@ -438,7 +438,7 @@ export function ExpectedValuePrimerClient({
             />
           </ControlStrip>
           {error ? (
-            <p className="mt-3 text-[0.9rem] text-destructive">{error}</p>
+            <p className="mt-3 text-[0.9em] text-destructive">{error}</p>
           ) : null}
           <Caption>
             Each payoff stands at its place on the value axis, as tall as its
@@ -455,7 +455,7 @@ export function ExpectedValuePrimerClient({
           </Caption>
         </Row>
 
-        <Section>Section 3 &nbsp;&middot;&nbsp; The long run</Section>
+        <Section>Section 3&nbsp;&middot; The long run</Section>
         <Row
           note={
             <>
@@ -464,7 +464,7 @@ export function ExpectedValuePrimerClient({
             </>
           }
         >
-          <h2 className="mt-4 text-[1.6rem]">An average needs repetitions</h2>
+          <h2 className="mt-4 text-[1.4rem]">An average needs repetitions</h2>
           <Prose>
             <p>
               Expected value is a promise about the average, not about any
@@ -518,7 +518,7 @@ export function ExpectedValuePrimerClient({
           </Caption>
         </Row>
 
-        <Section>Section 4 &nbsp;&middot;&nbsp; Beyond the average</Section>
+        <Section>Section 4&nbsp;&middot; Beyond the average</Section>
         <Row
           note={
             <>
@@ -577,7 +577,7 @@ export function ExpectedValuePrimerClient({
                     event.currentTarget.form?.requestSubmit()
                   }
                 }}
-                placeholder="We can spend $2,000 on a webinar. If it succeeds, expected net gain is $9,000; if not, we lose the spend. What's the expected value?"
+                placeholder="We can spend $2,000 on a webinar. If it succeeds, expected net gain is $9,000; if not, we lose the spend. What’s the expected value?"
                 rows={5}
                 disabled={customGeneration.isGenerating}
                 required
@@ -591,7 +591,7 @@ export function ExpectedValuePrimerClient({
                 Cancel
               </AlertDialogCancel>
               <Button type="submit" disabled={customGeneration.isGenerating}>
-                {customGeneration.isGenerating ? "Generating..." : "Generate"}
+                {customGeneration.isGenerating ? "Generating…" : "Generate"}
               </Button>
             </AlertDialogFooter>
           </form>

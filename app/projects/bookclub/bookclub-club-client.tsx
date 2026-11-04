@@ -141,15 +141,15 @@ export function BookclubClubClient({ clubId, isAuthed }: BookclubClubClientProps
   return (
     <div className="min-h-screen bg-background pt-16">
       <section className="mx-auto max-w-4xl px-6 py-10">
-        {loading && !data ? <p className="opacity-50">Loading...</p> : null}
-        {error ? <p className="text-[0.84rem] text-destructive">{error}</p> : null}
+        {loading && !data ? <p className="opacity-50">Loading…</p> : null}
+        {error ? <p className="text-[0.85em] text-destructive">{error}</p> : null}
 
         {club ? (
           <>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 className="text-[2.4rem] leading-tight">{club.name}</h1>
-                <p className="plate-label mt-2 text-[0.66rem] uppercase tracking-[0.12em] opacity-55">
+                <h1 className="text-[1.9rem] leading-tight">{club.name}</h1>
+                <p className="plate-label mt-2 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                   Session <span className="plate-data">{club.currentRound}</span>
                 </p>
               </div>
@@ -169,7 +169,7 @@ export function BookclubClubClient({ clubId, isAuthed }: BookclubClubClientProps
                       by {winningBook.author} · <span className="plate-figures">{winningBook.lengthHours}</span> audiobook hours
                     </p>
                     <p className="mt-3 flex items-baseline gap-3">
-                      <span className="plate-label text-[0.66rem] uppercase tracking-[0.12em] opacity-55">
+                      <span className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                         Meeting
                       </span>
                       <span className="plate-data text-[0.9rem]">{formatDateTime(club.meetingAt)}</span>
@@ -201,10 +201,10 @@ export function BookclubClubClient({ clubId, isAuthed }: BookclubClubClientProps
                         </p>
                         {(pitchesByBook[book.id] ?? []).map((pitchEntry) => (
                           <div key={pitchEntry.id} className="mt-3">
-                            <p className="plate-label text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                            <p className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                               {memberMap.get(pitchEntry.userId)?.displayName ?? "Member"}
                             </p>
-                            <p className="mt-1 max-w-[38rem]">{pitchEntry.pitch}</p>
+                            <p className="mt-1 max-w-[32em]">{pitchEntry.pitch}</p>
                           </div>
                         ))}
                       </li>
@@ -221,7 +221,7 @@ export function BookclubClubClient({ clubId, isAuthed }: BookclubClubClientProps
                   <li key={member.userId} className="flex items-baseline justify-between gap-3 py-2">
                     <span>{member.displayName}</span>
                     {member.role === "owner" ? (
-                      <span className="plate-label text-[0.66rem] uppercase tracking-[0.08em] opacity-55">
+                      <span className="plate-label text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
                         owner
                       </span>
                     ) : null}

@@ -50,7 +50,7 @@ export function BookclubJoinClient({ inviteCode, isAuthed }: BookclubJoinClientP
   return (
     <div className="min-h-screen bg-background pt-16">
       <section className="mx-auto max-w-xl px-6 py-10">
-        <h1 className="text-[2.4rem] leading-tight">Join Bookclub</h1>
+        <h1 className="text-[1.9rem] leading-tight">Join Bookclub</h1>
         {!isAuthed ? (
           <>
             <p className="mt-4 opacity-65">Log in first to accept this invite.</p>
@@ -63,10 +63,10 @@ export function BookclubJoinClient({ inviteCode, isAuthed }: BookclubJoinClientP
           </>
         ) : null}
         {isAuthed && status === "joining" ? (
-          <p className="mt-4 opacity-65">Joining bookclub...</p>
+          <p className="mt-4 opacity-65">Joining bookclub…</p>
         ) : null}
         {status === "error" ? (
-          <p className="mt-4 text-[0.84rem] text-destructive">{error}</p>
+          <p className="mt-4 text-[0.85em] text-destructive">{error}</p>
         ) : null}
       </section>
     </div>

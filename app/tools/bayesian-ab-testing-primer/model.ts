@@ -43,28 +43,28 @@ export const WORKED_EXAMPLE_WEEKS = [
 
 export const EXAMPLE_NARRATIVES = [
   {
-    heading: "Week 1 — B jumps out early",
-    body: "Only 250 users per side and B is already sitting well to the right of A's posterior. P(B > A) is high and Loss_B is the smaller loss. The math favors shipping B — but the posteriors are still very wide. Notice how elevated both losses are in absolute terms. This is a signal that the data is thin, not that B is proven.",
+    heading: "Week 1\u00a0— B jumps out early",
+    body: "Only 250 users per side and B is already sitting well to the right of A’s posterior. P(B > A) is high and Loss_B is the smaller loss. The math favors shipping B\u00a0— but the posteriors are still very wide. Notice how elevated both losses are in absolute terms. This is a signal that the data is thin, not that B is proven.",
   },
   {
-    heading: "Week 2 — B holds the lead",
-    body: "More data, tighter curves. B is still to the right of A and Loss_B is still smaller. The early signal is holding up. The math still says ship B — but both losses remain above what a conservative threshold would require. It is still plausible that this is variance.",
+    heading: "Week 2\u00a0— B holds the lead",
+    body: "More data, tighter curves. B is still to the right of A and Loss_B is still smaller. The early signal is holding up. The math still says ship B\u00a0— but both losses remain above what a conservative threshold would require. It is still plausible that this is variance.",
   },
   {
-    heading: "Week 3 — A overtakes",
-    body: "The posteriors have crossed. A's curve now sits to the right of B's. The week-1 spike for B was noise — A has caught up and moved ahead cumulatively. Loss_A is now the smaller number. The recommendation has flipped. If you had shipped B at week 1, you would now be running the worse variant.",
+    heading: "Week 3\u00a0— A overtakes",
+    body: "The posteriors have crossed. A’s curve now sits to the right of B’s. The week-1 spike for B was noise\u00a0— A has caught up and moved ahead cumulatively. Loss_A is now the smaller number. The recommendation has flipped. If you had shipped B at week 1, you would now be running the worse variant.",
   },
   {
-    heading: "Week 4 — A holds",
-    body: "A is still ahead. The posteriors are close together and barely separated, which means both losses are modest. The data is genuinely uncertain here — A is favored but not decisively. Hold with A.",
+    heading: "Week 4\u00a0— A holds",
+    body: "A is still ahead. The posteriors are close together and barely separated, which means both losses are modest. The data is genuinely uncertain here\u00a0— A is favored but not decisively. Hold with A.",
   },
   {
-    heading: "Week 5 — B re-emerges",
-    body: "B has moved back to the right. After two weeks of A leading, B's posterior has crossed back over. Loss_B has dropped below Loss_A again. The true underlying signal is starting to assert itself through the noise. Ship B.",
+    heading: "Week 5\u00a0— B re-emerges",
+    body: "B has moved back to the right. After two weeks of A leading, B’s posterior has crossed back over. Loss_B has dropped below Loss_A again. The true underlying signal is starting to assert itself through the noise. Ship B.",
   },
   {
-    heading: "Week 6 — the signal settles",
-    body: "B's posterior is clearly to the right, the curves are well-separated, and Loss_B is near zero. The accumulated evidence has converged. The early volatility is resolved and B's advantage is now supported by enough data to act on confidently.",
+    heading: "Week 6\u00a0— the signal settles",
+    body: "B’s posterior is clearly to the right, the curves are well-separated, and Loss_B is near zero. The accumulated evidence has converged. The early volatility is resolved and B’s advantage is now supported by enough data to act on confidently.",
   },
 ] as const
 const LANCZOS_COEFFICIENTS = [

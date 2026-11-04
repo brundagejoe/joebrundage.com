@@ -27,7 +27,7 @@ import {
 } from "./model"
 
 const railLabel =
-  "plate-label text-[0.7rem] font-medium uppercase tracking-[0.08em] opacity-60"
+  "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
 
 function PercentField({
   id,
@@ -66,7 +66,7 @@ function PercentField({
             }
           }}
         />
-        <span className="w-4 text-[0.8rem] opacity-50">{suffix}</span>
+        <span className="w-4 text-[0.8em] opacity-50">{suffix}</span>
       </span>
     </label>
   )
@@ -167,7 +167,7 @@ export default function SampleSizeCalculatorPage() {
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[14rem_minmax(0,1fr)]">
           <div className="lg:sticky lg:top-24">
-            <p className="plate-label text-[0.66rem] font-medium uppercase tracking-[0.16em] opacity-55">
+            <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
               The test
             </p>
             <div className="mt-3 grid">
@@ -197,7 +197,7 @@ export default function SampleSizeCalculatorPage() {
                     <label
                       key={mode.value}
                       className={cn(
-                        "cursor-pointer text-[0.9rem] transition-opacity has-[:focus-visible]:underline",
+                        "cursor-pointer text-[0.9em] transition-opacity has-[:focus-visible]:underline",
                         state.mdeMode === mode.value
                           ? "underline decoration-current/60 underline-offset-4"
                           : "opacity-45 hover:opacity-80"
@@ -218,7 +218,7 @@ export default function SampleSizeCalculatorPage() {
                 </span>
               </fieldset>
 
-              <p className="mt-6 plate-label text-[0.66rem] font-medium uppercase tracking-[0.12em] opacity-40">
+              <p className="mt-6 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Error rates
               </p>
               <RangeField
@@ -247,7 +247,7 @@ export default function SampleSizeCalculatorPage() {
               />
             </div>
 
-            <p className="mt-6 text-[0.8rem] leading-relaxed opacity-50">
+            <p className="mt-6 text-[0.8em] leading-[1.4] opacity-70">
               A relative effect scales the baseline; an absolute one adds
               percentage points to it.
             </p>
@@ -263,10 +263,10 @@ export default function SampleSizeCalculatorPage() {
                 </>
               }
             >
-              <h1 className="text-[2.4rem] leading-tight">
+              <h1 className="text-[1.9rem] leading-tight">
                 Sample Size Calculator
               </h1>
-              <p className="mt-4 max-w-[38rem]">
+              <p className="mt-4 max-w-[32em]">
                 How many visitors does an A/B test need before it can tell a
                 real change in conversion rate from noise? It depends on where
                 you start, how small a change you care about, and how often you
@@ -276,7 +276,7 @@ export default function SampleSizeCalculatorPage() {
 
             <Section>The answer</Section>
             <Row>
-              <p className="mt-4 max-w-[38rem] text-[1.5rem] leading-[1.45]">
+              <p className="mt-4 max-w-[32em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                 Run{" "}
                 <span className="plate-figures">{formatCount(sampleSize)}</span>{" "}
                 visitors through each variant,{" "}
@@ -296,7 +296,7 @@ export default function SampleSizeCalculatorPage() {
             </Row>
 
             <Section>
-              Figure 1 &nbsp;&middot;&nbsp; What a smaller effect costs
+              Figure 1&nbsp;&middot; What a smaller effect costs
             </Section>
             <Row
               note={
@@ -329,7 +329,7 @@ export default function SampleSizeCalculatorPage() {
 
             <Section>Method</Section>
             <Row>
-              <p className="mt-4 max-w-[38rem] text-[0.9rem] leading-relaxed opacity-70">
+              <p className="mt-4 max-w-[32em] text-[0.9em] leading-[1.4] opacity-70">
                 A two-sided test of two proportions under the normal
                 approximation. The page sizes the test for a move up and a move
                 down by the same effect and reports the larger of the two, since
