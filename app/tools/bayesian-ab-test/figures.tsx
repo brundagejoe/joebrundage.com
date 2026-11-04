@@ -91,7 +91,7 @@ export function LiftDistributionFigure({
         x={x(0)}
         y={plotTop - 19}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -119,7 +119,7 @@ export function LiftDistributionFigure({
           x={x(meaningfulLift)}
           y={plotTop - 19}
           textAnchor="middle"
-          fontSize={12}
+          fontSize={13}
           fill="currentColor"
           opacity={0.62}
         >
@@ -160,7 +160,7 @@ export function LiftDistributionFigure({
         x={x(intervalLower) - 8}
         y={intervalY + 4}
         textAnchor="end"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -169,7 +169,7 @@ export function LiftDistributionFigure({
       <text
         x={x(intervalUpper) + 8}
         y={intervalY + 4}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -179,7 +179,7 @@ export function LiftDistributionFigure({
         x={x(median)}
         y={intervalY + 20}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.5}
       >
@@ -210,7 +210,7 @@ export function LiftDistributionFigure({
             x={x(tick)}
             y={axisY + 20}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -284,7 +284,7 @@ export function RateDistributionFigure({
       x={stacked ? sharedX : apex.x}
       y={apex.y - 8 - (stacked ? stackOffset : 0)}
       textAnchor="middle"
-      fontSize={12}
+      fontSize={13}
       fill="currentColor"
       opacity={opacity}
     >
@@ -352,7 +352,7 @@ export function RateDistributionFigure({
             x={x(tick)}
             y={axisY + 20}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -413,7 +413,7 @@ export function RegretDecayFigure({
       <text
         x={curve[0].x}
         y={curve[0].y - 11}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.7}
       >
@@ -422,7 +422,7 @@ export function RegretDecayFigure({
       <text
         x={curve[curve.length - 1].x + 7}
         y={curve[curve.length - 1].y + 4}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.7}
       >
@@ -453,7 +453,7 @@ export function RegretDecayFigure({
             x={x(point.extraVisitors)}
             y={axisY + 20}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -483,7 +483,7 @@ export function ProbabilityStaircase({
   return (
     <div className="mt-6">
       <div
-        className={`plate-label grid grid-cols-[1fr_auto] items-end gap-x-4 pb-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70 ${columns}`}
+        className={`plate-label grid grid-cols-[1fr_auto] items-end gap-x-4 pb-2 text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70 ${columns}`}
       >
         <span>Statement</span>
         <span className="relative hidden h-4 sm:block">
@@ -520,7 +520,7 @@ export function ProbabilityStaircase({
                   }}
                 />
               </span>
-              <span className="plate-data w-[3rem] shrink-0 text-right text-[0.9rem] sm:w-auto">
+              <span className="plate-data w-[3rem] shrink-0 text-right text-[1rem] sm:w-auto">
                 {(row.probability * 100).toFixed(1)}
               </span>
             </div>

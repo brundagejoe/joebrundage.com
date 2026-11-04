@@ -27,7 +27,7 @@ import {
 } from "./model"
 
 const railLabel =
-  "plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
+  "plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70"
 
 function PercentField({
   id,
@@ -55,7 +55,7 @@ function PercentField({
           id={id}
           type="text"
           inputMode="decimal"
-          className="plate-data w-[4.5rem] bg-transparent text-right text-[0.95rem] outline-none"
+          className="plate-data w-[4.5rem] bg-transparent text-right text-[1.05rem] outline-none"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
           onBlur={onCommit}
@@ -98,7 +98,7 @@ function RangeField({
         className="grid grid-cols-[1fr_auto] items-baseline gap-3"
       >
         <span className={railLabel}>{label}</span>
-        <span className="plate-data pr-5 text-[0.95rem]">{display}</span>
+        <span className="plate-data pr-5 text-[1.05rem]">{display}</span>
       </label>
       <input
         id={id}
@@ -167,7 +167,7 @@ export default function SampleSizeCalculatorPage() {
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-[14rem_minmax(0,1fr)]">
           <div className="lg:sticky lg:top-24">
-            <p className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+            <p className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
               The test
             </p>
             <div className="mt-3 grid">
@@ -218,7 +218,7 @@ export default function SampleSizeCalculatorPage() {
                 </span>
               </fieldset>
 
-              <p className="mt-6 plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70">
+              <p className="mt-6 plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
                 Error rates
               </p>
               <RangeField
@@ -266,7 +266,7 @@ export default function SampleSizeCalculatorPage() {
               <h1 className="text-[1.9rem] leading-tight">
                 Sample Size Calculator
               </h1>
-              <p className="mt-4 max-w-[32em]">
+              <p className="mt-4 max-w-[35em]">
                 How many visitors does an A/B test need before it can tell a
                 real change in conversion rate from noise? It depends on where
                 you start, how small a change you care about, and how often you
@@ -276,7 +276,7 @@ export default function SampleSizeCalculatorPage() {
 
             <Section>The answer</Section>
             <Row>
-              <p className="mt-4 max-w-[32em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
+              <p className="mt-4 max-w-[35em] text-[1.25rem] leading-[1.4] sm:text-[1.5rem]">
                 Run{" "}
                 <span className="plate-figures">{formatCount(sampleSize)}</span>{" "}
                 visitors through each variant,{" "}
@@ -329,7 +329,7 @@ export default function SampleSizeCalculatorPage() {
 
             <Section>Method</Section>
             <Row>
-              <p className="mt-4 max-w-[32em] text-[0.9em] leading-[1.4] opacity-70">
+              <p className="mt-4 max-w-[35em] text-[0.9em] leading-[1.4] opacity-70">
                 A two-sided test of two proportions under the normal
                 approximation. The page sizes the test for a move up and a move
                 down by the same effect and reports the larger of the two, since

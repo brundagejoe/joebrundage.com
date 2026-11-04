@@ -117,7 +117,7 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
     <div className="min-h-screen bg-background pt-16">
       <section className="mx-auto max-w-4xl px-6 py-10">
         <h1 className="text-[1.9rem] leading-tight">Bookclub</h1>
-        <p className="mt-4 max-w-[32em] opacity-80">
+        <p className="mt-4 max-w-[35em] opacity-80">
           Create a club, share a join link, submit pitches, and run ranked-choice voting.
         </p>
 
@@ -196,7 +196,7 @@ export function BookclubHomeClient({ isAuthed }: BookclubHomeClientProps) {
                   >
                     <div>
                       <p>{club.name}</p>
-                      <p className="plate-label mt-0.5 text-[0.72rem] uppercase tracking-[0.1em] opacity-70">
+                      <p className="plate-label mt-0.5 text-[0.8rem] uppercase tracking-[0.1em] opacity-70">
                         Session <span className="plate-data">{club.currentRound}</span> · {club.phase}
                         {club.isOwner ? " · owner" : ""}
                       </p>

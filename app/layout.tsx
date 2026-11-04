@@ -1,5 +1,9 @@
 import type { Metadata } from "next"
-import { EB_Garamond, Geist_Mono, Inter } from "next/font/google"
+import {
+  Source_Code_Pro,
+  Source_Sans_3,
+  Source_Serif_4,
+} from "next/font/google"
 import "./globals.css"
 import { AppQueryProvider } from "@/shared/lib/query"
 import {
@@ -10,17 +14,24 @@ import {
 import { HeaderRouter } from "@/widgets/header"
 import { Analytics } from "@vercel/analytics/react"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-
-const ebGaramond = EB_Garamond({
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+})
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
   variable: "--font-plate-serif",
   display: "swap",
 })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sourceCode = Source_Code_Pro({
   subsets: ["latin"],
+  variable: "--font-code",
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -36,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistMono.variable} ${ebGaramond.variable}`}
+      className={`${sourceSans.variable} ${sourceCode.variable} ${sourceSerif.variable}`}
       suppressHydrationWarning
     >
       <head>

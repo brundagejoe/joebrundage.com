@@ -44,7 +44,7 @@
 
 :root {
   --app-font-sans: var(--font-sans);
-  --app-font-mono: var(--font-geist-mono);
+  --app-font-mono: var(--font-code);
   --background: oklch(0.97 0.005 85);
   --foreground: oklch(0.2 0.01 85);
   --card: oklch(0.96 0.005 85);
@@ -131,12 +131,12 @@
   --sidebar-accent-foreground: oklch(0.84 0.01 68);
   --sidebar-border: oklch(0.84 0.01 68 / 0.2);
   --sidebar-ring: oklch(0.66 0.14 243);
-  --app-font-sans: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --app-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --app-font-sans: var(--font-code), ui-monospace, monospace;
+  --app-font-mono: var(--font-code), ui-monospace, monospace;
 }
 
 .terminal body {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--app-font-mono);
   letter-spacing: 0.01em;
   background-image:
     linear-gradient(to bottom, rgb(244 159 49 / 0.06) 1px, transparent 1px),
@@ -188,13 +188,18 @@
 }
 
 .plate {
-  font-family: var(--font-plate-serif), Palatino, "Palatino Linotype",
-    "Iowan Old Style", Georgia, serif;
+  font-family: var(--font-plate-serif), "Iowan Old Style", Georgia, serif;
   font-variant-numeric: lining-nums;
   font-kerning: normal;
   text-rendering: optimizeLegibility;
-  font-size: 1.1875rem;
-  line-height: 1.4;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+
+@media (min-width: 40rem) {
+  .plate {
+    font-size: 1.125rem;
+  }
 }
 
 .plate :is(h1, h2, h3, h4) {

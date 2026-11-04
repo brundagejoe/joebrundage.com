@@ -49,7 +49,7 @@ function Axis({
             x={scale(tick)}
             y={y + 19}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -210,7 +210,7 @@ export function PosteriorFigure({
         x={priorApex.x}
         y={priorApex.y - 8}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.6}
       >
@@ -220,7 +220,7 @@ export function PosteriorFigure({
         x={posteriorApex.x}
         y={posteriorApex.y - 9}
         textAnchor="middle"
-        fontSize={13}
+        fontSize={14}
         fill="currentColor"
         opacity={0.95}
       >
@@ -232,7 +232,7 @@ export function PosteriorFigure({
           x={shadedLabel.x}
           y={shadedLabel.y}
           textAnchor="middle"
-          fontSize={13}
+          fontSize={14}
           fill="currentColor"
           opacity={0.85}
         >
@@ -253,7 +253,7 @@ export function PosteriorFigure({
         x={x(query.targetRate)}
         y={plotTop - 19}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -289,7 +289,7 @@ export function PosteriorFigure({
         x={x(intervalLower) - 8}
         y={intervalY + 4}
         textAnchor="end"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -298,7 +298,7 @@ export function PosteriorFigure({
       <text
         x={x(intervalUpper) + 8}
         y={intervalY + 4}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -308,7 +308,7 @@ export function PosteriorFigure({
         x={x(posteriorMean)}
         y={intervalY + 20}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.5}
       >
@@ -412,7 +412,7 @@ export function ThresholdSweepFigure({
             x={gutter - 10}
             y={y(tick) + 4}
             textAnchor="end"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -454,7 +454,7 @@ export function ThresholdSweepFigure({
         x={labelRight ? dotX + 10 : dotX - 10}
         y={labelAbove ? dotY - 10 : dotY + 20}
         textAnchor={labelRight ? "start" : "end"}
-        fontSize={13}
+        fontSize={14}
         fill="currentColor"
         opacity={0.9}
       >

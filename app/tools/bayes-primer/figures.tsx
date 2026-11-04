@@ -27,7 +27,7 @@ function RowTitle({ y, children }: { y: number; children: React.ReactNode }) {
     <text
       x={0}
       y={y}
-      fontSize={10.5}
+      fontSize={11.5}
       letterSpacing="0.12em"
       fill="currentColor"
       opacity={0.55}
@@ -54,7 +54,7 @@ function Label({
       x={x}
       y={y}
       textAnchor={anchor}
-      fontSize={12}
+      fontSize={13}
       fill="currentColor"
       opacity={0.78}
     >
@@ -323,7 +323,7 @@ export function PriorSweepFigure({
             x={plotLeft - 19}
             y={y(tick) + 4}
             textAnchor="end"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -362,7 +362,7 @@ export function PriorSweepFigure({
                   ? "end"
                   : "middle"
             }
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -374,7 +374,7 @@ export function PriorSweepFigure({
         x={plotRight}
         y={axisY + 38}
         textAnchor="end"
-        fontSize={11}
+        fontSize={12}
         fill="currentColor"
         opacity={0.55}
       >

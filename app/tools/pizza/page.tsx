@@ -66,7 +66,7 @@ export default function PizzaToolPage() {
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
           <h1 className="text-[1.9rem] leading-tight">Pizza Calculator</h1>
-          <p className="mt-4 max-w-[32em]">
+          <p className="mt-4 max-w-[35em]">
             How many pizzas do you need to get? Enter the number of people and
             find out.
           </p>
@@ -111,7 +111,7 @@ export default function PizzaToolPage() {
             <div className="grid gap-1">
               <Label
                 htmlFor="people-input"
-                className="plate-label text-[0.72rem] font-medium uppercase tracking-[0.1em] opacity-70"
+                className="plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70"
               >
                 Number of people
               </Label>

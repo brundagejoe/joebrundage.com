@@ -56,7 +56,7 @@ function Axis({
             x={scale(tick)}
             y={y + 19}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={13}
             fill="currentColor"
             opacity={0.7}
           >
@@ -124,7 +124,7 @@ export function BetaCurveFigure({
         x={x(mean)}
         y={plotTop - 17}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.62}
       >
@@ -133,7 +133,7 @@ export function BetaCurveFigure({
       <text
         x={apex.x + 10}
         y={Math.max(apex.y - 8, plotTop + 2)}
-        fontSize={13}
+        fontSize={14}
         fill="currentColor"
         opacity={0.75}
       >
@@ -209,7 +209,7 @@ export function SampleSizeOverlayFigure({
             <text
               x={flank.x + 6}
               y={flank.y - 3}
-              fontSize={12}
+              fontSize={13}
               fill="currentColor"
               opacity={0.55 + index * 0.18}
             >
@@ -329,7 +329,7 @@ export function PosteriorPairFigure({
             x={stacked ? sharedX : apexControl.x}
             y={apexControl.y - 8 - (stacked ? 16 : 0)}
             textAnchor="middle"
-            fontSize={13}
+            fontSize={14}
             fill="currentColor"
             opacity={0.7}
           >
@@ -339,7 +339,7 @@ export function PosteriorPairFigure({
             x={stacked ? sharedX : apexVariant.x}
             y={apexVariant.y - 8}
             textAnchor="middle"
-            fontSize={13}
+            fontSize={14}
             fill="currentColor"
             opacity={0.95}
           >
@@ -407,7 +407,7 @@ export function LossProjectionFigure({ points }: { points: LossCurvePoint[] }) {
     <text
       x={curve[curve.length - 1].x + 8}
       y={curve[curve.length - 1].y + 4}
-      fontSize={12}
+      fontSize={13}
       fill="currentColor"
       opacity={opacity}
     >
@@ -443,7 +443,7 @@ export function LossProjectionFigure({ points }: { points: LossCurvePoint[] }) {
       <text
         x={14}
         y={plotTop - 10}
-        fontSize={12}
+        fontSize={13}
         fill="currentColor"
         opacity={0.55}
       >
@@ -494,7 +494,7 @@ export function WeekSmallMultiples({
                 : "border-current/20 opacity-55 hover:opacity-85")
             }
           >
-            <span className="plate-label block text-[0.72rem] font-medium uppercase tracking-[0.1em]">
+            <span className="plate-label block text-[0.8rem] font-medium uppercase tracking-[0.1em]">
               Wk {week.week}
             </span>
             <PosteriorPairFigure
@@ -504,7 +504,7 @@ export function WeekSmallMultiples({
               height={74}
               compact
             />
-            <span className="plate-data mt-1 block text-[0.72rem]">
+            <span className="plate-data mt-1 block text-[0.8rem]">
               {week.call}
             </span>
           </button>

@@ -101,7 +101,7 @@ export default async function MoneyStuffToolPage() {
       <div className="mx-auto max-w-[78rem] px-6 py-10">
         <div className="max-w-[44rem]">
           <h1 className="text-[1.9rem] leading-tight">Money Stuff</h1>
-          <p className="mt-4 max-w-[32em]">Bloomberg RSS via archive.ph</p>
+          <p className="mt-4 max-w-[35em]">Bloomberg RSS via archive.ph</p>
 
           {error ? (
             <p className="mt-6 text-[0.9em] text-destructive">
@@ -123,11 +123,11 @@ export default async function MoneyStuffToolPage() {
                   style={{ color: "var(--foreground)" }}
                   className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-3 py-1.5 hover:underline"
                 >
-                  <span className="plate-data text-[0.8rem] opacity-50">
+                  <span className="plate-data text-[0.88rem] opacity-50">
                     {index + 1}
                   </span>
                   <span className="truncate">{item.title}</span>
-                  <span className="plate-data w-12 text-right text-[0.8rem] opacity-60">
+                  <span className="plate-data w-12 text-right text-[0.88rem] opacity-60">
                     {formatPubDate(item.pubDate) ?? "--/--"}
                   </span>
                 </a>
