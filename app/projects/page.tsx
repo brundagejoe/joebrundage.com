@@ -1,5 +1,13 @@
 import { Link } from "@/shared/ui/link"
 import { Section } from "@/shared/ui/plate"
+import { pageMetadata } from "@/shared/lib/metadata"
+
+export const metadata = pageMetadata({
+  title: "Projects",
+  description:
+    "Selected projects by Joe Brundage: a book club app with ranked-choice voting, a WebGL template in React and Rust, a C++ path tracer, and FX for an animated film.",
+  path: "/projects",
+})
 
 export default function ProjectsPage() {
   const projects = [

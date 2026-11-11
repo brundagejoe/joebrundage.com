@@ -23,6 +23,13 @@ The tools header combobox reads from this file. Do not hardcode tool lists in th
    - `code` must be uppercase only; do not use lowercase or mixed case
    - `title`: display name in search
    - `href`: full route path, for example `/tools/nck`
+   - `description`: meta description, one or two sentences (~110–160 chars)
+     saying what the tool does for the reader
+   - `noindex: true` only for personal utilities that shouldn't be in search
+   Then add `app/tools/<slug>/layout.tsx` exporting
+   `metadata = getToolMetadata("/tools/<slug>")` (copy any sibling's). Tool
+   pages are usually `"use client"`, and Next.js ignores `metadata` exported
+   from client files, so it must live in the server layout.
 4. Confirm the new tool is discoverable in the tools header search by:
    - code match
    - title match

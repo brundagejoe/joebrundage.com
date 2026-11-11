@@ -2,6 +2,14 @@ import Link from "next/link"
 
 import { TOOLS } from "@/shared/config"
 import { Section } from "@/shared/ui/plate"
+import { pageMetadata } from "@/shared/lib/metadata"
+
+export const metadata = pageMetadata({
+  title: "Tools",
+  description:
+    "Calculators and interactive explainers for probability and experimentation: Bayesian A/B tests, sample size, expected value, hash collisions, and more.",
+  path: "/tools",
+})
 
 export default function ToolsPage() {
   return (

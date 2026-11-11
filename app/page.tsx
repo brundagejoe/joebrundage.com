@@ -1,5 +1,12 @@
 import { Link } from "@/shared/ui/link"
 import { Row, Section } from "@/shared/ui/plate"
+import type { Metadata } from "next"
+
+// Title and description come from the root layout defaults; only the
+// canonical is page-specific, so it doesn't leak to other routes.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+}
 
 const selectedProjects = [
   {

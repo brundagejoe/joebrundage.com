@@ -5,6 +5,7 @@ import {
   Source_Serif_4,
 } from "next/font/google"
 import "./globals.css"
+import { SITE_NAME, SITE_URL } from "@/shared/lib/metadata"
 import { AppQueryProvider } from "@/shared/lib/query"
 import {
   SITE_THEME_STORAGE_KEY,
@@ -34,9 +35,23 @@ const sourceCode = Source_Code_Pro({
   display: "swap",
 })
 
+const HOME_TITLE = "Joe Brundage — Software Engineer"
+const HOME_DESCRIPTION =
+  "Joe Brundage is a software engineer at Neighbor working on performance, experimentation, and technical SEO for large consumer-facing systems."
+
 export const metadata: Metadata = {
-  title: "Joe Brundage | Software Engineer",
-  description: "Portfolio and projects from Joe Brundage, software engineer.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: HOME_TITLE,
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: HOME_DESCRIPTION,
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    siteName: SITE_NAME,
+    type: "website",
+  },
 }
 
 export default function RootLayout({
