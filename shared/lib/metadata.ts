@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const SITE_NAME = "Joe Brundage"
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://joebrundage.com"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.joebrundage.com"
 
 type PageMetadataInput = {
   /** Page title; the root layout's template appends the site name. */
