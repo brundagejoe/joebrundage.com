@@ -462,6 +462,12 @@ export default function BayesianAbTestingPrimerPage() {
               are smooth and well concentrated, so the approximation converges
               quickly.
             </p>
+            <p>
+              Counts of conversions do give whole-number parameters, and for
+              those the integral reduces to an exact finite sum. The P(B &gt; A)
+              figures on this page use that sum; the grid pass lands within a
+              point or two of it.
+            </p>
           </Prose>
         </Row>
 
@@ -653,8 +659,8 @@ export default function BayesianAbTestingPrimerPage() {
             {sectionFour.lossChooseB < sectionFour.lossChooseA
               ? "ship B"
               : "hold with A"}
-            . Both numbers come from the same left-to-right pass over the grid
-            that produced P(B &gt; A).
+            . Both numbers come from a left-to-right pass over a grid, the
+            same running totals described for P(B &gt; A).
           </Caption>
         </Row>
 
