@@ -1,3 +1,7 @@
+/* The statistics come from the bayes-ab package, the same code behind the
+   calculator and the bayes-ab CLI. This file shapes its output for the charts. */
+import { betaPdf, integratedExpectedLoss, probabilityBBeatsA } from "bayes-ab"
+
 export type BetaChartPoint = {
   probability: number
   density: number
@@ -67,17 +71,6 @@ export const EXAMPLE_NARRATIVES = [
     body: "B’s posterior is clearly to the right, the curves are well-separated, and Loss_B is near zero. The accumulated evidence has converged. The early volatility is resolved and B’s advantage is now supported by enough data to act on confidently.",
   },
 ] as const
-const LANCZOS_COEFFICIENTS = [
-  676.5203681218851,
-  -1259.1392167224028,
-  771.3234287776531,
-  -176.6150291621406,
-  12.507343278686905,
-  -0.13857109526572012,
-  9.984369578019572e-6,
-  1.5056327351493116e-7,
-]
-
 const CHART_POINTS = 180
 
 function clamp(value: number, min: number, max: number): number {
@@ -91,40 +84,6 @@ function clamp(value: number, min: number, max: number): number {
     return max
   }
   return value
-}
-
-function logGamma(z: number): number {
-  if (z < 0.5) {
-    return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - logGamma(1 - z)
-  }
-
-  const shifted = z - 1
-  let x = 0.9999999999998099
-
-  for (let index = 0; index < LANCZOS_COEFFICIENTS.length; index += 1) {
-    x += LANCZOS_COEFFICIENTS[index] / (shifted + index + 1)
-  }
-
-  const t = shifted + LANCZOS_COEFFICIENTS.length - 0.5
-  return (
-    0.9189385332046727 +
-    (shifted + 0.5) * Math.log(t) -
-    t +
-    Math.log(x)
-  )
-}
-
-function logBeta(alpha: number, beta: number): number {
-  return logGamma(alpha) + logGamma(beta) - logGamma(alpha + beta)
-}
-
-function betaPdf(x: number, alpha: number, beta: number): number {
-  const boundedX = clamp(x, 1e-6, 1 - 1e-6)
-  return Math.exp(
-    (alpha - 1) * Math.log(boundedX) +
-      (beta - 1) * Math.log(1 - boundedX) -
-      logBeta(alpha, beta)
-  )
 }
 
 export function createBetaChartData(alpha: number, beta: number): BetaChartPoint[] {
@@ -225,8 +184,6 @@ export function createAbComparisonData(
 
   const points: AbChartPoint[] = []
   let maxDensity = 0
-  let cdfA = 0
-  let probBBeatsA = 0
 
   for (let index = 0; index < CHART_POINTS; index += 1) {
     const probability = minProbability + dx * index
@@ -234,16 +191,19 @@ export function createAbComparisonData(
     const fA = betaPdf(x, alphaA, betaA)
     const fB = betaPdf(x, alphaB, betaB)
 
-    cdfA += fA * dx
-    probBBeatsA += fB * cdfA * dx
-
     if (fA > maxDensity) maxDensity = fA
     if (fB > maxDensity) maxDensity = fB
 
     points.push({ probability, control: fA, variant: fB })
   }
 
-  return { points, maxDensity, probBBeatsA: clamp(probBBeatsA, 0, 1) }
+  /* Exact closed form; the callers always pass whole-number parameters
+     (1 + successes, 1 + failures), which the formula requires. */
+  return {
+    points,
+    maxDensity,
+    probBBeatsA: clamp(probabilityBBeatsA(alphaA, betaA, alphaB, betaB), 0, 1),
+  }
 }
 
 export function computeExpectedLoss(
@@ -252,33 +212,8 @@ export function computeExpectedLoss(
   alphaB: number,
   betaB: number
 ): { lossChooseA: number; lossChooseB: number } {
-  const GRID = 600
-  const dx = 1 / GRID
-  let cdfA = 0
-  let cdfB = 0
-  let weightedSumA = 0
-  let weightedSumB = 0
-  let lossChooseB = 0
-  let lossChooseA = 0
-
-  for (let i = 0; i <= GRID; i++) {
-    const x = clamp(i * dx, 1e-6, 1 - 1e-6)
-    const fA = betaPdf(x, alphaA, betaA)
-    const fB = betaPdf(x, alphaB, betaB)
-
-    lossChooseB += fA * (x * cdfB - weightedSumB) * dx
-    lossChooseA += fB * (x * cdfA - weightedSumA) * dx
-
-    cdfA += fA * dx
-    weightedSumA += x * fA * dx
-    cdfB += fB * dx
-    weightedSumB += x * fB * dx
-  }
-
-  return {
-    lossChooseA: Math.max(lossChooseA, 0),
-    lossChooseB: Math.max(lossChooseB, 0),
-  }
+  const { shipA, shipB } = integratedExpectedLoss(alphaA, betaA, alphaB, betaB)
+  return { lossChooseA: shipA, lossChooseB: shipB }
 }
 
 export function createLossCurveData(

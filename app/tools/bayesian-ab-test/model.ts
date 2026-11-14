@@ -1,3 +1,5 @@
+import { analyze, PRIOR_ALPHA, PRIOR_BETA, type AnalyzeResult } from "bayes-ab"
+
 export type Inputs = {
   visitorsA: string
   conversionsA: string
@@ -84,36 +86,6 @@ export type AnalysisResult = {
   waitingScenarios: WaitingScenario[]
 }
 
-const LANCZOS_COEFFICIENTS = [
-  676.5203681218851,
-  -1259.1392167224028,
-  771.3234287776531,
-  -176.6150291621406,
-  12.507343278686905,
-  -0.13857109526572012,
-  9.984369578019572e-6,
-  1.5056327351493116e-7,
-]
-
-const MONTE_CARLO_SAMPLES = 12000
-const POSTERIOR_CHART_POINTS = 96
-const WAITING_SCENARIOS = [1000, 2000, 5000, 10000]
-const WAITING_VALUE_SIMULATIONS = 6000
-export const FIXED_PRIOR_ALPHA = 1
-export const FIXED_PRIOR_BETA = 1
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min
-  }
-  if (value < min) {
-    return min
-  }
-  if (value > max) {
-    return max
-  }
-  return value
-}
-
 function parseWholeNumber(value: string): number | null {
   if (!/^\d+$/.test(value.trim())) {
     return null
@@ -182,607 +154,37 @@ export function formatExpectedMissedConversions(
   )} visitors`
 }
 
-function logGamma(z: number): number {
-  if (z < 0.5) {
-    return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - logGamma(1 - z)
-  }
+/* The math lives in the bayes-ab package (github.com/brundagejoe/bayes-ab),
+   which the bayes-ab CLI also uses, so the page and the command line cannot
+   disagree. This file only parses the form, maps the library's result onto
+   the shape the page renders, and formats numbers. */
 
-  const shifted = z - 1
-  let x = 0.9999999999998099
+export const FIXED_PRIOR_ALPHA = PRIOR_ALPHA
+export const FIXED_PRIOR_BETA = PRIOR_BETA
 
-  for (let index = 0; index < LANCZOS_COEFFICIENTS.length; index += 1) {
-    x += LANCZOS_COEFFICIENTS[index] / (shifted + index + 1)
-  }
+/* A rule-of-thumb floor the page shows next to the sample-size estimate. */
+const RECOMMENDED_CONVERSIONS_PER_VARIANT = 200
 
-  const t = shifted + LANCZOS_COEFFICIENTS.length - 0.5
-  return (
-    0.9189385332046727 +
-    (shifted + 0.5) * Math.log(t) -
-    t +
-    Math.log(x)
-  )
+const DECISION_STATUS: Record<
+  AnalyzeResult["decision"]["status"],
+  AnalysisResult["decisionStatus"]
+> = {
+  ship_b: "Ship Variant B",
+  keep_a: "Keep Variant A",
+  continue: "Continue test",
+  inconclusive: "Inconclusive",
 }
 
-function logBeta(a: number, b: number): number {
-  return logGamma(a) + logGamma(b) - logGamma(a + b)
+const EVIDENCE_STRENGTH: Record<AnalyzeResult["decision"]["evidence"], EvidenceStrength> = {
+  low: "Low",
+  moderate: "Moderate",
+  strong: "Strong",
 }
 
-function betaPdf(x: number, alpha: number, beta: number): number {
-  const boundedX = clamp(x, 1e-9, 1 - 1e-9)
-  return Math.exp(
-    (alpha - 1) * Math.log(boundedX) +
-      (beta - 1) * Math.log(1 - boundedX) -
-      logBeta(alpha, beta)
-  )
-}
-
-function makeDeterministicRandom(seed: number) {
-  let state = seed >>> 0
-
-  return () => {
-    state = (1664525 * state + 1013904223) >>> 0
-    return state / 4294967296
-  }
-}
-
-function sampleStandardNormal(random: () => number): number {
-  const u1 = clamp(random(), 1e-12, 1 - 1e-12)
-  const u2 = random()
-
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
-}
-
-function sampleGamma(shape: number, random: () => number): number {
-  if (shape < 1) {
-    const u = clamp(random(), 1e-12, 1 - 1e-12)
-    return sampleGamma(shape + 1, random) * u ** (1 / shape)
-  }
-
-  const d = shape - 1 / 3
-  const c = 1 / Math.sqrt(9 * d)
-
-  while (true) {
-    const x = sampleStandardNormal(random)
-    const v = (1 + c * x) ** 3
-
-    if (v <= 0) {
-      continue
-    }
-
-    const u = random()
-
-    if (u < 1 - 0.0331 * x ** 4) {
-      return d * v
-    }
-
-    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
-      return d * v
-    }
-  }
-}
-
-function sampleBeta(alpha: number, beta: number, random: () => number): number {
-  const x = sampleGamma(alpha, random)
-  const y = sampleGamma(beta, random)
-  return x / (x + y)
-}
-
-function sampleBinomialApprox(
-  trials: number,
-  probability: number,
-  random: () => number
-): number {
-  const boundedTrials = Math.max(0, Math.round(trials))
-  const boundedProbability = clamp(probability, 0, 1)
-
-  if (boundedTrials === 0 || boundedProbability === 0) {
-    return 0
-  }
-
-  if (boundedProbability === 1) {
-    return boundedTrials
-  }
-
-  if (boundedTrials <= 50) {
-    let successes = 0
-    for (let index = 0; index < boundedTrials; index += 1) {
-      if (random() < boundedProbability) {
-        successes += 1
-      }
-    }
-    return successes
-  }
-
-  const mean = boundedTrials * boundedProbability
-  const standardDeviation = Math.sqrt(
-    boundedTrials * boundedProbability * (1 - boundedProbability)
-  )
-
-  return clamp(
-    Math.round(mean + sampleStandardNormal(random) * standardDeviation),
-    0,
-    boundedTrials
-  )
-}
-
-function quantile(sortedValues: number[], probability: number): number {
-  const boundedProbability = clamp(probability, 0, 1)
-  const position = (sortedValues.length - 1) * boundedProbability
-  const lowerIndex = Math.floor(position)
-  const upperIndex = Math.ceil(position)
-
-  if (lowerIndex === upperIndex) {
-    return sortedValues[lowerIndex]
-  }
-
-  const weight = position - lowerIndex
-  return (
-    sortedValues[lowerIndex] * (1 - weight) + sortedValues[upperIndex] * weight
-  )
-}
-
-function mean(values: number[]): number {
-  return values.reduce((sum, current) => sum + current, 0) / values.length
-}
-
-function probabilityRightBeatsLeftDirect({
-  alphaLeft,
-  betaLeft,
-  alphaRight,
-  betaRight,
-}: {
-  alphaLeft: number
-  betaLeft: number
-  alphaRight: number
-  betaRight: number
-}): number {
-  const base = logBeta(alphaLeft, betaLeft)
-  let maxLog = Number.NEGATIVE_INFINITY
-  let scaledSum = 0
-
-  for (let i = 0; i <= alphaRight - 1; i += 1) {
-    const current =
-      logBeta(alphaLeft + i, betaLeft + betaRight) -
-      Math.log(betaRight + i) -
-      logBeta(1 + i, betaRight) -
-      base
-
-    if (current <= maxLog) {
-      scaledSum += Math.exp(current - maxLog)
-      continue
-    }
-
-    scaledSum = scaledSum * Math.exp(maxLog - current) + 1
-    maxLog = current
-  }
-
-  return Math.exp(maxLog) * scaledSum
-}
-
-function probabilityVariantBBeatsA({
-  alphaA,
-  betaA,
-  alphaB,
-  betaB,
-}: {
-  alphaA: number
-  betaA: number
-  alphaB: number
-  betaB: number
-}): number {
-  if (alphaB <= alphaA) {
-    return probabilityRightBeatsLeftDirect({
-      alphaLeft: alphaA,
-      betaLeft: betaA,
-      alphaRight: alphaB,
-      betaRight: betaB,
-    })
-  }
-
-  return (
-    1 -
-    probabilityRightBeatsLeftDirect({
-      alphaLeft: alphaB,
-      betaLeft: betaB,
-      alphaRight: alphaA,
-      betaRight: betaA,
-    })
-  )
-}
-
-function inverseNormalCdf(p: number): number {
-  const a = [
-    -39.69683028665376,
-    220.9460984245205,
-    -275.9285104469687,
-    138.357751867269,
-    -30.66479806614716,
-    2.506628277459239,
-  ]
-  const b = [
-    -54.47609879822406,
-    161.5858368580409,
-    -155.6989798598866,
-    66.80131188771972,
-    -13.28068155288572,
-  ]
-  const c = [
-    -0.007784894002430293,
-    -0.3223964580411365,
-    -2.400758277161838,
-    -2.549732539343734,
-    4.374664141464968,
-    2.938163982698783,
-  ]
-  const d = [
-    0.007784695709041462,
-    0.3224671290700398,
-    2.445134137142996,
-    3.754408661907416,
-  ]
-
-  const probability = clamp(p, 1e-9, 1 - 1e-9)
-  const pLow = 0.02425
-  const pHigh = 1 - pLow
-
-  if (probability < pLow) {
-    const q = Math.sqrt(-2 * Math.log(probability))
-    return (
-      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
-      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
-    )
-  }
-
-  if (probability > pHigh) {
-    const q = Math.sqrt(-2 * Math.log(1 - probability))
-    return -(
-      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
-      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
-    )
-  }
-
-  const q = probability - 0.5
-  const r = q * q
-  return (
-    (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q
-  ) /
-    (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
-}
-
-function erf(x: number): number {
-  const sign = x < 0 ? -1 : 1
-  const absoluteX = Math.abs(x)
-  const a1 = 0.254829592
-  const a2 = -0.284496736
-  const a3 = 1.421413741
-  const a4 = -1.453152027
-  const a5 = 1.061405429
-  const p = 0.3275911
-  const t = 1 / (1 + p * absoluteX)
-  const y =
-    1 -
-    (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) *
-      Math.exp(-absoluteX * absoluteX)
-
-  return sign * y
-}
-
-function normalCdf(x: number): number {
-  return 0.5 * (1 + erf(x / Math.sqrt(2)))
-}
-
-function calculateTwoSidedPValue({
-  visitorsA,
-  conversionsA,
-  visitorsB,
-  conversionsB,
-}: {
-  visitorsA: number
-  conversionsA: number
-  visitorsB: number
-  conversionsB: number
-}): number {
-  const pA = conversionsA / visitorsA
-  const pB = conversionsB / visitorsB
-  const pooled = (conversionsA + conversionsB) / (visitorsA + visitorsB)
-  const standardError = Math.sqrt(
-    pooled *
-      (1 - pooled) *
-      (1 / visitorsA + 1 / visitorsB)
-  )
-
-  if (standardError === 0) {
-    return 1
-  }
-
-  const z = (pB - pA) / standardError
-  return clamp(2 * (1 - normalCdf(Math.abs(z))), 0, 1)
-}
-
-function createPosteriorChartData({
-  posteriorAlphaA,
-  posteriorBetaA,
-  posteriorAlphaB,
-  posteriorBetaB,
-  samplesA,
-  samplesB,
-}: {
-  posteriorAlphaA: number
-  posteriorBetaA: number
-  posteriorAlphaB: number
-  posteriorBetaB: number
-  samplesA: number[]
-  samplesB: number[]
-}): PosteriorPoint[] {
-  const sortedA = [...samplesA].sort((left, right) => left - right)
-  const sortedB = [...samplesB].sort((left, right) => left - right)
-  const minRate = Math.max(
-    1e-4,
-    Math.min(quantile(sortedA, 0.001), quantile(sortedB, 0.001)) * 0.9
-  )
-  const maxRate = Math.min(
-    0.9999,
-    Math.max(quantile(sortedA, 0.999), quantile(sortedB, 0.999)) * 1.1
-  )
-  const span = maxRate - minRate
-
-  return Array.from({ length: POSTERIOR_CHART_POINTS }, (_, index) => {
-    const x = minRate + (span * index) / (POSTERIOR_CHART_POINTS - 1)
-    const densityA = betaPdf(x, posteriorAlphaA, posteriorBetaA)
-    const densityB = betaPdf(x, posteriorAlphaB, posteriorBetaB)
-
-    return {
-      conversionRatePercent: x * 100,
-      variantA: densityA,
-      variantB: densityB,
-      overlap: Math.min(densityA, densityB),
-    }
-  })
-}
-
-const LIFT_DENSITY_POINTS = 160
-const LIFT_INTEGRATION_STEPS = 400
-
-/**
- * Density of B's relative lift over A, computed exactly rather than
- * histogrammed from the Monte Carlo samples. Writing B = A(1 + r), the ratio
- * density is f(r) = ∫ a · f_A(a) · f_B(a(1+r)) da, which is one Simpson
- * integral per grid point. A histogram of 12k draws carries ~10% sampling
- * noise per bin, and on a wide posterior that reads as a jagged curve.
- */
-function createLiftDensity({
-  posteriorAlphaA,
-  posteriorBetaA,
-  posteriorAlphaB,
-  posteriorBetaB,
-  sortedRelativeLifts,
-}: {
-  posteriorAlphaA: number
-  posteriorBetaA: number
-  posteriorAlphaB: number
-  posteriorBetaB: number
-  sortedRelativeLifts: number[]
-}): LiftDensityPoint[] {
-  const lower = quantile(sortedRelativeLifts, 0.002)
-  const upper = quantile(sortedRelativeLifts, 0.998)
-  const span = upper - lower
-
-  if (!Number.isFinite(span) || span <= 0) {
-    return [
-      { relativeLift: lower, density: 0 },
-      { relativeLift: lower, density: 1 },
-      { relativeLift: lower, density: 0 },
-    ]
-  }
-
-  /* A's posterior occupies a narrow slice of [0,1], so integrate only where it
-     has mass instead of sweeping the whole unit interval. */
-  const totalA = posteriorAlphaA + posteriorBetaA
-  const meanA = posteriorAlphaA / totalA
-  const sdA = Math.sqrt(
-    (posteriorAlphaA * posteriorBetaA) / (totalA * totalA * (totalA + 1))
-  )
-  const aLow = Math.max(1e-9, meanA - 10 * sdA)
-  const aHighBase = Math.min(1 - 1e-9, meanA + 10 * sdA)
-
-  const lifts = Array.from(
-    { length: LIFT_DENSITY_POINTS },
-    (_, index) => lower + (span * index) / (LIFT_DENSITY_POINTS - 1)
-  )
-
-  const densities = lifts.map((relativeLift) => {
-    const ratio = 1 + relativeLift
-    if (ratio <= 0) {
-      return 0
-    }
-
-    const aHigh = Math.min(aHighBase, (1 - 1e-9) / ratio)
-    if (aHigh <= aLow) {
-      return 0
-    }
-
-    const step = (aHigh - aLow) / LIFT_INTEGRATION_STEPS
-    let total = 0
-
-    for (let index = 0; index <= LIFT_INTEGRATION_STEPS; index += 1) {
-      const a = aLow + step * index
-      const weight =
-        index === 0 || index === LIFT_INTEGRATION_STEPS ? 1 : index % 2 ? 4 : 2
-      total +=
-        weight *
-        a *
-        betaPdf(a, posteriorAlphaA, posteriorBetaA) *
-        betaPdf(a * ratio, posteriorAlphaB, posteriorBetaB)
-    }
-
-    return (total * step) / 3
-  })
-
-  const peak = Math.max(...densities, Number.MIN_VALUE)
-
-  return lifts.map((relativeLift, index) => ({
-    relativeLift,
-    density: densities[index] / peak,
-  }))
-}
-
-function calculateRequiredSamplePerVariant({
-  baselineRate,
-  meaningfulLift,
-  alpha = 0.05,
-  power = 0.8,
-}: {
-  baselineRate: number
-  meaningfulLift: number
-  alpha?: number
-  power?: number
-}): number {
-  const boundedBaseline = clamp(baselineRate, 1e-6, 1 - 1e-6)
-  const absoluteDelta = Math.max(boundedBaseline * meaningfulLift, 1e-6)
-  const zAlpha = inverseNormalCdf(1 - alpha / 2)
-  const zPower = inverseNormalCdf(power)
-  const standardDeviation = Math.sqrt(
-    2 * boundedBaseline * (1 - boundedBaseline)
-  )
-
-  return Math.ceil(((zAlpha + zPower) * standardDeviation / absoluteDelta) ** 2)
-}
-
-function classifyEvidenceStrength(
-  currentVisitorsPerVariant: number,
-  requiredVisitorsPerVariant: number
-): EvidenceStrength {
-  const ratio = currentVisitorsPerVariant / Math.max(requiredVisitorsPerVariant, 1)
-
-  if (ratio < 0.5) {
-    return "Low"
-  }
-
-  if (ratio < 1) {
-    return "Moderate"
-  }
-
-  return "Strong"
-}
-
-function classifyExperimentMaturity(
-  currentVisitorsPerVariant: number,
-  requiredVisitorsPerVariant: number
-): {
-  experimentMaturity: ExperimentMaturity
-  maturityProgress: number
-} {
-  const progress = clamp(
-    currentVisitorsPerVariant / Math.max(requiredVisitorsPerVariant, 1),
-    0,
-    1
-  )
-
-  if (progress < 0.35) {
-    return {
-      experimentMaturity: "Early",
-      maturityProgress: progress,
-    }
-  }
-
-  if (progress < 0.85) {
-    return {
-      experimentMaturity: "Building",
-      maturityProgress: progress,
-    }
-  }
-
-  return {
-    experimentMaturity: "Mature",
-    maturityProgress: progress,
-  }
-}
-
-function determineDecisionStatus({
-  probabilityMeaningfulLift,
-  probabilityMeaningfulHarm,
-  decisionThreshold,
-  evidenceStrength,
-}: {
-  probabilityMeaningfulLift: number
-  probabilityMeaningfulHarm: number
-  decisionThreshold: number
-  evidenceStrength: EvidenceStrength
-}): AnalysisResult["decisionStatus"] {
-  if (probabilityMeaningfulLift >= decisionThreshold) {
-    return "Ship Variant B"
-  }
-
-  if (probabilityMeaningfulHarm >= decisionThreshold) {
-    return "Keep Variant A"
-  }
-
-  if (evidenceStrength === "Low") {
-    return "Continue test"
-  }
-
-  return "Inconclusive"
-}
-
-function calculateWaitingScenarios({
-  posteriorAlphaA,
-  posteriorBetaA,
-  posteriorAlphaB,
-  posteriorBetaB,
-  expectedRegretIfShipNow,
-}: {
-  posteriorAlphaA: number
-  posteriorBetaA: number
-  posteriorAlphaB: number
-  posteriorBetaB: number
-  expectedRegretIfShipNow: number
-}): WaitingScenario[] {
-  const seed =
-    posteriorAlphaA * 11 +
-    posteriorBetaA * 13 +
-    posteriorAlphaB * 17 +
-    posteriorBetaB * 19
-
-  return WAITING_SCENARIOS.map((extraVisitorsPerVariant) => {
-    const random = makeDeterministicRandom(seed)
-    let regretSum = 0
-
-    for (let index = 0; index < WAITING_VALUE_SIMULATIONS; index += 1) {
-      const trueRateA = sampleBeta(posteriorAlphaA, posteriorBetaA, random)
-      const trueRateB = sampleBeta(posteriorAlphaB, posteriorBetaB, random)
-      const extraConversionsA = sampleBinomialApprox(
-        extraVisitorsPerVariant,
-        trueRateA,
-        random
-      )
-      const extraConversionsB = sampleBinomialApprox(
-        extraVisitorsPerVariant,
-        trueRateB,
-        random
-      )
-      const futureMeanA =
-        (posteriorAlphaA + extraConversionsA) /
-        (posteriorAlphaA + posteriorBetaA + extraVisitorsPerVariant)
-      const futureMeanB =
-        (posteriorAlphaB + extraConversionsB) /
-        (posteriorAlphaB + posteriorBetaB + extraVisitorsPerVariant)
-      const regretIfChooseA = Math.max(trueRateB - trueRateA, 0)
-      const regretIfChooseB = Math.max(trueRateA - trueRateB, 0)
-
-      regretSum += futureMeanB >= futureMeanA ? regretIfChooseB : regretIfChooseA
-    }
-
-    const expectedRegretAfterWaiting = regretSum / WAITING_VALUE_SIMULATIONS
-
-    return {
-      extraVisitorsPerVariant,
-      expectedRegretAfterWaiting,
-      valueOfWaiting: Math.max(
-        0,
-        expectedRegretIfShipNow - expectedRegretAfterWaiting
-      ),
-    }
-  })
+const EXPERIMENT_MATURITY: Record<AnalyzeResult["decision"]["maturity"], ExperimentMaturity> = {
+  early: "Early",
+  building: "Building",
+  mature: "Mature",
 }
 
 function calculateAnalysis({
@@ -790,8 +192,6 @@ function calculateAnalysis({
   conversionsA,
   visitorsB,
   conversionsB,
-  priorAlpha,
-  priorBeta,
   decisionThreshold,
   meaningfulLift,
 }: {
@@ -799,89 +199,19 @@ function calculateAnalysis({
   conversionsA: number
   visitorsB: number
   conversionsB: number
-  priorAlpha: number
-  priorBeta: number
   decisionThreshold: number
   meaningfulLift: number
 }): AnalysisResult {
-  const posteriorAlphaA = priorAlpha + conversionsA
-  const posteriorBetaA = priorBeta + (visitorsA - conversionsA)
-  const posteriorAlphaB = priorAlpha + conversionsB
-  const posteriorBetaB = priorBeta + (visitorsB - conversionsB)
-  const observedRateA = conversionsA / visitorsA
-  const observedRateB = conversionsB / visitorsB
-  const posteriorMeanA = posteriorAlphaA / (posteriorAlphaA + posteriorBetaA)
-  const posteriorMeanB = posteriorAlphaB / (posteriorAlphaB + posteriorBetaB)
-  const probabilityBBeatsA = clamp(
-    probabilityVariantBBeatsA({
-      alphaA: posteriorAlphaA,
-      betaA: posteriorBetaA,
-      alphaB: posteriorAlphaB,
-      betaB: posteriorBetaB,
-    }),
-    0,
-    1
-  )
-  const probabilityABeatsB = 1 - probabilityBBeatsA
-  const random = makeDeterministicRandom(
-    posteriorAlphaA +
-      posteriorBetaA * 3 +
-      posteriorAlphaB * 5 +
-      posteriorBetaB * 7
-  )
-  const samplesA = Array.from({ length: MONTE_CARLO_SAMPLES }, () =>
-    sampleBeta(posteriorAlphaA, posteriorBetaA, random)
-  )
-  const samplesB = Array.from({ length: MONTE_CARLO_SAMPLES }, () =>
-    sampleBeta(posteriorAlphaB, posteriorBetaB, random)
-  )
-  const relativeLifts = samplesA.map((sampleA, index) => samplesB[index] / sampleA - 1)
-  const absoluteDiffs = samplesA.map((sampleA, index) => samplesB[index] - sampleA)
-  const sortedRelativeLifts = [...relativeLifts].sort((left, right) => left - right)
-  const sortedAbsoluteDiffs = [...absoluteDiffs].sort((left, right) => left - right)
-  const expectedLossIfShipA = mean(absoluteDiffs.map((difference) => Math.max(difference, 0)))
-  const expectedLossIfShipB = mean(absoluteDiffs.map((difference) => Math.max(-difference, 0)))
-  const chosenVariantNow =
-    expectedLossIfShipB <= expectedLossIfShipA ? "Variant B" : "Variant A"
-  const expectedRegretIfShipNow =
-    chosenVariantNow === "Variant B" ? expectedLossIfShipB : expectedLossIfShipA
-  const visitorsPerVariant = Math.round((visitorsA + visitorsB) / 2)
-  const totalConversions = conversionsA + conversionsB
-  const recommendedConversionsPerVariant = 200
-  const baselineRate = (posteriorMeanA + posteriorMeanB) / 2
-  const requiredVisitorsPerVariant = calculateRequiredSamplePerVariant({
-    baselineRate,
-    meaningfulLift,
+  const result = analyze({
+    visitorsA,
+    conversionsA,
+    visitorsB,
+    conversionsB,
+    threshold: decisionThreshold,
+    minEffect: meaningfulLift,
+    includeChart: true,
   })
-  const additionalVisitorsForStableEstimate = Math.max(
-    0,
-    requiredVisitorsPerVariant - Math.min(visitorsA, visitorsB)
-  )
-  const evidenceStrength = classifyEvidenceStrength(
-    Math.min(visitorsA, visitorsB),
-    requiredVisitorsPerVariant
-  )
-  const { experimentMaturity, maturityProgress } = classifyExperimentMaturity(
-    Math.min(visitorsA, visitorsB),
-    requiredVisitorsPerVariant
-  )
-  const decisionStatus = determineDecisionStatus({
-    probabilityMeaningfulLift: mean(
-      relativeLifts.map((lift) => (lift > meaningfulLift ? 1 : 0))
-    ),
-    probabilityMeaningfulHarm: mean(
-      relativeLifts.map((lift) => (lift < -meaningfulLift ? 1 : 0))
-    ),
-    decisionThreshold,
-    evidenceStrength,
-  })
-  const waitingScenarios = calculateWaitingScenarios({
-    posteriorAlphaA,
-    posteriorBetaA,
-    posteriorAlphaB,
-    posteriorBetaB,
-    expectedRegretIfShipNow,
-  })
+  const { decision, probability, effect, expectedLoss, variants, sampleSize } = result
 
   return {
     meaningfulLift,
@@ -890,88 +220,61 @@ function calculateAnalysis({
     conversionsA,
     visitorsB,
     conversionsB,
-    posteriorAlphaA,
-    posteriorBetaA,
-    posteriorAlphaB,
-    posteriorBetaB,
-    observedRateA,
-    observedRateB,
-    posteriorMeanA,
-    posteriorMeanB,
-    probabilityBBeatsA,
-    probabilityABeatsB,
-    probabilityMeaningfulLift: mean(
-      relativeLifts.map((lift) => (lift > meaningfulLift ? 1 : 0))
-    ),
-    probabilityMeaningfulHarm: mean(
-      relativeLifts.map((lift) => (lift < -meaningfulLift ? 1 : 0))
-    ),
-    probabilityImprovesOnePercent: mean(
-      relativeLifts.map((lift) => (lift > 0.01 ? 1 : 0))
-    ),
-    probabilityImprovesFivePercent: mean(
-      relativeLifts.map((lift) => (lift > 0.05 ? 1 : 0))
-    ),
-    probabilityHarmFivePercent: mean(
-      relativeLifts.map((lift) => (lift < -0.05 ? 1 : 0))
-    ),
-    probabilityHarmTenPercent: mean(
-      relativeLifts.map((lift) => (lift < -0.1 ? 1 : 0))
-    ),
-    /* The exact complement of the closed-form win probability. Estimating it
-       separately from the samples left the two halves summing to 99.3%. */
-    probabilityTreatmentHarmful: probabilityABeatsB,
-    expectedLossIfShipA,
-    expectedLossIfShipB,
-    observedAbsoluteDifference: observedRateB - observedRateA,
-    posteriorAbsoluteDifference: posteriorMeanB - posteriorMeanA,
-    observedRelativeLift:
-      observedRateA > 0 ? observedRateB / observedRateA - 1 : null,
-    posteriorRelativeLift: posteriorMeanB / posteriorMeanA - 1,
-    liftCredibleIntervalLower: quantile(sortedRelativeLifts, 0.025),
-    liftCredibleIntervalUpper: quantile(sortedRelativeLifts, 0.975),
-    absoluteDiffCredibleIntervalLower: quantile(sortedAbsoluteDiffs, 0.025),
-    absoluteDiffCredibleIntervalUpper: quantile(sortedAbsoluteDiffs, 0.975),
-    pValueTwoSided: calculateTwoSidedPValue({
-      visitorsA,
-      conversionsA,
-      visitorsB,
-      conversionsB,
-    }),
-    chartData: createPosteriorChartData({
-      posteriorAlphaA,
-      posteriorBetaA,
-      posteriorAlphaB,
-      posteriorBetaB,
-      samplesA,
-      samplesB,
-    }),
-    liftDensity: createLiftDensity({
-      posteriorAlphaA,
-      posteriorBetaA,
-      posteriorAlphaB,
-      posteriorBetaB,
-      sortedRelativeLifts,
-    }),
-    liftMedian: quantile(sortedRelativeLifts, 0.5),
-    liftInnerIntervalLower: quantile(sortedRelativeLifts, 0.25),
-    liftInnerIntervalUpper: quantile(sortedRelativeLifts, 0.75),
-    requiredVisitorsPerVariant,
-    visitorsPerVariant,
-    totalConversions,
-    recommendedConversionsPerVariant,
-    additionalVisitorsForStableEstimate,
-    detectableEffectRelative:
-      ((inverseNormalCdf(1 - 0.05 / 2) + inverseNormalCdf(0.8)) *
-        Math.sqrt(2 * baselineRate * (1 - baselineRate) / Math.min(visitorsA, visitorsB))) /
-      baselineRate,
-    evidenceStrength,
-    experimentMaturity,
-    maturityProgress,
-    decisionStatus,
-    chosenVariantNow,
-    expectedRegretIfShipNow,
-    waitingScenarios,
+    posteriorAlphaA: variants.A.posterior[0],
+    posteriorBetaA: variants.A.posterior[1],
+    posteriorAlphaB: variants.B.posterior[0],
+    posteriorBetaB: variants.B.posterior[1],
+    observedRateA: variants.A.rate,
+    observedRateB: variants.B.rate,
+    posteriorMeanA: variants.A.posteriorMean,
+    posteriorMeanB: variants.B.posteriorMean,
+    probabilityBBeatsA: probability.bBeatsA,
+    probabilityABeatsB: probability.aBeatsB,
+    probabilityMeaningfulLift: probability.meaningfulLift,
+    probabilityMeaningfulHarm: probability.meaningfulHarm,
+    probabilityImprovesOnePercent: probability.liftAbove1pct,
+    probabilityImprovesFivePercent: probability.liftAbove5pct,
+    probabilityHarmFivePercent: probability.harmBeyond5pct,
+    probabilityHarmTenPercent: probability.harmBeyond10pct,
+    probabilityTreatmentHarmful: probability.harmful,
+    expectedLossIfShipA: expectedLoss.shipA,
+    expectedLossIfShipB: expectedLoss.shipB,
+    observedAbsoluteDifference: effect.observedAbsoluteDiff,
+    posteriorAbsoluteDifference: effect.absoluteDiff,
+    observedRelativeLift: effect.observedRelativeLift,
+    posteriorRelativeLift: effect.relativeLift,
+    liftCredibleIntervalLower: effect.relativeLiftCI95[0],
+    liftCredibleIntervalUpper: effect.relativeLiftCI95[1],
+    absoluteDiffCredibleIntervalLower: effect.absoluteDiffCI95[0],
+    absoluteDiffCredibleIntervalUpper: effect.absoluteDiffCI95[1],
+    pValueTwoSided: result.frequentist.pValueTwoSided,
+    chartData: (result.chart ?? []).map((point) => ({
+      conversionRatePercent: point.rate * 100,
+      variantA: point.densityA,
+      variantB: point.densityB,
+      overlap: Math.min(point.densityA, point.densityB),
+    })),
+    liftDensity: result.liftChart ?? [],
+    liftMedian: effect.relativeLiftMedian,
+    liftInnerIntervalLower: effect.relativeLiftIQR[0],
+    liftInnerIntervalUpper: effect.relativeLiftIQR[1],
+    requiredVisitorsPerVariant: sampleSize.requiredPerVariant,
+    visitorsPerVariant: Math.round((visitorsA + visitorsB) / 2),
+    totalConversions: conversionsA + conversionsB,
+    recommendedConversionsPerVariant: RECOMMENDED_CONVERSIONS_PER_VARIANT,
+    additionalVisitorsForStableEstimate: sampleSize.additionalPerVariant,
+    detectableEffectRelative: sampleSize.detectableEffectNow,
+    evidenceStrength: EVIDENCE_STRENGTH[decision.evidence],
+    experimentMaturity: EXPERIMENT_MATURITY[decision.maturity],
+    maturityProgress: decision.maturityProgress,
+    decisionStatus: DECISION_STATUS[decision.status],
+    chosenVariantNow: decision.bayesActionNow === "B" ? "Variant B" : "Variant A",
+    expectedRegretIfShipNow: decision.expectedRegretNow,
+    waitingScenarios: result.waiting.map((scenario) => ({
+      extraVisitorsPerVariant: scenario.extraPerVariant,
+      expectedRegretAfterWaiting: scenario.expectedRegret,
+      valueOfWaiting: scenario.valueOfWaiting,
+    })),
   }
 }
 
@@ -1072,8 +375,6 @@ export function validateAndCalculate(inputs: Inputs):
       conversionsA,
       visitorsB,
       conversionsB,
-      priorAlpha: FIXED_PRIOR_ALPHA,
-      priorBeta: FIXED_PRIOR_BETA,
       decisionThreshold: decisionThreshold / 100,
       meaningfulLift: practicalThreshold / 100,
     }),
@@ -1086,8 +387,6 @@ export function getInitialResult(): AnalysisResult {
     conversionsA: 660,
     visitorsB: 11850,
     conversionsB: 714,
-    priorAlpha: FIXED_PRIOR_ALPHA,
-    priorBeta: FIXED_PRIOR_BETA,
     decisionThreshold: 0.95,
     meaningfulLift: 0.1,
   })
