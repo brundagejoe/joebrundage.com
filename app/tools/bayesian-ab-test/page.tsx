@@ -129,6 +129,7 @@ export default function BayesianAbTestPage() {
   const priorLabel = `Beta(${formatBetaParameter(priorAlpha)}, ${formatBetaParameter(priorBeta)})`
   const priorMean = priorAlpha / (priorAlpha + priorBeta)
   const priorWeight = priorAlpha + priorBeta
+  const priorWeightUnit = priorWeight === 1 ? "visitor" : "visitors"
   const lift = (value: number | null) => formatRelativeLift(value, 1)
 
   const isThreshold = (cut: number) => Math.abs(cut - meaningfulLift) < 1e-9
@@ -308,7 +309,7 @@ export default function BayesianAbTestPage() {
                 <>
                   {" "}
                   Yours centres on {formatPercent(priorMean, 2)} with the weight
-                  of {formatBetaParameter(priorWeight)} visitors.
+                  of {formatBetaParameter(priorWeight)} {priorWeightUnit}.
                 </>
               )}
             </p>
@@ -325,9 +326,9 @@ export default function BayesianAbTestPage() {
                 ) : (
                   <>
                     Each arm starts from a {priorLabel} prior, worth about{" "}
-                    {formatBetaParameter(priorWeight)} visitors of belief
-                    centred on {formatPercent(priorMean, 2)}. Everything below
-                    blends that with your counts.
+                    {formatBetaParameter(priorWeight)} {priorWeightUnit} of
+                    belief centred on {formatPercent(priorMean, 2)}. Everything
+                    below blends that with your counts.
                   </>
                 )
               }
