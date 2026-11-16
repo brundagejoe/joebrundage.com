@@ -13,8 +13,7 @@ import {
 import { Caption, ProbabilityStrip, Row, Section } from "@/shared/ui/plate"
 import {
   createSearchParamsFromInputs,
-  FIXED_PRIOR_ALPHA,
-  FIXED_PRIOR_BETA,
+  formatBetaParameter,
   formatCount,
   formatExpectedMissedConversions,
   formatPercent,
@@ -24,6 +23,7 @@ import {
   getInitialInputs,
   getInitialResult,
   getInputsFromSearchParams,
+  isFlatPrior,
   validateAndCalculate,
   type AnalysisResult,
   type Inputs,
@@ -123,8 +123,12 @@ export default function BayesianAbTestPage() {
     )
   }
 
-  const { meaningfulLift, decisionThreshold } = result
+  const { meaningfulLift, decisionThreshold, priorAlpha, priorBeta } = result
   const meaningfulLabel = formatPercent(meaningfulLift, 0)
+  const flatPrior = isFlatPrior(priorAlpha, priorBeta)
+  const priorLabel = `Beta(${formatBetaParameter(priorAlpha)}, ${formatBetaParameter(priorBeta)})`
+  const priorMean = priorAlpha / (priorAlpha + priorBeta)
+  const priorWeight = priorAlpha + priorBeta
   const lift = (value: number | null) => formatRelativeLift(value, 1)
 
   const isThreshold = (cut: number) => Math.abs(cut - meaningfulLift) < 1e-9
@@ -260,6 +264,22 @@ export default function BayesianAbTestPage() {
                 value={inputs.meaningfulLiftPercent}
                 onChange={setInput("meaningfulLiftPercent")}
               />
+
+              <p className="mt-6 plate-label text-[0.8rem] font-medium uppercase tracking-[0.1em] opacity-70">
+                Your prior
+              </p>
+              <Field
+                id="prior-alpha"
+                label="Prior alpha"
+                value={inputs.priorAlpha}
+                onChange={setInput("priorAlpha")}
+              />
+              <Field
+                id="prior-beta"
+                label="Prior beta"
+                value={inputs.priorBeta}
+                onChange={setInput("priorBeta")}
+              />
             </div>
 
             <button
@@ -279,16 +299,37 @@ export default function BayesianAbTestPage() {
               {meaningfulLabel} means about{" "}
               {formatPercent(result.posteriorMeanA * (1 + meaningfulLift), 2)}.
             </p>
+
+            <p className="mt-3 text-[0.8em] leading-[1.4] opacity-70">
+              The prior is a Beta(α,&nbsp;β) on each arm&rsquo;s rate, read as α
+              conversions in α&nbsp;+&nbsp;β visitors you had already seen. 1
+              and 1 is flat; 0.5 and 0.5 is Jeffreys.
+              {flatPrior ? null : (
+                <>
+                  {" "}
+                  Yours centres on {formatPercent(priorMean, 2)} with the weight
+                  of {formatBetaParameter(priorWeight)} visitors.
+                </>
+              )}
+            </p>
           </div>
 
           <div className="min-w-0">
             <Row
               note={
-                <>
-                  Priors are fixed at Beta({FIXED_PRIOR_ALPHA},&nbsp;
-                  {FIXED_PRIOR_BETA})&nbsp;&mdash; flat, opinionless. Everything
-                  below comes from your counts alone.
-                </>
+                flatPrior ? (
+                  <>
+                    The prior is {priorLabel}&nbsp;&mdash; flat, opinionless.
+                    Everything below comes from your counts alone.
+                  </>
+                ) : (
+                  <>
+                    Each arm starts from a {priorLabel} prior, worth about{" "}
+                    {formatBetaParameter(priorWeight)} visitors of belief
+                    centred on {formatPercent(priorMean, 2)}. Everything below
+                    blends that with your counts.
+                  </>
+                )
               }
             >
               <h1 className="text-[1.9rem] leading-tight">Bayesian A/B Test</h1>
@@ -434,11 +475,21 @@ export default function BayesianAbTestPage() {
                 <Section>Figure 3&nbsp;&middot; The two variants</Section>
                 <Row
                   note={
-                    <>
-                      Observed rates are what happened; posterior means are what
-                      happened after a flat prior pulls them a hair toward each
-                      other. With counts this size the two barely differ.
-                    </>
+                    flatPrior ? (
+                      <>
+                        Observed rates are what happened; posterior means are
+                        what happened after a flat prior pulls them a hair
+                        toward each other. With counts this size the two barely
+                        differ.
+                      </>
+                    ) : (
+                      <>
+                        Observed rates are what happened; posterior means are
+                        what happened after the {priorLabel} prior pulls each of
+                        them toward {formatPercent(priorMean, 2)}. The heavier
+                        the prior relative to the counts, the bigger the pull.
+                      </>
+                    )
                   }
                 >
                   <div className="mt-6 grid items-start gap-x-10 gap-y-6 lg:grid-cols-[1fr_1fr]">
@@ -606,13 +657,14 @@ export default function BayesianAbTestPage() {
                 >
                   <div className="mt-4 max-w-[35em] space-y-3 text-[0.9em] leading-[1.4] opacity-70">
                     <p>
-                      Posteriors are Beta(
-                      {formatCount(result.posteriorAlphaA)},&nbsp;
-                      {formatCount(result.posteriorBetaA)}) for A and Beta(
-                      {formatCount(result.posteriorAlphaB)},&nbsp;
-                      {formatCount(result.posteriorBetaB)}) for B. Interval and
-                      threshold probabilities come from sampling those two; the
-                      win probability is closed form.
+                      Starting from a {priorLabel} prior, posteriors are Beta(
+                      {formatBetaParameter(result.posteriorAlphaA)},&nbsp;
+                      {formatBetaParameter(result.posteriorBetaA)}) for A and
+                      Beta(
+                      {formatBetaParameter(result.posteriorAlphaB)},&nbsp;
+                      {formatBetaParameter(result.posteriorBetaB)}) for B.
+                      Interval and threshold probabilities come from sampling
+                      those two; the win probability is closed form.
                     </p>
                     <p>
                       With this much traffic the smallest relative effect the

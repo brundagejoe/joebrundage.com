@@ -7,6 +7,8 @@ export type Inputs = {
   conversionsB: string
   thresholdPercent: string
   meaningfulLiftPercent: string
+  priorAlpha: string
+  priorBeta: string
 }
 
 export type PosteriorPoint = {
@@ -34,6 +36,8 @@ export type WaitingScenario = {
 export type AnalysisResult = {
   meaningfulLift: number
   decisionThreshold: number
+  priorAlpha: number
+  priorBeta: number
   visitorsA: number
   conversionsA: number
   visitorsB: number
@@ -80,7 +84,8 @@ export type AnalysisResult = {
   evidenceStrength: EvidenceStrength
   experimentMaturity: ExperimentMaturity
   maturityProgress: number
-  decisionStatus: "Ship Variant B" | "Keep Variant A" | "Continue test" | "Inconclusive"
+  decisionStatus:
+    "Ship Variant B" | "Keep Variant A" | "Continue test" | "Inconclusive"
   chosenVariantNow: ChosenVariant
   expectedRegretIfShipNow: number
   waitingScenarios: WaitingScenario[]
@@ -132,7 +137,10 @@ export function formatPercentagePoints(value: number, digits = 2): string {
   return `${points < 0 ? "−" : "+"}${Math.abs(points).toFixed(digits)} pp`
 }
 
-export function formatUnsignedPercentagePoints(value: number, digits = 2): string {
+export function formatUnsignedPercentagePoints(
+  value: number,
+  digits = 2
+): string {
   return `${(value * 100).toFixed(digits)} pp`
 }
 
@@ -159,8 +167,31 @@ export function formatExpectedMissedConversions(
    disagree. This file only parses the form, maps the library's result onto
    the shape the page renders, and formats numbers. */
 
-export const FIXED_PRIOR_ALPHA = PRIOR_ALPHA
-export const FIXED_PRIOR_BETA = PRIOR_BETA
+export const DEFAULT_PRIOR_ALPHA = PRIOR_ALPHA
+export const DEFAULT_PRIOR_BETA = PRIOR_BETA
+
+export function isFlatPrior(alpha: number, beta: number): boolean {
+  return alpha === DEFAULT_PRIOR_ALPHA && beta === DEFAULT_PRIOR_BETA
+}
+
+/* Beta parameters print as whole numbers with separators, or to three
+   decimals when fractional (a Jeffreys 0.5, or a posterior built on one). */
+export function formatBetaParameter(value: number): string {
+  if (Number.isInteger(value)) return formatCount(value)
+  return value.toLocaleString("en-US", { maximumFractionDigits: 3 })
+}
+
+function parsePositiveNumber(value: string): number | null {
+  const trimmed = value.trim()
+  if (trimmed === "") {
+    return null
+  }
+  const parsed = Number(trimmed)
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null
+  }
+  return parsed
+}
 
 /* A rule-of-thumb floor the page shows next to the sample-size estimate. */
 const RECOMMENDED_CONVERSIONS_PER_VARIANT = 200
@@ -175,13 +206,19 @@ const DECISION_STATUS: Record<
   inconclusive: "Inconclusive",
 }
 
-const EVIDENCE_STRENGTH: Record<AnalyzeResult["decision"]["evidence"], EvidenceStrength> = {
+const EVIDENCE_STRENGTH: Record<
+  AnalyzeResult["decision"]["evidence"],
+  EvidenceStrength
+> = {
   low: "Low",
   moderate: "Moderate",
   strong: "Strong",
 }
 
-const EXPERIMENT_MATURITY: Record<AnalyzeResult["decision"]["maturity"], ExperimentMaturity> = {
+const EXPERIMENT_MATURITY: Record<
+  AnalyzeResult["decision"]["maturity"],
+  ExperimentMaturity
+> = {
   early: "Early",
   building: "Building",
   mature: "Mature",
@@ -194,6 +231,8 @@ function calculateAnalysis({
   conversionsB,
   decisionThreshold,
   meaningfulLift,
+  priorAlpha = DEFAULT_PRIOR_ALPHA,
+  priorBeta = DEFAULT_PRIOR_BETA,
 }: {
   visitorsA: number
   conversionsA: number
@@ -201,6 +240,8 @@ function calculateAnalysis({
   conversionsB: number
   decisionThreshold: number
   meaningfulLift: number
+  priorAlpha?: number
+  priorBeta?: number
 }): AnalysisResult {
   const result = analyze({
     visitorsA,
@@ -209,13 +250,17 @@ function calculateAnalysis({
     conversionsB,
     threshold: decisionThreshold,
     minEffect: meaningfulLift,
+    prior: [priorAlpha, priorBeta],
     includeChart: true,
   })
-  const { decision, probability, effect, expectedLoss, variants, sampleSize } = result
+  const { decision, probability, effect, expectedLoss, variants, sampleSize } =
+    result
 
   return {
     meaningfulLift,
     decisionThreshold,
+    priorAlpha,
+    priorBeta,
     visitorsA,
     conversionsA,
     visitorsB,
@@ -268,7 +313,8 @@ function calculateAnalysis({
     experimentMaturity: EXPERIMENT_MATURITY[decision.maturity],
     maturityProgress: decision.maturityProgress,
     decisionStatus: DECISION_STATUS[decision.status],
-    chosenVariantNow: decision.bayesActionNow === "B" ? "Variant B" : "Variant A",
+    chosenVariantNow:
+      decision.bayesActionNow === "B" ? "Variant B" : "Variant A",
     expectedRegretIfShipNow: decision.expectedRegretNow,
     waitingScenarios: result.waiting.map((scenario) => ({
       extraVisitorsPerVariant: scenario.extraPerVariant,
@@ -286,10 +332,14 @@ export function getInitialInputs(): Inputs {
     conversionsB: "714",
     thresholdPercent: "95",
     meaningfulLiftPercent: "10",
+    priorAlpha: String(DEFAULT_PRIOR_ALPHA),
+    priorBeta: String(DEFAULT_PRIOR_BETA),
   }
 }
 
-export function getInputsFromSearchParams(searchParams: URLSearchParams): Inputs {
+export function getInputsFromSearchParams(
+  searchParams: URLSearchParams
+): Inputs {
   const defaults = getInitialInputs()
 
   return {
@@ -300,7 +350,10 @@ export function getInputsFromSearchParams(searchParams: URLSearchParams): Inputs
     thresholdPercent:
       searchParams.get("thresholdPercent") ?? defaults.thresholdPercent,
     meaningfulLiftPercent:
-      searchParams.get("meaningfulLiftPercent") ?? defaults.meaningfulLiftPercent,
+      searchParams.get("meaningfulLiftPercent") ??
+      defaults.meaningfulLiftPercent,
+    priorAlpha: searchParams.get("priorAlpha") ?? defaults.priorAlpha,
+    priorBeta: searchParams.get("priorBeta") ?? defaults.priorBeta,
   }
 }
 
@@ -314,18 +367,33 @@ export function createSearchParamsFromInputs(inputs: Inputs): URLSearchParams {
   searchParams.set("thresholdPercent", inputs.thresholdPercent)
   searchParams.set("meaningfulLiftPercent", inputs.meaningfulLiftPercent)
 
+  /* The flat default stays out of the URL, so links shared before priors
+     were adjustable and links using the default look the same. */
+  const priorAlpha = parsePositiveNumber(inputs.priorAlpha)
+  const priorBeta = parsePositiveNumber(inputs.priorBeta)
+  if (
+    priorAlpha === null ||
+    priorBeta === null ||
+    !isFlatPrior(priorAlpha, priorBeta)
+  ) {
+    searchParams.set("priorAlpha", inputs.priorAlpha)
+    searchParams.set("priorBeta", inputs.priorBeta)
+  }
+
   return searchParams
 }
 
-export function validateAndCalculate(inputs: Inputs):
-  | { error: string; result: null }
-  | { error: null; result: AnalysisResult } {
+export function validateAndCalculate(
+  inputs: Inputs
+): { error: string; result: null } | { error: null; result: AnalysisResult } {
   const visitorsA = parsePositiveWholeNumber(inputs.visitorsA)
   const conversionsA = parseWholeNumber(inputs.conversionsA)
   const visitorsB = parsePositiveWholeNumber(inputs.visitorsB)
   const conversionsB = parseWholeNumber(inputs.conversionsB)
   const decisionThreshold = parsePercent(inputs.thresholdPercent)
   const practicalThreshold = parsePercent(inputs.meaningfulLiftPercent)
+  const priorAlpha = parsePositiveNumber(inputs.priorAlpha)
+  const priorBeta = parsePositiveNumber(inputs.priorBeta)
 
   if (
     visitorsA === null ||
@@ -368,6 +436,13 @@ export function validateAndCalculate(inputs: Inputs):
     }
   }
 
+  if (priorAlpha === null || priorBeta === null) {
+    return {
+      error: "Prior α and β must be numbers greater than 0.",
+      result: null,
+    }
+  }
+
   return {
     error: null,
     result: calculateAnalysis({
@@ -377,6 +452,8 @@ export function validateAndCalculate(inputs: Inputs):
       conversionsB,
       decisionThreshold: decisionThreshold / 100,
       meaningfulLift: practicalThreshold / 100,
+      priorAlpha,
+      priorBeta,
     }),
   }
 }
