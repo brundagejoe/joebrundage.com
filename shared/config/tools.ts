@@ -42,6 +42,13 @@ export const TOOLS: ToolDefinition[] = [
       "Enter visitors and conversions for two variants to see the chance B beats A, the plausible size of the lift, and the expected cost of shipping today.",
   },
   {
+    code: "SABT",
+    title: "Skeptical A/B Test Calculator",
+    href: "/tools/skeptical-ab-test",
+    description:
+      "A Bayesian A/B test that expects most lifts to be small: noisy early wins get pulled toward zero, and you can set that prior from your own past tests.",
+  },
+  {
     code: "BABTP",
     title: "Bayesian A/B Testing Primer",
     href: "/tools/bayesian-ab-testing-primer",
